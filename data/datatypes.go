@@ -1,5 +1,7 @@
 package data
 
+import "csql/funky"
+
 // ColumnMetadata describes a column
 type ColumnMetadata interface {
 	// Parent returns the datasource to which this column belongs
@@ -25,6 +27,7 @@ type DataSourceHeader interface {
 type Row interface {
 	Parent() DataSource
 	Values() []string
+	GetByName(string) funky.Option[string]
 }
 
 // DataSource is an representation of rows of columns
@@ -34,6 +37,8 @@ type DataSource interface {
 	MatchesName(string) bool
 	// NextRow returns the next row of values or nil
 	NextRow() (Row, error)
+	// ReadAll reads all rows
+	ReadAll() ([]Row, error)
 }
 
 type QueryContext interface {

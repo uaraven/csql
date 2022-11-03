@@ -1,6 +1,7 @@
 package data
 
 import (
+	"csql/funky"
 	"csql/util"
 )
 
@@ -74,4 +75,13 @@ func (r rowImpl) Parent() DataSource {
 
 func (r rowImpl) Values() []string {
 	return r.values
+}
+
+func (r rowImpl) GetByName(column string) funky.Option[string] {
+	index := r.Parent().Header().IndexByName(column)
+	if index < 0 {
+		return funky.NoneOf[string]()
+	} else {
+		return funky.SomeOf(r.values[index])
+	}
 }

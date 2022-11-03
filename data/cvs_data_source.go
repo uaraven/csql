@@ -62,6 +62,22 @@ func (cds *csvDataSource) NextRow() (Row, error) {
 	}, nil
 }
 
+func (cds *csvDataSource) ReadAll() ([]Row, error) {
+	result := make([]Row, 0)
+	row, err := cds.NextRow()
+	if err != nil {
+		return nil, err
+	}
+	for row != nil {
+		result = append(result, row)
+		row, err = cds.NextRow()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return result, nil
+}
+
 func (cds *csvDataSource) Close() error {
 	return cds.file.Close()
 }
