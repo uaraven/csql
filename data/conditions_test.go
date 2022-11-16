@@ -99,7 +99,7 @@ var (
 func testSet(g gomega.Gomega, testSet []conditionTest) {
 	for _, test := range testSet {
 		cc := cond(test.maker, test.left, test.right)
-		g.Expect(cc.Evaluate()).To(test.matcher, fmt.Sprintf("Condition %s", cc))
+		g.Expect(cc.Evaluate().Value()).To(test.matcher, fmt.Sprintf("Condition %s", cc))
 	}
 }
 

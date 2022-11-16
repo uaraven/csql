@@ -15,8 +15,9 @@ type Value interface {
 	AsString() Value
 	AsInt() Value
 	AsFloat() Value
+	AsBool() Value
 }
 
 type Condition interface {
-	Evaluate() bool
+	Evaluate() Value
 }

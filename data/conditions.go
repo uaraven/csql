@@ -61,14 +61,14 @@ type ComparisonCondition struct {
 	right    Value
 }
 
-func (cc ComparisonCondition) Evaluate() bool {
+func (cc ComparisonCondition) Evaluate() Value {
 	switch cc.left.Type() {
 	case StringType:
-		return getComparator(cc.left.Value().(string), cc.operator)(cc.right.Value().(string))
+		return NewBoolValue(getComparator(cc.left.Value().(string), cc.operator)(cc.right.Value().(string)))
 	case IntType:
-		return getComparator(cc.left.Value().(int64), cc.operator)(cc.right.Value().(int64))
+		return NewBoolValue(getComparator(cc.left.Value().(int64), cc.operator)(cc.right.Value().(int64)))
 	case FloatType:
-		return getComparator(cc.left.Value().(float64), cc.operator)(cc.right.Value().(float64))
+		return NewBoolValue(getComparator(cc.left.Value().(float64), cc.operator)(cc.right.Value().(float64)))
 	default:
 		panic(fmt.Errorf("unsupported type in expression %v", cc))
 	}

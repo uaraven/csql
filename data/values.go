@@ -17,6 +17,10 @@ type floatValue struct {
 	value float64
 }
 
+type boolValue struct {
+	value bool
+}
+
 func NewStringValue(v string) Value {
 	return &stringValue{value: v}
 }
@@ -27,6 +31,10 @@ func NewIntValue(iv int64) Value {
 
 func NewFloatValue(fv float64) Value {
 	return &floatValue{value: fv}
+}
+
+func NewBoolValue(b bool) Value {
+	return &boolValue{value: b}
 }
 
 func (rv stringValue) Type() DataType {
@@ -59,6 +67,15 @@ func (rv stringValue) AsFloat() Value {
 	}
 }
 
+func (rv stringValue) AsBool() Value {
+	b, err := strconv.ParseBool(rv.value)
+	if err == nil {
+		return NewBoolValue(b)
+	} else {
+		return nil
+	}
+}
+
 func (rv stringValue) String() string {
 	return fmt.Sprintf("\"%s\"", rv.value)
 }
@@ -81,6 +98,10 @@ func (iv intValue) AsInt() Value {
 
 func (iv intValue) AsFloat() Value {
 	return NewFloatValue(float64(iv.value))
+}
+
+func (iv intValue) AsBool() Value {
+	return NewBoolValue(iv.value != 0)
 }
 
 func (iv intValue) String() string {
@@ -107,8 +128,48 @@ func (fv floatValue) AsFloat() Value {
 	return fv
 }
 
+func (fv floatValue) AsBool() Value {
+	return NewBoolValue(fv.value != 0)
+}
+
 func (fv floatValue) String() string {
 	return fmt.Sprintf("%f", fv.value)
+}
+
+func (bv boolValue) Type() DataType {
+	return BooleanType
+}
+
+func (bv boolValue) Value() interface{} {
+	return bv.value
+}
+
+func (bv boolValue) AsString() Value {
+	return NewStringValue(fmt.Sprintf("%t", bv.value))
+}
+
+func (bv boolValue) AsInt() Value {
+	if bv.value {
+		return NewIntValue(1)
+	} else {
+		return NewIntValue(0)
+	}
+}
+
+func (bv boolValue) AsFloat() Value {
+	if bv.value {
+		return NewFloatValue(1.0)
+	} else {
+		return NewFloatValue(0.0)
+	}
+}
+
+func (bv boolValue) AsBool() Value {
+	return bv
+}
+
+func (bv boolValue) String() string {
+	return fmt.Sprintf("%t", bv.value)
 }
 
 func NewRowValue(row Row, identifier string) (Value, error) {
