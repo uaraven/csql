@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-type condMaker func(Value, Value) Condition
+type condMaker func(Evaluator, Evaluator) Condition
 
 func cond(maker condMaker, left interface{}, right interface{}) Condition {
 	switch l := left.(type) {

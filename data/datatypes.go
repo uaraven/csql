@@ -28,6 +28,7 @@ type Row interface {
 	Parent() DataSource
 	Values() []string
 	GetByName(string) funky.Option[string]
+	Satisfies(c Condition) bool
 }
 
 // DataSource is an representation of rows of columns

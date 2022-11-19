@@ -3,10 +3,10 @@ package data
 type DataType int
 
 const (
-	IntType DataType = iota
-	FloatType
-	StringType
-	BooleanType
+	TypeInt DataType = iota
+	TypeFloat
+	TypeString
+	TypeBoolean
 )
 
 type Evaluator interface {

@@ -3,6 +3,7 @@ package data
 import (
 	"fmt"
 	"strconv"
+	"sync"
 )
 
 type stringValue struct {
@@ -38,7 +39,7 @@ func NewBoolValue(b bool) Value {
 }
 
 func (rv stringValue) Type() DataType {
-	return StringType
+	return TypeString
 }
 
 func (rv stringValue) Value() interface{} {
@@ -85,7 +86,7 @@ func (rv stringValue) Evaluate() Value {
 }
 
 func (iv intValue) Type() DataType {
-	return IntType
+	return TypeInt
 }
 
 func (iv intValue) Value() interface{} {
@@ -117,7 +118,7 @@ func (iv intValue) Evaluate() Value {
 }
 
 func (fv floatValue) Type() DataType {
-	return FloatType
+	return TypeFloat
 }
 
 func (fv floatValue) Value() interface{} {
@@ -149,7 +150,7 @@ func (fv floatValue) String() string {
 }
 
 func (bv boolValue) Type() DataType {
-	return BooleanType
+	return TypeBoolean
 }
 
 func (bv boolValue) Value() interface{} {
@@ -188,8 +189,37 @@ func (bv boolValue) Evaluate() Value {
 	return &bv
 }
 
-func NewRowValue(row Row, identifier string) (Value, error) {
-	val := row.GetByName(identifier)
+type rowValue struct {
+	lock       sync.RWMutex
+	row        Row
+	identifier string
+	value      Value
+}
+
+func NewRowValue(row Row, identifier string) Evaluator {
+	return &rowValue{
+		lock:       sync.RWMutex{},
+		row:        row,
+		identifier: identifier,
+		value:      nil,
+	}
+}
+
+func (rv *rowValue) Evaluate() Value {
+	rv.lock.Lock()
+	defer rv.lock.Unlock()
+	if rv.value == nil {
+		var err error
+		rv.value, err = rv.getValue()
+		if err != nil {
+			panic(err)
+		}
+	}
+	return rv.value
+}
+
+func (rv *rowValue) getValue() (Value, error) {
+	val := rv.row.GetByName(rv.identifier)
 	if val.IsPresent() {
 		switch v := decode(val.Value()).(type) {
 		case string:
@@ -203,7 +233,7 @@ func NewRowValue(row Row, identifier string) (Value, error) {
 
 		}
 	} else {
-		return nil, fmt.Errorf("unknown column %s", identifier)
+		return nil, fmt.Errorf("unknown column %s", rv.identifier)
 	}
 }
 

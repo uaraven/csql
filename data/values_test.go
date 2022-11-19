@@ -10,7 +10,7 @@ func TestNewStringValue(t *testing.T) {
 
 	v := NewStringValue("str")
 
-	g.Expect(v.Type()).To(gomega.Equal(StringType))
+	g.Expect(v.Type()).To(gomega.Equal(TypeString))
 	g.Expect(v.Value()).To(gomega.Equal("str"))
 }
 
@@ -20,7 +20,7 @@ func TestStringValue_AsInt(t *testing.T) {
 	v := NewStringValue("12")
 	vi := v.AsInt()
 
-	g.Expect(vi.Type()).To(gomega.Equal(IntType))
+	g.Expect(vi.Type()).To(gomega.Equal(TypeInt))
 	g.Expect(vi.Value()).To(gomega.Equal(int64(12)))
 }
 
@@ -30,7 +30,7 @@ func TestStringValue_AsFloat(t *testing.T) {
 	v := NewStringValue("12.44")
 	vi := v.AsFloat()
 
-	g.Expect(vi.Type()).To(gomega.Equal(FloatType))
+	g.Expect(vi.Type()).To(gomega.Equal(TypeFloat))
 	g.Expect(vi.Value()).To(gomega.Equal(12.44))
 }
 
@@ -40,6 +40,6 @@ func TestStringValue_AsFloatExp(t *testing.T) {
 	v := NewStringValue("12e44")
 	vi := v.AsFloat()
 
-	g.Expect(vi.Type()).To(gomega.Equal(FloatType))
+	g.Expect(vi.Type()).To(gomega.Equal(TypeFloat))
 	g.Expect(vi.Value()).To(gomega.Equal(12e44))
 }

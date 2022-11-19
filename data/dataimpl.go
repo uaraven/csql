@@ -85,3 +85,7 @@ func (r rowImpl) GetByName(column string) funky.Option[string] {
 		return funky.SomeOf(r.values[index])
 	}
 }
+
+func (r rowImpl) Satisfies(cond Condition) bool {
+	return cond.Evaluate().AsBool().Value().(bool)
+}

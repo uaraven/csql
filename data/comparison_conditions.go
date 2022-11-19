@@ -57,18 +57,20 @@ func compare[T constraints.Ordered](left T, right T) int {
 type ComparisonCondition struct {
 	Condition
 	operator compareOperator
-	left     Value
-	right    Value
+	left     Evaluator
+	right    Evaluator
 }
 
 func (cc ComparisonCondition) Evaluate() Value {
-	switch cc.left.Type() {
-	case StringType:
-		return NewBoolValue(getComparator(cc.left.Value().(string), cc.operator)(cc.right.Value().(string)))
-	case IntType:
-		return NewBoolValue(getComparator(cc.left.Value().(int64), cc.operator)(cc.right.Value().(int64)))
-	case FloatType:
-		return NewBoolValue(getComparator(cc.left.Value().(float64), cc.operator)(cc.right.Value().(float64)))
+	lv := cc.left.Evaluate()
+	rv := cc.right.Evaluate()
+	switch lv.Type() {
+	case TypeString:
+		return NewBoolValue(getComparator(lv.Value().(string), cc.operator)(rv.Value().(string)))
+	case TypeInt:
+		return NewBoolValue(getComparator(lv.Value().(int64), cc.operator)(rv.Value().(int64)))
+	case TypeFloat:
+		return NewBoolValue(getComparator(lv.Value().(float64), cc.operator)(rv.Value().(float64)))
 	default:
 		panic(fmt.Errorf("unsupported type in expression %v", cc))
 	}
@@ -78,7 +80,7 @@ func (cc ComparisonCondition) String() string {
 	return fmt.Sprintf("%s %s %s", cc.left, operatorStr[cc.operator], cc.right)
 }
 
-func NewEq(left Value, right Value) Condition {
+func NewEq(left Evaluator, right Evaluator) Condition {
 	return ComparisonCondition{
 		operator: equal,
 		left:     left,
@@ -86,7 +88,7 @@ func NewEq(left Value, right Value) Condition {
 	}
 }
 
-func NewNeq(left Value, right Value) Condition {
+func NewNeq(left Evaluator, right Evaluator) Condition {
 	return ComparisonCondition{
 		operator: notEqual,
 		left:     left,
@@ -94,7 +96,7 @@ func NewNeq(left Value, right Value) Condition {
 	}
 }
 
-func NewLt(left Value, right Value) Condition {
+func NewLt(left Evaluator, right Evaluator) Condition {
 	return ComparisonCondition{
 		operator: lessThan,
 		left:     left,
@@ -102,7 +104,7 @@ func NewLt(left Value, right Value) Condition {
 	}
 }
 
-func NewGt(left Value, right Value) Condition {
+func NewGt(left Evaluator, right Evaluator) Condition {
 	return ComparisonCondition{
 		operator: greaterThan,
 		left:     left,
@@ -110,7 +112,7 @@ func NewGt(left Value, right Value) Condition {
 	}
 }
 
-func NewLte(left Value, right Value) Condition {
+func NewLte(left Evaluator, right Evaluator) Condition {
 	return ComparisonCondition{
 		operator: lessEqual,
 		left:     left,
@@ -118,7 +120,7 @@ func NewLte(left Value, right Value) Condition {
 	}
 }
 
-func NewGte(left Value, right Value) Condition {
+func NewGte(left Evaluator, right Evaluator) Condition {
 	return ComparisonCondition{
 		operator: greaterEqual,
 		left:     left,
