@@ -1,32 +1,52 @@
 package data
 
 import (
-	"github.com/onsi/gomega"
+	. "github.com/onsi/gomega"
 	"testing"
 )
 
 func TestRowValue_Evaluate(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
+	g := NewGomegaWithT(t)
 
 	ds, err := NewCsvDataSource("../test-data/employees.csv")
-	g.Expect(err).To(gomega.BeNil())
+	g.Expect(err).To(BeNil())
 
 	row, err := ds.NextRow()
-	g.Expect(err).To(gomega.BeNil())
+	g.Expect(err).To(BeNil())
 
-	firstName := NewRowValue(row, "first_name")
-	g.Expect(firstName.Evaluate().Type()).To(gomega.Equal(TypeString))
-	g.Expect(firstName.Evaluate().Value()).To(gomega.Equal("John"))
+	firstName := NewRowValue("first_name")
+	g.Expect(firstName.Evaluate(row).Type()).To(Equal(TypeString))
+	g.Expect(firstName.Evaluate(row).Value()).To(Equal("John"))
 
-	lastName := NewRowValue(row, "last_name")
-	g.Expect(lastName.Evaluate().Type()).To(gomega.Equal(TypeString))
-	g.Expect(lastName.Evaluate().Value()).To(gomega.Equal("Snow"))
+	lastName := NewRowValue("last_name")
+	g.Expect(lastName.Evaluate(row).Type()).To(Equal(TypeString))
+	g.Expect(lastName.Evaluate(row).Value()).To(Equal("Snow"))
 
-	deptId := NewRowValue(row, "dept_id")
-	g.Expect(deptId.Evaluate().Type()).To(gomega.Equal(TypeInt))
-	g.Expect(deptId.Evaluate().Value()).To(gomega.Equal(int64(1)))
+	deptId := NewRowValue("dept_id")
+	g.Expect(deptId.Evaluate(row).Type()).To(Equal(TypeInt))
+	g.Expect(deptId.Evaluate(row).Value()).To(Equal(int64(1)))
 
-	width := NewRowValue(row, "width")
-	g.Expect(width.Evaluate().Type()).To(gomega.Equal(TypeFloat))
-	g.Expect(width.Evaluate().Value()).To(gomega.Equal(1.0))
+	width := NewRowValue("width")
+	g.Expect(width.Evaluate(row).Type()).To(Equal(TypeFloat))
+	g.Expect(width.Evaluate(row).Value()).To(Equal(1.0))
+}
+
+func TestRowImpl_CacheTest(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ctx1 := newMapContextWithId(1)
+	ctx1.SetValue("number", "10")
+
+	ctx2 := newMapContextWithId(1)
+	ctx2.SetValue("number", "15")
+
+	width := NewRowValue("number")
+	g.Expect(width.Evaluate(ctx1).Value()).To(Equal(int64(10)))
+	g.Expect(width.Evaluate(ctx2).Value()).To(Equal(int64(10)))
+
+	ctx2.SetId(2)
+	width = NewRowValue("number")
+	g.Expect(width.Evaluate(ctx1).Value()).To(Equal(int64(10)))
+	g.Expect(width.Evaluate(ctx2).Value()).To(Equal(int64(15)))
+
 }

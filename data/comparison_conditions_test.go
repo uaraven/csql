@@ -97,9 +97,10 @@ var (
 )
 
 func testSet(g Gomega, testSet []conditionTest) {
+	c := newMapContext()
 	for _, test := range testSet {
 		cc := cond(test.maker, test.left, test.right)
-		g.Expect(cc.Evaluate().Value()).To(test.matcher, fmt.Sprintf("Condition %s", cc))
+		g.Expect(cc.Evaluate(c).Value()).To(test.matcher, fmt.Sprintf("Condition %s", cc))
 	}
 }
 

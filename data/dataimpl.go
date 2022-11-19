@@ -71,6 +71,22 @@ type rowImpl struct {
 	values []string
 }
 
+func newRowWithId(id int64, parent DataSource, values []string) Row {
+	return &rowImpl{
+		id:     id,
+		parent: parent,
+		values: values,
+	}
+}
+
+func copyRowWithId(id int64, row Row) Row {
+	return &rowImpl{
+		id:     id,
+		parent: row.Parent(),
+		values: row.Values(),
+	}
+}
+
 func (r rowImpl) Parent() DataSource {
 	return r.parent
 }
@@ -91,8 +107,27 @@ func (r rowImpl) GetByName(column string) funky.Option[string] {
 	}
 }
 
+func (r rowImpl) Get(column string) funky.Option[Value] {
+	s := r.GetByName(column)
+	return funky.OptMap(s, func(p string) Value {
+		return decodeToValue(p)
+	})
+}
+
+func decodeToValue(value string) Value {
+	i64, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		f64, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return NewStringValue(value)
+		}
+		return NewFloatValue(f64)
+	}
+	return NewIntValue(i64)
+}
+
 func (r rowImpl) Satisfies(cond Condition) bool {
-	return cond.Evaluate().AsBool().Value().(bool)
+	return cond.Evaluate(r).AsBool().Value().(bool)
 }
 
 func (r rowImpl) Id() int64 {

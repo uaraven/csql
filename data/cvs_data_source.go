@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 )
 
 type csvDataSource struct {
@@ -17,7 +18,7 @@ type csvDataSource struct {
 	path    string
 	name    string
 	alias   string
-	index   int64
+	index   atomic.Int64
 	file    *os.File
 	reader  *csv.Reader
 	headers DataSourceHeader
@@ -37,12 +38,12 @@ func NewCsvDataSource(csvFile string) (DataSource, error) {
 		return nil, err
 	}
 	cds := &csvDataSource{
-		index:  -1,
 		path:   csvFile,
 		file:   file,
 		name:   justName,
 		reader: csvReader,
 	}
+	cds.index.Store(-1)
 	cds.headers = NewHeadersFromSlice(cds, headers)
 	return cds, nil
 }
@@ -64,12 +65,7 @@ func (cds *csvDataSource) NextRow() (Row, error) {
 	} else if err != nil {
 		return nil, err
 	}
-	cds.index += 1
-	return &rowImpl{
-		id:     cds.index,
-		parent: cds,
-		values: values,
-	}, nil
+	return newRowWithId(cds.index.Add(1), cds, values), nil
 }
 
 func (cds *csvDataSource) Rewind() error {
@@ -86,7 +82,7 @@ func (cds *csvDataSource) Rewind() error {
 	cds.file = file
 	cds.reader = csv.NewReader(bufio.NewReader(cds.file))
 	cds.reader.TrimLeadingSpace = true
-	cds.index = -1
+	cds.index.Store(-1)
 	_, err = cds.reader.Read()
 	return err
 }

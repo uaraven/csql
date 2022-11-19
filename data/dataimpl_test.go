@@ -47,10 +47,10 @@ func TestRowImpl_Satisfies(t *testing.T) {
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	condT := NewAndCondition(
-		NewEq(NewRowValue(row, "first_name"), NewStringValue("John")),
-		NewLt(NewRowValue(row, "dept_id"), NewIntValue(3)))
+		NewEq(NewRowValue("first_name"), NewStringValue("John")),
+		NewLt(NewRowValue("dept_id"), NewIntValue(3)))
 
-	condF := NewEq(NewRowValue(row, "first_name"), NewStringValue("Connor"))
+	condF := NewEq(NewRowValue("first_name"), NewStringValue("Connor"))
 
 	g.Expect(row.Satisfies(condT)).To(BeTrue())
 	g.Expect(row.Satisfies(condF)).To(BeFalse())

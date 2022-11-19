@@ -1,5 +1,7 @@
 package data
 
+import "csql/funky"
+
 type DataType int
 
 const (
@@ -9,8 +11,14 @@ const (
 	TypeBoolean
 )
 
+// EvaluationContext provides a way to retrieve value by name during evaluation
+type EvaluationContext interface {
+	Get(string) funky.Option[Value]
+	Id() int64
+}
+
 type Evaluator interface {
-	Evaluate() Value
+	Evaluate(EvaluationContext) Value
 }
 
 type Condition interface {

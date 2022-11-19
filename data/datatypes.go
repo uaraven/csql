@@ -33,6 +33,7 @@ type Row interface {
 	Parent() DataSource
 	Values() []string
 	GetByName(string) funky.Option[string]
+	Get(string) funky.Option[Value]
 	Satisfies(c Condition) bool
 }
 

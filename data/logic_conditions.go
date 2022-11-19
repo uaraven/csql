@@ -12,9 +12,9 @@ func NewAndCondition(left Evaluator, right Evaluator) Evaluator {
 	}
 }
 
-func (ac andCondition) Evaluate() Value {
-	if ac.left.Evaluate().AsBool().Value().(bool) {
-		return ac.right.Evaluate().AsBool()
+func (ac andCondition) Evaluate(ctx EvaluationContext) Value {
+	if ac.left.Evaluate(ctx).AsBool().Value().(bool) {
+		return ac.right.Evaluate(ctx).AsBool()
 	} else {
 		return ValueFalse
 	}
@@ -32,11 +32,11 @@ func NewOrCondition(left Evaluator, right Evaluator) Evaluator {
 	}
 }
 
-func (oc orCondition) Evaluate() Value {
-	if oc.left.Evaluate().AsBool().Value().(bool) {
+func (oc orCondition) Evaluate(ctx EvaluationContext) Value {
+	if oc.left.Evaluate(ctx).AsBool().Value().(bool) {
 		return ValueTrue
 	} else {
-		return oc.right.Evaluate().AsBool()
+		return oc.right.Evaluate(ctx).AsBool()
 	}
 }
 
@@ -48,6 +48,6 @@ func NewNotCondition(arg Evaluator) Evaluator {
 	return &notCondition{arg: arg}
 }
 
-func (nc notCondition) Evaluate() Value {
-	return NewBoolValue(!nc.arg.Evaluate().AsBool().Value().(bool))
+func (nc notCondition) Evaluate(ctx EvaluationContext) Value {
+	return NewBoolValue(!nc.arg.Evaluate(ctx).AsBool().Value().(bool))
 }

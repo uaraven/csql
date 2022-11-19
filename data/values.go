@@ -81,7 +81,7 @@ func (rv stringValue) String() string {
 	return fmt.Sprintf("\"%s\"", rv.value)
 }
 
-func (rv stringValue) Evaluate() Value {
+func (rv stringValue) Evaluate(_ EvaluationContext) Value {
 	return &rv
 }
 
@@ -113,7 +113,7 @@ func (iv intValue) String() string {
 	return fmt.Sprintf("%d", iv.value)
 }
 
-func (iv intValue) Evaluate() Value {
+func (iv intValue) Evaluate(_ EvaluationContext) Value {
 	return &iv
 }
 
@@ -141,7 +141,7 @@ func (fv floatValue) AsBool() Value {
 	return NewBoolValue(fv.value != 0)
 }
 
-func (fv floatValue) Evaluate() Value {
+func (fv floatValue) Evaluate(_ EvaluationContext) Value {
 	return fv
 }
 
@@ -185,52 +185,43 @@ func (bv boolValue) String() string {
 	return fmt.Sprintf("%t", bv.value)
 }
 
-func (bv boolValue) Evaluate() Value {
+func (bv boolValue) Evaluate(_ EvaluationContext) Value {
 	return &bv
 }
 
 type rowValue struct {
 	lock       sync.Mutex
-	row        Row
 	identifier string
 	value      Value
+	ctxId      int64
 }
 
-func NewRowValue(row Row, identifier string) Evaluator {
+func NewRowValue(identifier string) Evaluator {
 	return &rowValue{
-		row:        row,
 		identifier: identifier,
 		value:      nil,
+		ctxId:      -1,
 	}
 }
 
-func (rv *rowValue) Evaluate() Value {
+func (rv *rowValue) Evaluate(ctx EvaluationContext) Value {
 	rv.lock.Lock()
 	defer rv.lock.Unlock()
-	if rv.value == nil {
+	if rv.value == nil || rv.ctxId != ctx.Id() {
 		var err error
-		rv.value, err = rv.getValue()
+		rv.value, err = rv.getValue(ctx)
 		if err != nil {
 			panic(err)
 		}
+		rv.ctxId = ctx.Id()
 	}
 	return rv.value
 }
 
-func (rv *rowValue) getValue() (Value, error) {
-	val := rv.row.GetByName(rv.identifier)
+func (rv *rowValue) getValue(ctx EvaluationContext) (Value, error) {
+	val := ctx.Get(rv.identifier)
 	if val.IsPresent() {
-		switch v := decode(val.Value()).(type) {
-		case string:
-			return NewStringValue(v), nil
-		case int64:
-			return NewIntValue(v), nil
-		case float64:
-			return NewFloatValue(v), nil
-		default:
-			return nil, fmt.Errorf("unsupported data type: %v", v)
-
-		}
+		return val.Value(), nil
 	} else {
 		return nil, fmt.Errorf("unknown column %s", rv.identifier)
 	}

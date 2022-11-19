@@ -61,9 +61,9 @@ type ComparisonCondition struct {
 	right    Evaluator
 }
 
-func (cc ComparisonCondition) Evaluate() Value {
-	lv := cc.left.Evaluate()
-	rv := cc.right.Evaluate()
+func (cc ComparisonCondition) Evaluate(ctx EvaluationContext) Value {
+	lv := cc.left.Evaluate(ctx)
+	rv := cc.right.Evaluate(ctx)
 	switch lv.Type() {
 	case TypeString:
 		return NewBoolValue(getComparator(lv.Value().(string), cc.operator)(rv.Value().(string)))
