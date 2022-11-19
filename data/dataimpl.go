@@ -3,6 +3,7 @@ package data
 import (
 	"csql/funky"
 	"csql/util"
+	"strconv"
 )
 
 type columnMetadata struct {
@@ -65,6 +66,7 @@ func NewHeadersFromSlice(parent DataSource, headers []string) DataSourceHeader {
 }
 
 type rowImpl struct {
+	id     int64
 	parent DataSource
 	values []string
 }
@@ -78,6 +80,9 @@ func (r rowImpl) Values() []string {
 }
 
 func (r rowImpl) GetByName(column string) funky.Option[string] {
+	if column == RowId {
+		return funky.SomeOf(strconv.FormatInt(r.id, 10))
+	}
 	index := r.Parent().Header().IndexByName(column)
 	if index < 0 {
 		return funky.NoneOf[string]()
@@ -88,4 +93,8 @@ func (r rowImpl) GetByName(column string) funky.Option[string] {
 
 func (r rowImpl) Satisfies(cond Condition) bool {
 	return cond.Evaluate().AsBool().Value().(bool)
+}
+
+func (r rowImpl) Id() int64 {
+	return r.id
 }

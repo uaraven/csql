@@ -1,79 +1,77 @@
 package data
 
 import (
-	"github.com/onsi/gomega"
+	. "github.com/onsi/gomega"
 	"testing"
 )
 
 func TestLoadCsv(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
+	g := NewGomegaWithT(t)
 
 	ds, err := NewCsvDataSource("../test-data/employees.csv")
 
-	g.Expect(err).To(gomega.BeNil())
+	g.Expect(err).To(BeNil())
 
 	hdr := ds.Header()
 
-	g.Expect(hdr.ColumnCount()).To(gomega.Equal(4))
+	g.Expect(hdr.ColumnCount()).To(Equal(5))
 }
 
 func TestLoadCsvRow(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
+	g := NewGomegaWithT(t)
 
-	ds, err := NewCsvDataSource("../test-data/employees.csv")
-
-	g.Expect(err).To(gomega.BeNil())
+	ds := loadTestDatasource()
 
 	row, err := ds.NextRow()
-	g.Expect(err).To(gomega.BeNil())
+	g.Expect(err).To(BeNil())
 
-	g.Expect(row.Values()).To(gomega.Equal([]string{"1", "1", "John", "Snow"}))
+	g.Expect(row.Values()).To(Equal([]string{"1", "1", "John", "Snow", "1.0"}))
+	g.Expect(row.Id()).To(Equal(int64(0)))
+
+	row, err = ds.NextRow()
+	g.Expect(err).To(BeNil())
+
+	g.Expect(row.Values()).To(Equal([]string{"2", "1", "James", "Snow", "1.2"}))
+	g.Expect(row.Id()).To(Equal(int64(1)))
 }
 
 func TestLoadCsvRewind(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
+	g := NewGomegaWithT(t)
 
-	ds, err := NewCsvDataSource("../test-data/employees.csv")
-
-	g.Expect(err).To(gomega.BeNil())
+	ds := loadTestDatasource()
 
 	row1, err := ds.NextRow()
-	g.Expect(err).To(gomega.BeNil())
+	g.Expect(err).ToNot(HaveOccurred())
 
-	err = ds.Rewind()
-	g.Expect(err).To(gomega.BeNil())
+	g.Expect(ds.Rewind()).To(Succeed())
+	g.Expect(err).ShouldNot(HaveOccurred())
 
-	row2, err := ds.NextRow()
-	g.Expect(err).To(gomega.BeNil())
-
-	g.Expect(row1).To(gomega.Equal(row2))
+	g.Expect(ds.NextRow()).To(Equal(row1))
 }
 
 func TestCsvGetValueByName(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
+	g := NewGomegaWithT(t)
 
-	ds, err := NewCsvDataSource("../test-data/employees.csv")
-	g.Expect(err).To(gomega.BeNil())
+	ds := loadTestDatasource()
 
 	row, err := ds.NextRow()
-	g.Expect(err).To(gomega.BeNil())
+	g.Expect(err).ShouldNot(HaveOccurred())
 
 	val := row.GetByName("first_name")
 
-	g.Expect(val.IsPresent()).To(gomega.BeTrue())
-	g.Expect(val.Value()).To(gomega.Equal("John"))
+	g.Expect(val.IsPresent()).To(BeTrue())
+	g.Expect(val.Value()).To(Equal("John"))
 }
 
 func TestCsvGetValueByInvalidName(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
+	g := NewGomegaWithT(t)
 
-	ds, err := NewCsvDataSource("../test-data/employees.csv")
-	g.Expect(err).To(gomega.BeNil())
+	ds := loadTestDatasource()
 
 	row, err := ds.NextRow()
-	g.Expect(err).To(gomega.BeNil())
+	g.Expect(err).ShouldNot(HaveOccurred())
 
 	val := row.GetByName("middle_name")
 
-	g.Expect(val.IsPresent()).To(gomega.BeFalse())
+	g.Expect(val.IsPresent()).To(BeFalse())
 }

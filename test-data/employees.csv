@@ -1,5 +1,5 @@
-id,dept_id,first_name,last_name
-1,1,John,Snow
-2,1,James,Snow
-3,2,Jeremy,Clarkson
-4,2,James,May
+id,dept_id,first_name,last_name,width
+1,1,John,Snow,1.0
+2,1,James,Snow,1.2
+3,2,Jeremy,Clarkson,2.1
+4,2,James,May,1.6

@@ -72,3 +72,11 @@ func SomeOf[T any](v T) Option[T] {
 func NoneOf[T any]() Option[T] {
 	return None[T]{}
 }
+
+func OptMap[T any, R any](in Option[T], mapper func(T) R) Option[R] {
+	if in.IsPresent() {
+		return SomeOf(mapper(in.Value()))
+	} else {
+		return NoneOf[R]()
+	}
+}

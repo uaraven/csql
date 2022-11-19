@@ -190,7 +190,7 @@ func (bv boolValue) Evaluate() Value {
 }
 
 type rowValue struct {
-	lock       sync.RWMutex
+	lock       sync.Mutex
 	row        Row
 	identifier string
 	value      Value
@@ -198,7 +198,6 @@ type rowValue struct {
 
 func NewRowValue(row Row, identifier string) Evaluator {
 	return &rowValue{
-		lock:       sync.RWMutex{},
 		row:        row,
 		identifier: identifier,
 		value:      nil,

@@ -8,13 +8,16 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 type csvDataSource struct {
 	io.Closer
+	lock    sync.Mutex
 	path    string
 	name    string
 	alias   string
+	index   int64
 	file    *os.File
 	reader  *csv.Reader
 	headers DataSourceHeader
@@ -34,6 +37,7 @@ func NewCsvDataSource(csvFile string) (DataSource, error) {
 		return nil, err
 	}
 	cds := &csvDataSource{
+		index:  -1,
 		path:   csvFile,
 		file:   file,
 		name:   justName,
@@ -52,19 +56,25 @@ func (cds *csvDataSource) MatchesName(s string) bool {
 }
 
 func (cds *csvDataSource) NextRow() (Row, error) {
+	cds.lock.Lock()
+	defer cds.lock.Unlock()
 	values, err := cds.reader.Read()
 	if err == io.EOF {
 		return nil, nil
 	} else if err != nil {
 		return nil, err
 	}
+	cds.index += 1
 	return &rowImpl{
+		id:     cds.index,
 		parent: cds,
 		values: values,
 	}, nil
 }
 
 func (cds *csvDataSource) Rewind() error {
+	cds.lock.Lock()
+	defer cds.lock.Unlock()
 	err := cds.file.Close()
 	if err != nil {
 		return err
@@ -76,11 +86,14 @@ func (cds *csvDataSource) Rewind() error {
 	cds.file = file
 	cds.reader = csv.NewReader(bufio.NewReader(cds.file))
 	cds.reader.TrimLeadingSpace = true
+	cds.index = -1
 	_, err = cds.reader.Read()
 	return err
 }
 
 func (cds *csvDataSource) ReadAll() ([]Row, error) {
+	cds.lock.Lock()
+	defer cds.lock.Unlock()
 	result := make([]Row, 0)
 	row, err := cds.NextRow()
 	if err != nil {
@@ -97,5 +110,7 @@ func (cds *csvDataSource) ReadAll() ([]Row, error) {
 }
 
 func (cds *csvDataSource) Close() error {
+	cds.lock.Lock()
+	defer cds.lock.Unlock()
 	return cds.file.Close()
 }

@@ -2,6 +2,10 @@ package data
 
 import "csql/funky"
 
+const (
+	RowId = "__row_id"
+)
+
 // ColumnMetadata describes a column
 type ColumnMetadata interface {
 	// Parent returns the datasource to which this column belongs
@@ -25,18 +29,22 @@ type DataSourceHeader interface {
 }
 
 type Row interface {
+	Id() int64
 	Parent() DataSource
 	Values() []string
 	GetByName(string) funky.Option[string]
 	Satisfies(c Condition) bool
 }
 
-// DataSource is an representation of rows of columns
+// DataSource is a representation of rows of columns
 type DataSource interface {
+	// Header returns header information for the DataSource
 	Header() DataSourceHeader
 	// MatchesName returns true if the provided parameter matches name or alias of the DataSource
 	MatchesName(string) bool
-	// NextRow returns the next row of values or nil
+	// NextRow returns the next row of values.
+	//
+	// If returned row is nil and error is also nil, then this DataSource does not contain any more rows
 	NextRow() (Row, error)
 	// Rewind the dataset to ahead of the first row
 	Rewind() error

@@ -1,62 +1,36 @@
 package funky
 
-import "testing"
+import (
+	. "github.com/onsi/gomega"
+	"testing"
+)
 
 func TestSome(t *testing.T) {
+	g := NewGomegaWithT(t)
 	expected := 12
 	v := SomeOf(expected)
-	if v.IsEmpty() {
-		t.Errorf("expected IsEmpty() to return false")
-	}
-	if !v.IsPresent() {
-		t.Errorf("expected IsPresent() to return true")
-	}
-	if v.Value() != expected {
-		t.Errorf("expected Value() to return %d", expected)
-	}
-	if v.OrGet(10) != expected {
-		t.Errorf("expected OrGet() to return %d", expected)
-	}
+	g.Expect(v.IsEmpty()).To(BeFalse(), "expected IsEmpty() to return false")
+	g.Expect(v.IsPresent()).To(BeTrue(), "expected IsPresent() to return true")
+	g.Expect(v.Value()).To(Equal(expected))
+	g.Expect(v.OrGet(10)).To(Equal(expected))
 	var executed bool = false
 	v.IfPresent(func(value int) {
-		if value != expected {
-			t.Errorf("expected parameter to IfPresent to be equal %d", expected)
-		}
+		g.Expect(value).To(Equal(expected))
 		executed = true
 	})
-	if !executed {
-		t.Errorf("expected function passed to IfPresent to execute")
-	}
+	g.Expect(executed).To(BeTrue())
 }
 
 func TestNone(t *testing.T) {
+	g := NewGomegaWithT(t)
 	v := NoneOf[int]()
-	if !v.IsEmpty() {
-		t.Errorf("expected IsEmpty() to return true")
-	}
-	if v.IsPresent() {
-		t.Errorf("expected IsPresent() to return false")
-	}
-	expected := 10
-	if v.OrGet(expected) != expected {
-		t.Errorf("expected OrGet() to return %d", expected)
-	}
-	var executed bool = false
-	v.IfPresent(func(value int) {
-		t.Errorf("expected parameter to IfPresent to be equal %d", expected)
-		executed = true
-	})
-	if executed {
-		t.Errorf("expected function passed to IfPresent to not execute")
-	}
-}
+	g.Expect(v.IsEmpty()).To(BeTrue(), "expected IsEmpty() to return true")
+	g.Expect(v.IsPresent()).To(BeFalse(), "expected IsPresent() to return false")
+	g.Expect(func() { v.Value() }).To(Panic())
 
-func TestNone_Value(t *testing.T) {
-	defer func() {
-		if r := recover(); r != nil {
-		}
-	}()
-	v := NoneOf[string]()
-	v.Value()
-	t.Errorf("expected Value() to panic")
+	expected := 10
+	g.Expect(v.OrGet(expected)).To(Equal(expected))
+	v.IfPresent(func(value int) {
+		t.Fatal("Should not execute")
+	})
 }

@@ -26,4 +26,7 @@ func TestRowValue_Evaluate(t *testing.T) {
 	g.Expect(deptId.Evaluate().Type()).To(gomega.Equal(TypeInt))
 	g.Expect(deptId.Evaluate().Value()).To(gomega.Equal(int64(1)))
 
+	width := NewRowValue(row, "width")
+	g.Expect(width.Evaluate().Type()).To(gomega.Equal(TypeFloat))
+	g.Expect(width.Evaluate().Value()).To(gomega.Equal(1.0))
 }
