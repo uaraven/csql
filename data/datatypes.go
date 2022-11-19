@@ -37,8 +37,8 @@ type DataSource interface {
 	MatchesName(string) bool
 	// NextRow returns the next row of values or nil
 	NextRow() (Row, error)
-	// ReadAll reads all rows
-	ReadAll() ([]Row, error)
+	// Rewind the dataset to ahead of the first row
+	Rewind() error
 }
 
 type QueryContext interface {

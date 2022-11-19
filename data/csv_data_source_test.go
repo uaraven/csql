@@ -30,17 +30,23 @@ func TestLoadCsvRow(t *testing.T) {
 	g.Expect(row.Values()).To(gomega.Equal([]string{"1", "1", "John", "Snow"}))
 }
 
-func TestLoadCsvAllRow(t *testing.T) {
+func TestLoadCsvRewind(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	ds, err := NewCsvDataSource("../test-data/employees.csv")
 
 	g.Expect(err).To(gomega.BeNil())
 
-	rows, err := ds.ReadAll()
+	row1, err := ds.NextRow()
 	g.Expect(err).To(gomega.BeNil())
 
-	g.Expect(rows).To(gomega.HaveLen(4))
+	err = ds.Rewind()
+	g.Expect(err).To(gomega.BeNil())
+
+	row2, err := ds.NextRow()
+	g.Expect(err).To(gomega.BeNil())
+
+	g.Expect(row1).To(gomega.Equal(row2))
 }
 
 func TestCsvGetValueByName(t *testing.T) {

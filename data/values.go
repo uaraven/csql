@@ -46,7 +46,7 @@ func (rv stringValue) Value() interface{} {
 }
 
 func (rv stringValue) AsString() Value {
-	return rv
+	return &rv
 }
 
 func (rv stringValue) AsInt() Value {
@@ -80,6 +80,10 @@ func (rv stringValue) String() string {
 	return fmt.Sprintf("\"%s\"", rv.value)
 }
 
+func (rv stringValue) Evaluate() Value {
+	return &rv
+}
+
 func (iv intValue) Type() DataType {
 	return IntType
 }
@@ -93,7 +97,7 @@ func (iv intValue) AsString() Value {
 }
 
 func (iv intValue) AsInt() Value {
-	return iv
+	return &iv
 }
 
 func (iv intValue) AsFloat() Value {
@@ -106,6 +110,10 @@ func (iv intValue) AsBool() Value {
 
 func (iv intValue) String() string {
 	return fmt.Sprintf("%d", iv.value)
+}
+
+func (iv intValue) Evaluate() Value {
+	return &iv
 }
 
 func (fv floatValue) Type() DataType {
@@ -130,6 +138,10 @@ func (fv floatValue) AsFloat() Value {
 
 func (fv floatValue) AsBool() Value {
 	return NewBoolValue(fv.value != 0)
+}
+
+func (fv floatValue) Evaluate() Value {
+	return fv
 }
 
 func (fv floatValue) String() string {
@@ -165,11 +177,15 @@ func (bv boolValue) AsFloat() Value {
 }
 
 func (bv boolValue) AsBool() Value {
-	return bv
+	return &bv
 }
 
 func (bv boolValue) String() string {
 	return fmt.Sprintf("%t", bv.value)
+}
+
+func (bv boolValue) Evaluate() Value {
+	return &bv
 }
 
 func NewRowValue(row Row, identifier string) (Value, error) {
@@ -202,3 +218,8 @@ func decode(value string) interface{} {
 	}
 	return i64
 }
+
+var (
+	ValueFalse = NewBoolValue(false)
+	ValueTrue  = NewBoolValue(true)
+)

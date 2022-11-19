@@ -9,15 +9,20 @@ const (
 	BooleanType
 )
 
+type Evaluator interface {
+	Evaluate() Value
+}
+
+type Condition interface {
+	Evaluator
+}
+
 type Value interface {
+	Evaluator
 	Type() DataType
 	Value() interface{}
 	AsString() Value
 	AsInt() Value
 	AsFloat() Value
 	AsBool() Value
-}
-
-type Condition interface {
-	Evaluate() Value
 }

@@ -12,6 +12,7 @@ import (
 
 type csvDataSource struct {
 	io.Closer
+	path    string
 	name    string
 	alias   string
 	file    *os.File
@@ -33,6 +34,7 @@ func NewCsvDataSource(csvFile string) (DataSource, error) {
 		return nil, err
 	}
 	cds := &csvDataSource{
+		path:   csvFile,
 		file:   file,
 		name:   justName,
 		reader: csvReader,
@@ -60,6 +62,22 @@ func (cds *csvDataSource) NextRow() (Row, error) {
 		parent: cds,
 		values: values,
 	}, nil
+}
+
+func (cds *csvDataSource) Rewind() error {
+	err := cds.file.Close()
+	if err != nil {
+		return err
+	}
+	file, err := os.Open(cds.path)
+	if err != nil {
+		return err
+	}
+	cds.file = file
+	cds.reader = csv.NewReader(bufio.NewReader(cds.file))
+	cds.reader.TrimLeadingSpace = true
+	_, err = cds.reader.Read()
+	return err
 }
 
 func (cds *csvDataSource) ReadAll() ([]Row, error) {
