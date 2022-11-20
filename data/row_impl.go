@@ -22,6 +22,14 @@ func newRowWithId(id int64, parent DataSource, values []string) Row {
 	}
 }
 
+func newRowWithIdAndValues(id int64, parent DataSource, values []Value) Row {
+	return &rowImpl{
+		id:     id,
+		parent: parent,
+		values: values,
+	}
+}
+
 func copyRowWithId(id int64, row Row) Row {
 	return &rowImpl{
 		id:     id,
