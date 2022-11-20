@@ -1,4 +1,4 @@
-package data
+package core
 
 type andCondition struct {
 	left  Evaluator

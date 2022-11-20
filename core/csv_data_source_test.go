@@ -1,4 +1,4 @@
-package data
+package core
 
 import (
 	. "github.com/onsi/gomega"
@@ -10,7 +10,7 @@ func TestLoadCsv(t *testing.T) {
 
 	ds, err := NewCsvDataSource("../test-data/employees.csv")
 
-	g.Expect(err).To(BeNil())
+	g.Expect(err).ToNot(HaveOccurred())
 
 	hdr := ds.Header()
 
@@ -23,7 +23,7 @@ func TestLoadCsvRow(t *testing.T) {
 	ds := loadTestDatasource()
 
 	row, err := ds.NextRow()
-	g.Expect(err).To(BeNil())
+	g.Expect(err).ToNot(HaveOccurred())
 
 	g.Expect(row.Values()).To(Equal([]Value{NewIntValue(1), NewIntValue(1),
 		NewStringValue("John"),
