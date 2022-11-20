@@ -33,7 +33,7 @@ func TestLoadCsvRow(t *testing.T) {
 	g.Expect(row.Id()).To(Equal(int64(0)))
 
 	row, err = ds.NextRow()
-	g.Expect(err).To(BeNil())
+	g.Expect(err).ToNot(HaveOccurred())
 
 	g.Expect(row.Values()).To(Equal([]Value{NewIntValue(2), NewIntValue(1),
 		NewStringValue("James"),
