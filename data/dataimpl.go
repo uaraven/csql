@@ -12,6 +12,10 @@ type columnMetadata struct {
 	index      int
 }
 
+func (cm columnMetadata) ParentName() string {
+	return cm.parentName
+}
+
 func (cm columnMetadata) Parent() DataSource {
 	return cm.parent
 }
