@@ -72,6 +72,17 @@ func NewHeadersFromSlice(parent DataSource, headers []string) DataSourceHeader {
 	return &dataSourceHeader{parent: parent, columns: columns}
 }
 
+func NewHeadersFromOtherHeaders(parent DataSource, headers ...[]ColumnMetadata) DataSourceHeader {
+	columns := make([]ColumnMetadata, 0)
+	for _, otherHeaders := range headers {
+		columns = append(columns, otherHeaders...)
+	}
+	return &dataSourceHeader{
+		parent:  parent,
+		columns: columns,
+	}
+}
+
 func qualified(name string) (string, string) {
 	p := strings.Split(name, ".")
 	if len(p) == 1 {

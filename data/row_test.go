@@ -8,7 +8,7 @@ import (
 func TestRowValue_Evaluate(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ds := loadTestMemDatasource()
+	ds := loadDefaultTestMemDatasource()
 
 	row, err := ds.NextRow()
 	g.Expect(err).ToNot(HaveOccurred())
@@ -30,30 +30,10 @@ func TestRowValue_Evaluate(t *testing.T) {
 	g.Expect(width.Evaluate(row).Value()).To(Equal(1.0))
 }
 
-func TestRowImpl_CacheTest(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	ctx1 := newMapContextWithId(1)
-	ctx1.SetValue("number", "10")
-
-	ctx2 := newMapContextWithId(1)
-	ctx2.SetValue("number", "15")
-
-	width := NewRowValue("number")
-	g.Expect(width.Evaluate(ctx1).Value()).To(Equal(int64(10)))
-	g.Expect(width.Evaluate(ctx2).Value()).To(Equal(int64(10)))
-
-	ctx2.SetId(2)
-	width = NewRowValue("number")
-	g.Expect(width.Evaluate(ctx1).Value()).To(Equal(int64(10)))
-	g.Expect(width.Evaluate(ctx2).Value()).To(Equal(int64(15)))
-
-}
-
 func TestRowImpl_Get_QualifiedAccess(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ds := loadTestMemDatasource()
+	ds := loadDefaultTestMemDatasource()
 
 	row, err := ds.NextRow()
 	g.Expect(err).ToNot(HaveOccurred())

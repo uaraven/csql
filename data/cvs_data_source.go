@@ -14,13 +14,14 @@ import (
 
 type csvDataSource struct {
 	io.Closer
-	lock    sync.Mutex
-	path    string
-	name    string
-	index   atomic.Int64
-	file    *os.File
-	reader  *csv.Reader
-	headers DataSourceHeader
+	lock          sync.Mutex
+	path          string
+	name          string
+	index         atomic.Int64
+	file          *os.File
+	reader        *csv.Reader
+	headers       DataSourceHeader
+	currentValues []string
 }
 
 func NewCsvDataSource(csvFile string) (DataSource, error) {
@@ -77,7 +78,18 @@ func (cds *csvDataSource) NextRow() (Row, error) {
 	} else if err != nil {
 		return nil, err
 	}
+	cds.currentValues = values
 	return newRowWithId(cds.index.Add(1), cds, values), nil
+}
+
+func (cds *csvDataSource) CurrentRow() (Row, error) {
+	cds.lock.Lock()
+	defer cds.lock.Unlock()
+	if cds.currentValues == nil {
+		return nil, nil
+	} else {
+		return newRowWithId(cds.index.Load(), cds, cds.currentValues), nil
+	}
 }
 
 func (cds *csvDataSource) Rewind() error {
@@ -95,26 +107,9 @@ func (cds *csvDataSource) Rewind() error {
 	cds.reader = csv.NewReader(bufio.NewReader(cds.file))
 	cds.reader.TrimLeadingSpace = true
 	cds.index.Store(-1)
+	cds.currentValues = nil
 	_, err = cds.reader.Read()
 	return err
-}
-
-func (cds *csvDataSource) ReadAll() ([]Row, error) {
-	cds.lock.Lock()
-	defer cds.lock.Unlock()
-	result := make([]Row, 0)
-	row, err := cds.NextRow()
-	if err != nil {
-		return nil, err
-	}
-	for row != nil {
-		result = append(result, row)
-		row, err = cds.NextRow()
-		if err != nil {
-			return nil, err
-		}
-	}
-	return result, nil
 }
 
 func (cds *csvDataSource) Close() error {

@@ -2,6 +2,7 @@ package data
 
 import (
 	"csql/funky"
+	"fmt"
 	"strconv"
 )
 
@@ -26,6 +27,18 @@ func copyRowWithId(id int64, row Row) Row {
 		id:     id,
 		parent: row.Parent(),
 		values: row.Values(),
+	}
+}
+
+func joinRows(id int64, parent DataSource, row1 Row, row2 Row) Row {
+	rowData := make([]Value, len(row1.Values()))
+	copy(rowData, row1.Values())
+	rowData = append(rowData, row2.Values()...)
+
+	return &rowImpl{
+		id:     id,
+		parent: parent,
+		values: rowData,
 	}
 }
 
@@ -66,4 +79,8 @@ func (r rowImpl) Satisfies(cond Condition) bool {
 
 func (r rowImpl) Id() int64 {
 	return r.id
+}
+
+func (r rowImpl) String() string {
+	return fmt.Sprintf("%v", r.values)
 }

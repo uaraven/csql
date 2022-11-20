@@ -10,6 +10,7 @@ type filteredDataSource struct {
 	datasource DataSource
 	condition  Condition
 	counter    atomic.Int64
+	currentRow Row
 }
 
 func (f *filteredDataSource) Header() DataSourceHeader {
@@ -36,15 +37,26 @@ func (f *filteredDataSource) NextRow() (Row, error) {
 			return nil, nil
 		}
 		if row.Satisfies(f.condition) {
-			return copyRowWithId(f.counter.Add(1), row), nil
+			f.currentRow = copyRowWithId(f.counter.Add(1), row)
+			return f.currentRow, nil
 		}
 	}
+}
+
+func (f *filteredDataSource) CurrentRow() (Row, error) {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+	if f.currentRow == nil {
+		return nil, nil
+	}
+	return f.currentRow, nil
 }
 
 func (f *filteredDataSource) Rewind() error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 	f.counter.Store(-1)
+	f.currentRow = nil
 	return f.datasource.Rewind()
 }
 

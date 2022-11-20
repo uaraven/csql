@@ -1,6 +1,9 @@
 package data
 
-import "csql/funky"
+import (
+	"csql/funky"
+	"fmt"
+)
 
 const (
 	RowId             = "__row_id"
@@ -31,6 +34,7 @@ type DataSourceHeader interface {
 }
 
 type Row interface {
+	fmt.Stringer
 	Id() int64
 	Parent() DataSource
 	Values() []Value
@@ -50,6 +54,11 @@ type DataSource interface {
 	//
 	// If returned row is nil and error is also nil, then this DataSource does not contain any more rows
 	NextRow() (Row, error)
+
+	// CurrentRow returns the row of values that internal DataSource pointer is currently pointed to
+	//
+	// If nil is returned that means that the pointer is positioned before the first row and NextRow() should be called
+	CurrentRow() (Row, error)
 	// Rewind the dataset to ahead of the first row
 	Rewind() error
 }

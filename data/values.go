@@ -199,23 +199,17 @@ type rowValue struct {
 func NewRowValue(identifier string) Evaluator {
 	return &rowValue{
 		identifier: identifier,
-		value:      nil,
-		ctxId:      -1,
 	}
 }
 
 func (rv *rowValue) Evaluate(ctx EvaluationContext) Value {
 	rv.lock.Lock()
 	defer rv.lock.Unlock()
-	if rv.value == nil || rv.ctxId != ctx.Id() {
-		var err error
-		rv.value, err = rv.getValue(ctx)
-		if err != nil {
-			panic(err)
-		}
-		rv.ctxId = ctx.Id()
+	value, err := rv.getValue(ctx)
+	if err != nil {
+		panic(err)
 	}
-	return rv.value
+	return value
 }
 
 func (rv *rowValue) getValue(ctx EvaluationContext) (Value, error) {

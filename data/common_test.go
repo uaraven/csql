@@ -1,6 +1,9 @@
 package data
 
-import "csql/funky"
+import (
+	"csql/funky"
+	"fmt"
+)
 
 func loadTestDatasource() DataSource {
 	ds, err := NewCsvDataSource("../test-data/employees.csv")
@@ -10,8 +13,16 @@ func loadTestDatasource() DataSource {
 	return ds
 }
 
-func loadTestMemDatasource() DataSource {
+func loadDefaultTestMemDatasource() DataSource {
 	ds, err := NewMemDataSource("../test-data/employees.csv")
+	if err != nil {
+		panic(err)
+	}
+	return ds
+}
+
+func loadTestMemDatasource(name string) DataSource {
+	ds, err := NewMemDataSource(fmt.Sprintf("../test-data/%s.csv", name))
 	if err != nil {
 		panic(err)
 	}
@@ -24,6 +35,22 @@ func loadTestMemDatasourceWithAlias(alias string) DataSource {
 		panic(err)
 	}
 	return ds
+}
+
+func ReadAllRows(ds DataSource) ([]Row, error) {
+	result := make([]Row, 0)
+	row, err := ds.NextRow()
+	if err != nil {
+		return nil, err
+	}
+	for row != nil {
+		result = append(result, row)
+		row, err = ds.NextRow()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return result, nil
 }
 
 type mapContext struct {

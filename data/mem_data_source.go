@@ -13,9 +13,7 @@ import (
 )
 
 type memDataSource struct {
-	io.Closer
 	lock    sync.Mutex
-	path    string
 	name    string
 	index   atomic.Int64
 	data    []Row
@@ -23,7 +21,7 @@ type memDataSource struct {
 }
 
 func NewMemDataSource(csvFile string) (DataSource, error) {
-	return NewCsvDataSourceWithAlias(csvFile, "")
+	return NewMemDataSourceWithAlias(csvFile, "")
 }
 
 func NewMemDataSourceWithAlias(csvFile string, alias string) (DataSource, error) {
@@ -46,7 +44,6 @@ func NewMemDataSourceWithAlias(csvFile string, alias string) (DataSource, error)
 		return nil, err
 	}
 	cds := &memDataSource{
-		path: csvFile,
 		name: justName,
 	}
 	err = cds.loadCsv(csvReader)
@@ -63,15 +60,15 @@ func (cds *memDataSource) loadCsv(csvReader *csv.Reader) error {
 	index := int64(0)
 	for {
 		csvRow, err := csvReader.Read()
-		r := newRowWithId(index, cds, csvRow)
-		index++
-		rows = append(rows, r)
 		if err == io.EOF {
 			cds.data = rows
 			return nil
 		} else if err != nil {
 			return err
 		}
+		r := newRowWithId(index, cds, csvRow)
+		index++
+		rows = append(rows, r)
 	}
 }
 
@@ -97,31 +94,19 @@ func (cds *memDataSource) NextRow() (Row, error) {
 	return cds.data[readIndex], nil
 }
 
+func (cds *memDataSource) CurrentRow() (Row, error) {
+	cds.lock.Lock()
+	defer cds.lock.Unlock()
+	readIndex := cds.index.Load()
+	if readIndex < int64(0) {
+		return nil, nil
+	}
+	return cds.data[readIndex], nil
+}
+
 func (cds *memDataSource) Rewind() error {
 	cds.lock.Lock()
 	defer cds.lock.Unlock()
 	cds.index.Store(-1)
-	return nil
-}
-
-func (cds *memDataSource) ReadAll() ([]Row, error) {
-	cds.lock.Lock()
-	defer cds.lock.Unlock()
-	result := make([]Row, 0)
-	row, err := cds.NextRow()
-	if err != nil {
-		return nil, err
-	}
-	for row != nil {
-		result = append(result, row)
-		row, err = cds.NextRow()
-		if err != nil {
-			return nil, err
-		}
-	}
-	return result, nil
-}
-
-func (cds *memDataSource) Close() error {
 	return nil
 }

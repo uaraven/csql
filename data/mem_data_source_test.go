@@ -10,17 +10,21 @@ func TestLoadMemCsv(t *testing.T) {
 
 	ds, err := NewMemDataSource("../test-data/employees.csv")
 
-	g.Expect(err).To(BeNil())
+	g.Expect(err).ToNot(HaveOccurred())
 
 	hdr := ds.Header()
 
 	g.Expect(hdr.ColumnCount()).To(Equal(5))
+
+	rows, err := ReadAllRows(ds)
+	g.Expect(err).ToNot(HaveOccurred())
+	g.Expect(rows).To(HaveLen(4))
 }
 
 func TestLoadMemCsvRow(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ds := loadTestMemDatasource()
+	ds := loadDefaultTestMemDatasource()
 
 	row, err := ds.NextRow()
 	g.Expect(err).To(BeNil())
@@ -44,7 +48,7 @@ func TestLoadMemCsvRow(t *testing.T) {
 func TestLoadMemCsvRewind(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ds := loadTestMemDatasource()
+	ds := loadDefaultTestMemDatasource()
 
 	row1, err := ds.NextRow()
 	g.Expect(err).ToNot(HaveOccurred())
@@ -58,7 +62,7 @@ func TestLoadMemCsvRewind(t *testing.T) {
 func TestMemCsvGetValueByName(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ds := loadTestMemDatasource()
+	ds := loadDefaultTestMemDatasource()
 
 	row, err := ds.NextRow()
 	g.Expect(err).ShouldNot(HaveOccurred())
@@ -72,7 +76,7 @@ func TestMemCsvGetValueByName(t *testing.T) {
 func TestMemCsvGetValueByInvalidName(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ds := loadTestMemDatasource()
+	ds := loadDefaultTestMemDatasource()
 
 	row, err := ds.NextRow()
 	g.Expect(err).ShouldNot(HaveOccurred())
