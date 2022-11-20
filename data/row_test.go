@@ -8,11 +8,10 @@ import (
 func TestRowValue_Evaluate(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ds, err := NewCsvDataSource("../test-data/employees.csv")
-	g.Expect(err).To(BeNil())
+	ds := loadTestMemDatasource()
 
 	row, err := ds.NextRow()
-	g.Expect(err).To(BeNil())
+	g.Expect(err).ToNot(HaveOccurred())
 
 	firstName := NewRowValue("first_name")
 	g.Expect(firstName.Evaluate(row).Type()).To(Equal(TypeString))
@@ -48,5 +47,52 @@ func TestRowImpl_CacheTest(t *testing.T) {
 	width = NewRowValue("number")
 	g.Expect(width.Evaluate(ctx1).Value()).To(Equal(int64(10)))
 	g.Expect(width.Evaluate(ctx2).Value()).To(Equal(int64(15)))
+
+}
+
+func TestRowImpl_Get_QualifiedAccess(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ds := loadTestMemDatasource()
+
+	row, err := ds.NextRow()
+	g.Expect(err).ToNot(HaveOccurred())
+
+	v := row.Get("first_name")
+	g.Expect(v.IsPresent()).To(BeTrue())
+	g.Expect(v.Value()).To(Equal(NewStringValue("John")))
+
+	v = row.Get("employees.first_name")
+	g.Expect(v.IsPresent()).To(BeTrue())
+	g.Expect(v.Value()).To(Equal(NewStringValue("John")))
+
+	v = row.Get("employee.middle_name")
+	g.Expect(v.IsPresent()).To(BeFalse())
+
+	v = row.Get("emp.middle_name")
+	g.Expect(v.IsPresent()).To(BeFalse())
+}
+
+func TestRowImpl_Get_QualifiedAccessAlias(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	dsa := loadTestMemDatasourceWithAlias("emp")
+
+	row, err := dsa.NextRow()
+	g.Expect(err).ToNot(HaveOccurred())
+
+	v := row.Get("first_name")
+	g.Expect(v.IsPresent()).To(BeTrue())
+	g.Expect(v.Value()).To(Equal(NewStringValue("John")))
+
+	v = row.Get("emp.first_name")
+	g.Expect(v.IsPresent()).To(BeTrue())
+	g.Expect(v.Value()).To(Equal(NewStringValue("John")))
+
+	v = row.Get("emp.middle_name")
+	g.Expect(v.IsPresent()).To(BeFalse())
+
+	v = row.Get("employee.middle_name")
+	g.Expect(v.IsPresent()).To(BeFalse())
 
 }

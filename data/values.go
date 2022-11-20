@@ -227,18 +227,6 @@ func (rv *rowValue) getValue(ctx EvaluationContext) (Value, error) {
 	}
 }
 
-func decode(value string) interface{} {
-	i64, err := strconv.ParseInt(value, 10, 64)
-	if err != nil {
-		f64, err := strconv.ParseFloat(value, 64)
-		if err != nil {
-			return value
-		}
-		return f64
-	}
-	return i64
-}
-
 var (
 	ValueFalse = NewBoolValue(false)
 	ValueTrue  = NewBoolValue(true)

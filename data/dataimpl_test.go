@@ -15,27 +15,27 @@ func TestRowImpl_GetRowId(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	val := row.GetByName(RowId)
+	val := row.Get(RowId)
 
 	g.Expect(val.IsPresent()).To(BeTrue())
-	g.Expect(val.Value()).To(Equal("0"))
+	g.Expect(val.Value()).To(Equal(NewIntValue(0)))
 
 	row, err = ds.NextRow()
 	g.Expect(err).ShouldNot(HaveOccurred())
 
-	val = row.GetByName(RowId)
+	val = row.Get(RowId)
 
 	g.Expect(val.IsPresent()).To(BeTrue())
-	g.Expect(val.Value()).To(Equal("1"))
+	g.Expect(val.Value()).To(Equal(NewIntValue(1)))
 
 	g.Expect(ds.Rewind()).ShouldNot(HaveOccurred())
 	row, err = ds.NextRow()
 	g.Expect(err).ShouldNot(HaveOccurred())
 
-	val = row.GetByName(RowId)
+	val = row.Get(RowId)
 
 	g.Expect(val.IsPresent()).To(BeTrue())
-	g.Expect(val.Value()).To(Equal("0"))
+	g.Expect(val.Value()).To(Equal(NewIntValue(0)))
 }
 
 func TestRowImpl_Satisfies(t *testing.T) {

@@ -18,15 +18,15 @@ func TestFilteredDataSource_NextRow(t *testing.T) {
 	g.Expect(err).ToNot(HaveOccurred())
 
 	g.Expect(row.Id()).To(Equal(int64(0)))
-	g.Expect(row.GetByName("first_name").Value()).To(Equal("Jeremy"))
-	g.Expect(row.GetByName("last_name").Value()).To(Equal("Clarkson"))
+	g.Expect(row.Get("first_name").Value()).To(Equal(NewStringValue("Jeremy")))
+	g.Expect(row.Get("last_name").Value()).To(Equal(NewStringValue("Clarkson")))
 
 	row, err = fds.NextRow()
 	g.Expect(err).ToNot(HaveOccurred())
 
 	g.Expect(row.Id()).To(Equal(int64(1)))
-	g.Expect(row.GetByName("first_name").Value()).To(Equal("James"))
-	g.Expect(row.GetByName("last_name").Value()).To(Equal("May"))
+	g.Expect(row.Get("first_name").Value()).To(Equal(NewStringValue("James")))
+	g.Expect(row.Get("last_name").Value()).To(Equal(NewStringValue("May")))
 }
 
 func TestFilteredDataSource_Rewind(t *testing.T) {
@@ -49,6 +49,6 @@ func TestFilteredDataSource_Rewind(t *testing.T) {
 	g.Expect(err).ToNot(HaveOccurred())
 
 	g.Expect(row.Id()).To(Equal(int64(0)))
-	g.Expect(row.GetByName("first_name").Value()).To(Equal("Jeremy"))
-	g.Expect(row.GetByName("last_name").Value()).To(Equal("Clarkson"))
+	g.Expect(row.Get("first_name").Value()).To(Equal(NewStringValue("Jeremy")))
+	g.Expect(row.Get("last_name").Value()).To(Equal(NewStringValue("Clarkson")))
 }

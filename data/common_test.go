@@ -10,6 +10,22 @@ func loadTestDatasource() DataSource {
 	return ds
 }
 
+func loadTestMemDatasource() DataSource {
+	ds, err := NewMemDataSource("../test-data/employees.csv")
+	if err != nil {
+		panic(err)
+	}
+	return ds
+}
+
+func loadTestMemDatasourceWithAlias(alias string) DataSource {
+	ds, err := NewMemDataSourceWithAlias("../test-data/employees.csv", alias)
+	if err != nil {
+		panic(err)
+	}
+	return ds
+}
+
 type mapContext struct {
 	EvaluationContext
 	id     int64

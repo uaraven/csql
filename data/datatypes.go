@@ -3,7 +3,9 @@ package data
 import "csql/funky"
 
 const (
-	RowId = "__row_id"
+	RowId             = "__row_id"
+	RowIdIndex        = -1
+	InvalidFieldIndex = -2
 )
 
 // ColumnMetadata describes a column
@@ -31,8 +33,7 @@ type DataSourceHeader interface {
 type Row interface {
 	Id() int64
 	Parent() DataSource
-	Values() []string
-	GetByName(string) funky.Option[string]
+	Values() []Value
 	Get(string) funky.Option[Value]
 	Satisfies(c Condition) bool
 }
@@ -41,6 +42,8 @@ type Row interface {
 type DataSource interface {
 	// Header returns header information for the DataSource
 	Header() DataSourceHeader
+	// GetName returns the name of the DataSource
+	GetName() string
 	// MatchesName returns true if the provided parameter matches name or alias of the DataSource
 	MatchesName(string) bool
 	// NextRow returns the next row of values.

@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-func TestLoadCsv(t *testing.T) {
+func TestLoadMemCsv(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ds, err := NewCsvDataSource("../test-data/employees.csv")
+	ds, err := NewMemDataSource("../test-data/employees.csv")
 
 	g.Expect(err).To(BeNil())
 
@@ -17,10 +17,10 @@ func TestLoadCsv(t *testing.T) {
 	g.Expect(hdr.ColumnCount()).To(Equal(5))
 }
 
-func TestLoadCsvRow(t *testing.T) {
+func TestLoadMemCsvRow(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ds := loadTestDatasource()
+	ds := loadTestMemDatasource()
 
 	row, err := ds.NextRow()
 	g.Expect(err).To(BeNil())
@@ -29,7 +29,6 @@ func TestLoadCsvRow(t *testing.T) {
 		NewStringValue("John"),
 		NewStringValue("Snow"),
 		NewFloatValue(1.0)}))
-
 	g.Expect(row.Id()).To(Equal(int64(0)))
 
 	row, err = ds.NextRow()
@@ -39,14 +38,13 @@ func TestLoadCsvRow(t *testing.T) {
 		NewStringValue("James"),
 		NewStringValue("Snow"),
 		NewFloatValue(1.2)}))
-
 	g.Expect(row.Id()).To(Equal(int64(1)))
 }
 
-func TestLoadCsvRewind(t *testing.T) {
+func TestLoadMemCsvRewind(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ds := loadTestDatasource()
+	ds := loadTestMemDatasource()
 
 	row1, err := ds.NextRow()
 	g.Expect(err).ToNot(HaveOccurred())
@@ -57,10 +55,10 @@ func TestLoadCsvRewind(t *testing.T) {
 	g.Expect(ds.NextRow()).To(Equal(row1))
 }
 
-func TestCsvGetValueByName(t *testing.T) {
+func TestMemCsvGetValueByName(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ds := loadTestDatasource()
+	ds := loadTestMemDatasource()
 
 	row, err := ds.NextRow()
 	g.Expect(err).ShouldNot(HaveOccurred())
@@ -71,10 +69,10 @@ func TestCsvGetValueByName(t *testing.T) {
 	g.Expect(val.Value().Value()).To(Equal("John"))
 }
 
-func TestCsvGetValueByInvalidName(t *testing.T) {
+func TestMemCsvGetValueByInvalidName(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ds := loadTestDatasource()
+	ds := loadTestMemDatasource()
 
 	row, err := ds.NextRow()
 	g.Expect(err).ShouldNot(HaveOccurred())

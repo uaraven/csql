@@ -20,6 +20,10 @@ func (f *filteredDataSource) MatchesName(s string) bool {
 	return f.datasource.MatchesName(s)
 }
 
+func (f *filteredDataSource) GetName() string {
+	return f.datasource.GetName()
+}
+
 func (f *filteredDataSource) NextRow() (Row, error) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
