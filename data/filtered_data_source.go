@@ -17,10 +17,6 @@ func (f *filteredDataSource) Header() DataSourceHeader {
 	return f.datasource.Header()
 }
 
-func (f *filteredDataSource) MatchesName(s string) bool {
-	return f.datasource.MatchesName(s)
-}
-
 func (f *filteredDataSource) GetName() string {
 	return f.datasource.GetName()
 }

@@ -13,8 +13,6 @@ const (
 
 // ColumnMetadata describes a column
 type ColumnMetadata interface {
-	// Parent returns the datasource to which this column belongs
-	Parent() DataSource
 	// Index is the numeric index of the column
 	Index() int
 	// MatchesName returns true if the requested name matches the name or alias (or index) of this column
@@ -38,7 +36,7 @@ type DataSourceHeader interface {
 type Row interface {
 	fmt.Stringer
 	Id() int64
-	Parent() DataSource
+	Header() DataSourceHeader
 	Values() []Value
 	Get(string) funky.Option[Value]
 	Satisfies(c Condition) bool
@@ -50,8 +48,6 @@ type DataSource interface {
 	Header() DataSourceHeader
 	// GetName returns the name of the DataSource
 	GetName() string
-	// MatchesName returns true if the provided parameter matches name or alias of the DataSource
-	MatchesName(string) bool
 	// NextRow returns the next row of values.
 	//
 	// If returned row is nil and error is also nil, then this DataSource does not contain any more rows
@@ -63,10 +59,4 @@ type DataSource interface {
 	CurrentRow() (Row, error)
 	// Rewind the dataset to ahead of the first row
 	Rewind() error
-}
-
-type QueryContext interface {
-	Projection() []string
-	GetDataSources() []DataSource
-	GetDataSourceByName(string) DataSource
 }

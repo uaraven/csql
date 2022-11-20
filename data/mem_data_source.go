@@ -2,7 +2,6 @@ package data
 
 import (
 	"bufio"
-	"csql/util"
 	"encoding/csv"
 	"io"
 	"os"
@@ -46,12 +45,12 @@ func NewMemDataSourceWithAlias(csvFile string, alias string) (DataSource, error)
 	cds := &memDataSource{
 		name: justName,
 	}
+	cds.headers = NewHeadersFromSlice(cds, headers)
 	err = cds.loadCsv(csvReader)
 	if err != nil {
 		return nil, err
 	}
 	cds.index.Store(-1)
-	cds.headers = NewHeadersFromSlice(cds, headers)
 	return cds, nil
 }
 
@@ -66,7 +65,7 @@ func (cds *memDataSource) loadCsv(csvReader *csv.Reader) error {
 		} else if err != nil {
 			return err
 		}
-		r := newRowWithId(index, cds, csvRow)
+		r := parseRowWithId(index, cds.Header(), csvRow)
 		index++
 		rows = append(rows, r)
 	}
@@ -78,10 +77,6 @@ func (cds *memDataSource) Header() DataSourceHeader {
 
 func (cds *memDataSource) GetName() string {
 	return cds.name
-}
-
-func (cds *memDataSource) MatchesName(s string) bool {
-	return util.EqualsIgnoreCase(s, cds.name)
 }
 
 func (cds *memDataSource) NextRow() (Row, error) {

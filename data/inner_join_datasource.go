@@ -42,10 +42,6 @@ func (i *innerJoinDatasource) GetName() string {
 	return i.left.GetName() + " JOIN " + i.right.GetName()
 }
 
-func (i *innerJoinDatasource) MatchesName(s string) bool {
-	return false
-}
-
 func (i *innerJoinDatasource) NextRow() (Row, error) {
 	i.lock.Lock()
 	defer i.lock.Unlock()
@@ -80,7 +76,7 @@ func (i *innerJoinDatasource) NextRow() (Row, error) {
 				return nil, fmt.Errorf("failed to rewind right dataset: %w", err)
 			}
 		} else {
-			newRow := joinRows(i.id.Add(1), i, leftRow, rightRow)
+			newRow := joinRows(i.id.Add(1), i.Header(), leftRow, rightRow)
 			if i.joinCondition == nil || newRow.Satisfies(i.joinCondition) {
 				i.currentRow = newRow
 				return newRow, nil

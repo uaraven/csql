@@ -2,7 +2,6 @@ package data
 
 import (
 	"bufio"
-	"csql/util"
 	"encoding/csv"
 	"io"
 	"os"
@@ -65,10 +64,6 @@ func (cds *csvDataSource) GetName() string {
 	return cds.name
 }
 
-func (cds *csvDataSource) MatchesName(s string) bool {
-	return util.EqualsIgnoreCase(s, cds.name)
-}
-
 func (cds *csvDataSource) NextRow() (Row, error) {
 	cds.lock.Lock()
 	defer cds.lock.Unlock()
@@ -79,7 +74,7 @@ func (cds *csvDataSource) NextRow() (Row, error) {
 		return nil, err
 	}
 	cds.currentValues = values
-	return newRowWithId(cds.index.Add(1), cds, values), nil
+	return parseRowWithId(cds.index.Add(1), cds.Header(), values), nil
 }
 
 func (cds *csvDataSource) CurrentRow() (Row, error) {
@@ -88,7 +83,7 @@ func (cds *csvDataSource) CurrentRow() (Row, error) {
 	if cds.currentValues == nil {
 		return nil, nil
 	} else {
-		return newRowWithId(cds.index.Load(), cds, cds.currentValues), nil
+		return parseRowWithId(cds.index.Load(), cds.Header(), cds.currentValues), nil
 	}
 }
 

@@ -6,7 +6,6 @@ import (
 )
 
 type columnMetadata struct {
-	parent     DataSource
 	parentName string
 	name       string
 	index      int
@@ -14,10 +13,6 @@ type columnMetadata struct {
 
 func (cm columnMetadata) ParentName() string {
 	return cm.parentName
-}
-
-func (cm columnMetadata) Parent() DataSource {
-	return cm.parent
 }
 
 func (cm columnMetadata) Index() int {
@@ -67,7 +62,6 @@ func NewHeadersFromSlice(parent DataSource, headers []string) DataSourceHeader {
 	columns := make([]ColumnMetadata, 0)
 	for idx, name := range headers {
 		columns = append(columns, &columnMetadata{
-			parent:     parent,
 			parentName: parent.GetName(),
 			name:       name,
 			index:      idx,

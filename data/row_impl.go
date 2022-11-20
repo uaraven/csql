@@ -8,24 +8,24 @@ import (
 
 type rowImpl struct {
 	id     int64
-	parent DataSource
+	header DataSourceHeader
 	values []Value
 }
 
-func newRowWithId(id int64, parent DataSource, values []string) Row {
+func parseRowWithId(id int64, headers DataSourceHeader, values []string) Row {
 	return &rowImpl{
 		id:     id,
-		parent: parent,
+		header: headers,
 		values: funky.Map(values, func(s string) Value {
 			return decodeToValue(s)
 		}),
 	}
 }
 
-func newRowWithIdAndValues(id int64, parent DataSource, values []Value) Row {
+func newRowWithId(id int64, headers DataSourceHeader, values []Value) Row {
 	return &rowImpl{
 		id:     id,
-		parent: parent,
+		header: headers,
 		values: values,
 	}
 }
@@ -33,25 +33,25 @@ func newRowWithIdAndValues(id int64, parent DataSource, values []Value) Row {
 func copyRowWithId(id int64, row Row) Row {
 	return &rowImpl{
 		id:     id,
-		parent: row.Parent(),
+		header: row.Header(),
 		values: row.Values(),
 	}
 }
 
-func joinRows(id int64, parent DataSource, row1 Row, row2 Row) Row {
+func joinRows(id int64, header DataSourceHeader, row1 Row, row2 Row) Row {
 	rowData := make([]Value, len(row1.Values()))
 	copy(rowData, row1.Values())
 	rowData = append(rowData, row2.Values()...)
 
 	return &rowImpl{
 		id:     id,
-		parent: parent,
+		header: header,
 		values: rowData,
 	}
 }
 
-func (r rowImpl) Parent() DataSource {
-	return r.parent
+func (r rowImpl) Header() DataSourceHeader {
+	return r.header
 }
 
 func (r rowImpl) Values() []Value {
@@ -59,7 +59,7 @@ func (r rowImpl) Values() []Value {
 }
 
 func (r rowImpl) Get(column string) funky.Option[Value] {
-	index := r.Parent().Header().IndexByName(column)
+	index := r.Header().IndexByName(column)
 	if index == RowIdIndex {
 		return funky.SomeOf(NewIntValue(r.id))
 	} else if index < RowIdIndex {

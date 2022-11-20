@@ -50,7 +50,6 @@ func newHeaderWithProjection(src DataSource, projection []ProjectionColumn) Data
 			panic(fmt.Errorf("unknown column: %v", prjColumn.name))
 		}
 		columnMeta := columnMetadata{
-			parent:     src.Header().ColumnsMetadata()[columnIdx].Parent(),
 			parentName: src.Header().ColumnsMetadata()[columnIdx].ParentName(),
 			index:      idx,
 		}
@@ -73,11 +72,7 @@ func (p *projectionDataSource) Header() DataSourceHeader {
 }
 
 func (p *projectionDataSource) GetName() string {
-	return ""
-}
-
-func (p *projectionDataSource) MatchesName(s string) bool {
-	return false
+	return p.source.GetName()
 }
 
 func (p *projectionDataSource) NextRow() (Row, error) {
@@ -112,5 +107,5 @@ func (p *projectionDataSource) Project(row Row) (Row, error) {
 		}
 		resultValues[idx] = v.Value()
 	}
-	return newRowWithIdAndValues(row.Id(), p, resultValues), nil
+	return newRowWithId(row.Id(), p.Header(), resultValues), nil
 }
