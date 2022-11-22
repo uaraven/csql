@@ -2,6 +2,7 @@ package core
 
 import (
 	"csql/util"
+	"fmt"
 	"strings"
 )
 
@@ -50,12 +51,16 @@ func (d dataSourceHeader) IndexByName(s string) int {
 	if c == RowId {
 		return RowIdIndex
 	}
+	index := InvalidFieldIndex
 	for idx, column := range d.columns {
 		if column.MatchesName(s) {
-			return idx
+			if index != InvalidFieldIndex {
+				panic(fmt.Errorf("ambiguous column name: %s", s))
+			}
+			index = idx
 		}
 	}
-	return InvalidFieldIndex
+	return index
 }
 
 func NewHeadersFromSlice(parent DataSource, headers []string) DataSourceHeader {

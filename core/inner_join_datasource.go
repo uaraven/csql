@@ -69,6 +69,7 @@ func (i *innerJoinDatasource) NextRow() (Row, error) {
 				return nil, fmt.Errorf("failed to read next row from left dataset: %w", err)
 			}
 			if leftRow == nil {
+				i.currentRow = nil
 				return nil, nil
 			}
 			err = i.right.Rewind()

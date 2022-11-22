@@ -30,6 +30,7 @@ func (f *filteredDataSource) NextRow() (Row, error) {
 			return nil, err
 		}
 		if row == nil {
+			f.currentRow = nil
 			return nil, nil
 		}
 		if row.Satisfies(f.condition) {

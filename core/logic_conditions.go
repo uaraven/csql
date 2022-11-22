@@ -5,7 +5,7 @@ type andCondition struct {
 	right Evaluator
 }
 
-func NewAndCondition(left Evaluator, right Evaluator) Evaluator {
+func NewAnd(left Evaluator, right Evaluator) Evaluator {
 	return &andCondition{
 		left:  left,
 		right: right,
@@ -25,7 +25,7 @@ type orCondition struct {
 	right Evaluator
 }
 
-func NewOrCondition(left Evaluator, right Evaluator) Evaluator {
+func NewOr(left Evaluator, right Evaluator) Evaluator {
 	return &orCondition{
 		left:  left,
 		right: right,
@@ -44,7 +44,7 @@ type notCondition struct {
 	arg Evaluator
 }
 
-func NewNotCondition(arg Evaluator) Evaluator {
+func NewNot(arg Evaluator) Evaluator {
 	return &notCondition{arg: arg}
 }
 

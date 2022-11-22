@@ -46,7 +46,7 @@ func TestRowImpl_Satisfies(t *testing.T) {
 	row, err := ds.NextRow()
 	g.Expect(err).ShouldNot(HaveOccurred())
 
-	condT := NewAndCondition(
+	condT := NewAnd(
 		NewEq(NewRowValue("first_name"), NewStringValue("John")),
 		NewLt(NewRowValue("dept_id"), NewIntValue(3)))
 
