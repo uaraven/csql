@@ -8,13 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"sync/atomic"
 )
 
 type memDataSource struct {
 	lock    sync.Mutex
 	name    string
-	index   atomic.Int64
+	index   int
 	data    []Row
 	headers DataSourceHeader
 }
@@ -43,14 +42,14 @@ func NewMemDataSourceWithAlias(csvFile string, alias string) (DataSource, error)
 		return nil, err
 	}
 	cds := &memDataSource{
-		name: justName,
+		name:  justName,
+		index: -1,
 	}
 	cds.headers = NewHeadersFromSlice(cds, headers)
 	err = cds.loadCsv(csvReader)
 	if err != nil {
 		return nil, err
 	}
-	cds.index.Store(-1)
 	return cds, nil
 }
 
@@ -82,26 +81,25 @@ func (cds *memDataSource) GetName() string {
 func (cds *memDataSource) NextRow() (Row, error) {
 	cds.lock.Lock()
 	defer cds.lock.Unlock()
-	readIndex := cds.index.Add(1)
-	if readIndex >= int64(len(cds.data)) {
+	cds.index++
+	if cds.index >= len(cds.data) {
 		return nil, nil
 	}
-	return cds.data[readIndex], nil
+	return cds.data[cds.index], nil
 }
 
 func (cds *memDataSource) CurrentRow() (Row, error) {
 	cds.lock.Lock()
 	defer cds.lock.Unlock()
-	readIndex := cds.index.Load()
-	if readIndex < int64(0) {
+	if cds.index < 0 {
 		return nil, nil
 	}
-	return cds.data[readIndex], nil
+	return cds.data[cds.index], nil
 }
 
 func (cds *memDataSource) Rewind() error {
 	cds.lock.Lock()
 	defer cds.lock.Unlock()
-	cds.index.Store(-1)
+	cds.index = -1
 	return nil
 }

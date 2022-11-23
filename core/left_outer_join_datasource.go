@@ -12,13 +12,13 @@ type leftOuterJoinDatasource struct {
 	header     DataSourceHeader
 	name       string
 	currentRow Row
-	counter    int
+	index      int
 }
 
 func NewLeftOuterJoinDatasource(left DataSource, right DataSource, joinOn Condition) (DataSource, error) {
 	ds := &leftOuterJoinDatasource{
-		name:    fmt.Sprintf("(%s LEFT JOIN %s)", left.GetName(), right.GetName()),
-		counter: -1,
+		name:  fmt.Sprintf("(%s LEFT JOIN %s)", left.GetName(), right.GetName()),
+		index: -1,
 	}
 	ds.header = NewHeadersFromOtherHeaders(ds, left.Header().ColumnsMetadata(), right.Header().ColumnsMetadata())
 	var err error
@@ -90,23 +90,25 @@ func (l *leftOuterJoinDatasource) selectRight(leftRow Row, right DataSource, joi
 func (l *leftOuterJoinDatasource) NextRow() (Row, error) {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	l.counter++
-	if l.counter >= len(l.joinedRows) {
+	l.index++
+	if l.index >= len(l.joinedRows) {
 		return nil, nil
 	}
-	return l.joinedRows[l.counter], nil
+	return l.joinedRows[l.index], nil
 }
 
 func (l *leftOuterJoinDatasource) CurrentRow() (Row, error) {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-
-	return l.joinedRows[l.counter], nil
+	if l.index < 0 {
+		return nil, nil
+	}
+	return l.joinedRows[l.index], nil
 }
 
 func (l *leftOuterJoinDatasource) Rewind() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	l.counter = -1
+	l.index = -1
 	return nil
 }

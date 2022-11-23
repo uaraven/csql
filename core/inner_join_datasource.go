@@ -82,7 +82,7 @@ func (i *innerJoinDatasource) NextRow() (Row, error) {
 				i.currentRow = newRow
 				return newRow, nil
 			} else {
-				i.id.Add(-1) // reset counter and repeat
+				i.id.Add(-1) // resetcounter and repeat
 			}
 		}
 	}
