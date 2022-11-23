@@ -50,6 +50,14 @@ func joinRows(id int64, header DataSourceHeader, row1 Row, row2 Row) Row {
 	}
 }
 
+func nullRow(header DataSourceHeader) Row {
+	rowData := make([]Value, header.ColumnCount())
+	for i := range rowData {
+		rowData[i] = NewNullValue()
+	}
+	return newRowWithId(0, header, rowData)
+}
+
 func (r rowImpl) Header() DataSourceHeader {
 	return r.header
 }
@@ -74,6 +82,9 @@ func decodeToValue(value string) Value {
 	if err != nil {
 		f64, err := strconv.ParseFloat(value, 64)
 		if err != nil {
+			if value == NullValueString {
+				return NewNullValue()
+			}
 			return NewStringValue(value)
 		}
 		return NewFloatValue(f64)

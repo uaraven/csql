@@ -6,6 +6,11 @@ import (
 	"sync"
 )
 
+var (
+	NullValueString = "null"
+	nullV           = &nullValue{}
+)
+
 type stringValue struct {
 	value string
 }
@@ -22,6 +27,9 @@ type boolValue struct {
 	value bool
 }
 
+type nullValue struct {
+}
+
 func NewStringValue(v string) Value {
 	return &stringValue{value: v}
 }
@@ -36,6 +44,10 @@ func NewFloatValue(fv float64) Value {
 
 func NewBoolValue(b bool) Value {
 	return &boolValue{value: b}
+}
+
+func NewNullValue() Value {
+	return nullV
 }
 
 func (rv stringValue) Type() DataType {
@@ -187,6 +199,38 @@ func (bv boolValue) String() string {
 
 func (bv boolValue) Evaluate(_ EvaluationContext) Value {
 	return &bv
+}
+
+func (n nullValue) Evaluate(_ EvaluationContext) Value {
+	return &n
+}
+
+func (n nullValue) Type() DataType {
+	return TypeNull
+}
+
+func (n nullValue) Value() interface{} {
+	return nil
+}
+
+func (n nullValue) AsString() Value {
+	return NewStringValue(NullValueString)
+}
+
+func (n nullValue) AsInt() Value {
+	panic(fmt.Sprintf("cannot cast null to int"))
+}
+
+func (n nullValue) AsFloat() Value {
+	panic(fmt.Sprintf("cannot cast null to float"))
+}
+
+func (n nullValue) AsBool() Value {
+	panic(fmt.Sprintf("cannot cast null to bool"))
+}
+
+func (n nullValue) String() string {
+	return NullValueString
 }
 
 type rowValue struct {

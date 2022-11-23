@@ -9,6 +9,7 @@ const (
 	TypeFloat
 	TypeString
 	TypeBoolean
+	TypeNull
 )
 
 // EvaluationContext provides a way to retrieve value by name during evaluation
