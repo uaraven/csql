@@ -12,7 +12,7 @@ func NewCrossJoin(left DataSource, right DataSource) (DataSource, error) {
 func NewInnerJoin(left DataSource, right DataSource, joinCondition Condition) (DataSource, error) {
 	mds := &memDataSource{
 		lock:  sync.Mutex{},
-		name:  fmt.Sprintf("%s JOIN %s", left.GetName(), right.GetName()),
+		name:  fmt.Sprintf("(%s JOIN %s)", left.GetName(), right.GetName()),
 		index: -1,
 	}
 	mds.headers = NewHeadersFromOtherHeaders(mds, left.Header().ColumnsMetadata(), right.Header().ColumnsMetadata())

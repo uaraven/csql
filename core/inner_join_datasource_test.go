@@ -97,7 +97,7 @@ func TestInnerJoinDatasource_GetName(t *testing.T) {
 
 	fds, err := NewCrossJoin(emp, dept)
 	g.Expect(err).ToNot(HaveOccurred())
-	g.Expect(fds.GetName()).To(Equal("employees JOIN dept"))
+	g.Expect(fds.GetName()).To(Equal("(employees JOIN dept)"))
 
 }
 
