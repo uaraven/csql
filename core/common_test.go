@@ -14,7 +14,7 @@ func loadTestDatasource() DataSource {
 }
 
 func loadDefaultTestMemDatasource() DataSource {
-	ds, err := NewMemDataSource("../test-data/employees.csv")
+	ds, err := NewMemDataSourceFromCsv("../test-data/employees.csv")
 	if err != nil {
 		panic(err)
 	}
@@ -22,7 +22,7 @@ func loadDefaultTestMemDatasource() DataSource {
 }
 
 func loadTestMemDatasource(name string) DataSource {
-	ds, err := NewMemDataSource(fmt.Sprintf("../test-data/%s.csv", name))
+	ds, err := NewMemDataSourceFromCsv(fmt.Sprintf("../test-data/%s.csv", name))
 	if err != nil {
 		panic(err)
 	}

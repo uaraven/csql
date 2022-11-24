@@ -8,7 +8,7 @@ import (
 func TestLoadMemCsv(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ds, err := NewMemDataSource("../test-data/employees.csv")
+	ds, err := NewMemDataSourceFromCsv("../test-data/employees.csv")
 
 	g.Expect(err).ToNot(HaveOccurred())
 

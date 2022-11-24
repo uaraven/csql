@@ -8,9 +8,9 @@ import (
 func TestLeftOuterJoinDatasource_NextRow(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	left, err := NewMemDataSource("../test-data/authors.csv")
+	left, err := NewMemDataSourceFromCsv("../test-data/authors.csv")
 	g.Expect(err).ToNot(HaveOccurred())
-	right, err := NewMemDataSource("../test-data/books.csv")
+	right, err := NewMemDataSourceFromCsv("../test-data/books.csv")
 	g.Expect(err).ToNot(HaveOccurred())
 
 	joinCondition := NewEq(NewRowValue("authors.id"),
@@ -27,9 +27,9 @@ func TestLeftOuterJoinDatasource_NextRow(t *testing.T) {
 func TestLeftOuterJoinDatasource_CurrentRow(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	left, err := NewMemDataSource("../test-data/authors.csv")
+	left, err := NewMemDataSourceFromCsv("../test-data/authors.csv")
 	g.Expect(err).ToNot(HaveOccurred())
-	right, err := NewMemDataSource("../test-data/books.csv")
+	right, err := NewMemDataSourceFromCsv("../test-data/books.csv")
 	g.Expect(err).ToNot(HaveOccurred())
 
 	joinCondition := NewEq(NewRowValue("authors.id"),
@@ -46,9 +46,9 @@ func TestLeftOuterJoinDatasource_CurrentRow(t *testing.T) {
 func TestLeftOuterJoinDatasource_Rewind(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	left, err := NewMemDataSource("../test-data/authors.csv")
+	left, err := NewMemDataSourceFromCsv("../test-data/authors.csv")
 	g.Expect(err).ToNot(HaveOccurred())
-	right, err := NewMemDataSource("../test-data/books.csv")
+	right, err := NewMemDataSourceFromCsv("../test-data/books.csv")
 	g.Expect(err).ToNot(HaveOccurred())
 
 	joinCondition := NewEq(NewRowValue("authors.id"),

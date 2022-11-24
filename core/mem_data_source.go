@@ -18,8 +18,24 @@ type memDataSource struct {
 	headers DataSourceHeader
 }
 
-func NewMemDataSource(csvFile string) (DataSource, error) {
+func NewMemDataSourceFromCsv(csvFile string) (DataSource, error) {
 	return NewMemDataSourceWithAlias(csvFile, "")
+}
+
+func NewMemDataSource(name string, headers []ColumnMetadata, rows []Row) (DataSource, error) {
+	ds := &memDataSource{
+		lock:  sync.Mutex{},
+		name:  name,
+		index: 0,
+		data:  rows,
+	}
+
+	ds.headers = dataSourceHeader{
+		parent:  ds,
+		columns: headers,
+	}
+
+	return ds, nil
 }
 
 func NewMemDataSourceWithAlias(csvFile string, alias string) (DataSource, error) {
