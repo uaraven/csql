@@ -8,19 +8,34 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"sync/atomic"
 )
 
 type memDataSource struct {
 	lock    sync.Mutex
 	name    string
-	index   atomic.Int64
+	index   int
 	data    []Row
 	headers DataSourceHeader
 }
 
-func NewMemDataSource(csvFile string) (DataSource, error) {
+func NewMemDataSourceFromCsv(csvFile string) (DataSource, error) {
 	return NewMemDataSourceWithAlias(csvFile, "")
+}
+
+func NewMemDataSource(name string, headers []ColumnMetadata, rows []Row) (DataSource, error) {
+	ds := &memDataSource{
+		lock:  sync.Mutex{},
+		name:  name,
+		index: -1,
+		data:  rows,
+	}
+
+	ds.headers = dataSourceHeader{
+		parent:  ds,
+		columns: headers,
+	}
+
+	return ds, nil
 }
 
 func NewMemDataSourceWithAlias(csvFile string, alias string) (DataSource, error) {
@@ -43,20 +58,20 @@ func NewMemDataSourceWithAlias(csvFile string, alias string) (DataSource, error)
 		return nil, err
 	}
 	cds := &memDataSource{
-		name: justName,
+		name:  justName,
+		index: -1,
 	}
 	cds.headers = NewHeadersFromSlice(cds, headers)
 	err = cds.loadCsv(csvReader)
 	if err != nil {
 		return nil, err
 	}
-	cds.index.Store(-1)
 	return cds, nil
 }
 
 func (cds *memDataSource) loadCsv(csvReader *csv.Reader) error {
 	rows := make([]Row, 0)
-	index := int64(0)
+	index := 0
 	for {
 		csvRow, err := csvReader.Read()
 		if err == io.EOF {
@@ -82,26 +97,25 @@ func (cds *memDataSource) GetName() string {
 func (cds *memDataSource) NextRow() (Row, error) {
 	cds.lock.Lock()
 	defer cds.lock.Unlock()
-	readIndex := cds.index.Add(1)
-	if readIndex >= int64(len(cds.data)) {
+	if cds.index+1 >= len(cds.data) {
 		return nil, nil
 	}
-	return cds.data[readIndex], nil
+	cds.index++
+	return cds.data[cds.index], nil
 }
 
 func (cds *memDataSource) CurrentRow() (Row, error) {
 	cds.lock.Lock()
 	defer cds.lock.Unlock()
-	readIndex := cds.index.Load()
-	if readIndex < int64(0) {
+	if cds.index < 0 {
 		return nil, nil
 	}
-	return cds.data[readIndex], nil
+	return cds.data[cds.index], nil
 }
 
 func (cds *memDataSource) Rewind() error {
 	cds.lock.Lock()
 	defer cds.lock.Unlock()
-	cds.index.Store(-1)
+	cds.index = -1
 	return nil
 }

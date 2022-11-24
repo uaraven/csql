@@ -10,7 +10,8 @@ func TestCrossJoinDatasource_NextRow(t *testing.T) {
 	emp := loadDefaultTestMemDatasource()
 	dept := loadTestMemDatasource("dept")
 
-	cj := NewCrossJoin(emp, dept)
+	cj, err := NewCrossJoin(emp, dept)
+	g.Expect(err).ToNot(HaveOccurred())
 	g.Expect(cj).ToNot(BeNil())
 
 	g.Expect(cj.CurrentRow()).To(BeNil())

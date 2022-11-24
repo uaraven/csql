@@ -8,6 +8,14 @@ func Map[T any, R any](data []T, transformer func(T) R) []R {
 	return result
 }
 
+func MapWithIndex[T any, R any](data []T, transformer func(int, T) R) []R {
+	result := make([]R, len(data))
+	for idx, elem := range data {
+		result[idx] = transformer(idx, elem)
+	}
+	return result
+}
+
 func Find[T any](data []T, matcher func(T) bool) (int, Option[T]) {
 	for idx, elem := range data {
 		if matcher(elem) {

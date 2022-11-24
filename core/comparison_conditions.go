@@ -71,6 +71,8 @@ func (cc ComparisonCondition) Evaluate(ctx EvaluationContext) Value {
 		return NewBoolValue(getComparator(lv.Value().(int64), cc.operator)(rv.Value().(int64)))
 	case TypeFloat:
 		return NewBoolValue(getComparator(lv.Value().(float64), cc.operator)(rv.Value().(float64)))
+	case TypeNull:
+		return NewBoolValue(false)
 	default:
 		panic(fmt.Errorf("unsupported type in expression %v", cc))
 	}
