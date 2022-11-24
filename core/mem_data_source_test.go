@@ -33,7 +33,7 @@ func TestLoadMemCsvRow(t *testing.T) {
 		NewStringValue("John"),
 		NewStringValue("Snow"),
 		NewFloatValue(1.0)}))
-	g.Expect(row.Id()).To(Equal(int64(0)))
+	g.Expect(row.Id()).To(Equal(0))
 
 	row, err = ds.NextRow()
 	g.Expect(err).ToNot(HaveOccurred())
@@ -42,7 +42,7 @@ func TestLoadMemCsvRow(t *testing.T) {
 		NewStringValue("James"),
 		NewStringValue("Snow"),
 		NewFloatValue(1.2)}))
-	g.Expect(row.Id()).To(Equal(int64(1)))
+	g.Expect(row.Id()).To(Equal(1))
 }
 
 func TestLoadMemCsvRewind(t *testing.T) {

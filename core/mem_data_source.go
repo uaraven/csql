@@ -26,7 +26,7 @@ func NewMemDataSource(name string, headers []ColumnMetadata, rows []Row) (DataSo
 	ds := &memDataSource{
 		lock:  sync.Mutex{},
 		name:  name,
-		index: 0,
+		index: -1,
 		data:  rows,
 	}
 
@@ -71,7 +71,7 @@ func NewMemDataSourceWithAlias(csvFile string, alias string) (DataSource, error)
 
 func (cds *memDataSource) loadCsv(csvReader *csv.Reader) error {
 	rows := make([]Row, 0)
-	index := int64(0)
+	index := 0
 	for {
 		csvRow, err := csvReader.Read()
 		if err == io.EOF {
@@ -97,10 +97,10 @@ func (cds *memDataSource) GetName() string {
 func (cds *memDataSource) NextRow() (Row, error) {
 	cds.lock.Lock()
 	defer cds.lock.Unlock()
-	cds.index++
-	if cds.index >= len(cds.data) {
+	if cds.index+1 >= len(cds.data) {
 		return nil, nil
 	}
+	cds.index++
 	return cds.data[cds.index], nil
 }
 

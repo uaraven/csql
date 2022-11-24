@@ -15,7 +15,7 @@ const (
 // EvaluationContext provides a way to retrieve value by name during evaluation
 type EvaluationContext interface {
 	Get(string) funky.Option[Value]
-	Id() int64
+	Id() int
 }
 
 type Evaluator interface {

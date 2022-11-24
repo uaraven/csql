@@ -35,7 +35,7 @@ type DataSourceHeader interface {
 
 type Row interface {
 	fmt.Stringer
-	Id() int64
+	Id() int
 	Header() DataSourceHeader
 	Values() []Value
 	Get(string) funky.Option[Value]

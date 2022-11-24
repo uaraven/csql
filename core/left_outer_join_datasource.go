@@ -39,7 +39,7 @@ func (l *leftOuterJoinDatasource) GetName() string {
 
 func (l *leftOuterJoinDatasource) innerJoin(left DataSource, right DataSource, joinOn Condition) ([]Row, error) {
 	result := make([]Row, 0)
-	counter := int64(0)
+	counter := 0
 	for {
 		leftRow, err := left.NextRow()
 		if err != nil {
