@@ -24,6 +24,9 @@ func TestArithExpression_EvaluateAdd(t *testing.T) {
 	result = expr.Evaluate(context)
 	g.Expect(result.Type()).To(Equal(TypeFloat))
 	g.Expect(result.Value()).To(Equal(14.4))
+
+	expr = NewExpression(addition, NewStringValue("10.4"), NewIntValue(-2))
+	g.Expect(func() { expr.Evaluate(context) }).To(Panic())
 }
 
 func TestArithExpression_EvaluateSub(t *testing.T) {
@@ -44,6 +47,9 @@ func TestArithExpression_EvaluateSub(t *testing.T) {
 	result = expr.Evaluate(context)
 	g.Expect(result.Type()).To(Equal(TypeFloat))
 	g.Expect(result.Value()).To(Equal(12.4))
+
+	expr = NewExpression(subtraction, NewStringValue("10.4"), NewIntValue(-2))
+	g.Expect(func() { expr.Evaluate(context) }).To(Panic())
 }
 
 func TestArithExpression_EvaluateMul(t *testing.T) {
@@ -69,6 +75,9 @@ func TestArithExpression_EvaluateMul(t *testing.T) {
 	result = expr.Evaluate(context)
 	g.Expect(result.Type()).To(Equal(TypeFloat))
 	g.Expect(result.Value()).To(Equal(5.2))
+
+	expr = NewExpression(multiplication, NewStringValue("10.4"), NewIntValue(-2))
+	g.Expect(func() { expr.Evaluate(context) }).To(Panic())
 }
 
 func TestArithExpression_EvaluateDiv(t *testing.T) {
@@ -99,6 +108,9 @@ func TestArithExpression_EvaluateDiv(t *testing.T) {
 	result = expr.Evaluate(context)
 	g.Expect(result.Type()).To(Equal(TypeFloat))
 	g.Expect(result.Value()).To(Equal(math.Inf(1)))
+
+	expr = NewExpression(division, NewStringValue("10.4"), NewIntValue(-2))
+	g.Expect(func() { expr.Evaluate(context) }).To(Panic())
 }
 
 func TestArithExpression_EvaluateMod(t *testing.T) {
@@ -118,5 +130,16 @@ func TestArithExpression_EvaluateMod(t *testing.T) {
 	expr = NewExpression(modulo, NewRowValue("ten_four"), NewIntValue(6))
 	result = expr.Evaluate(context)
 	g.Expect(result.Value()).To(Equal(4.0))
+
+	expr = NewExpression(modulo, NewStringValue("10"), NewIntValue(-2))
+	g.Expect(func() { expr.Evaluate(context) }).To(Panic())
+}
+
+func TestArithExpression_EvaluateInvalidOp(t *testing.T) {
+	g := NewGomegaWithT(t)
+	context := newMapContext()
+
+	expr := NewExpression(arithmeticsOperator('&'), NewIntValue(10), NewIntValue(2))
+	g.Expect(func() { expr.Evaluate(context) }).To(Panic())
 
 }
