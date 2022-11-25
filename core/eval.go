@@ -35,3 +35,7 @@ type Value interface {
 	AsFloat() Value
 	AsBool() Value
 }
+
+func IsNumeric(v Value) bool {
+	return v.Type() == TypeFloat || v.Type() == TypeInt
+}

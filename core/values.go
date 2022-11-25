@@ -9,6 +9,8 @@ import (
 var (
 	NullValueString = "null"
 	nullV           = &nullValue{}
+	ValueFalse      = NewBoolValue(false)
+	ValueTrue       = NewBoolValue(true)
 )
 
 type stringValue struct {
@@ -264,8 +266,3 @@ func (rv *rowValue) getValue(ctx EvaluationContext) (Value, error) {
 		return nil, fmt.Errorf("unknown column %s", rv.identifier)
 	}
 }
-
-var (
-	ValueFalse = NewBoolValue(false)
-	ValueTrue  = NewBoolValue(true)
-)
