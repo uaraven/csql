@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"strconv"
-	"sync"
 )
 
 var (
@@ -235,11 +234,12 @@ func (n nullValue) String() string {
 	return NullValueString
 }
 
+type Idintifiable interface {
+	Identifier() string
+}
+
 type rowValue struct {
-	lock       sync.Mutex
 	identifier string
-	value      Value
-	ctxId      int64
 }
 
 func NewRowValue(identifier string) Evaluator {
@@ -248,21 +248,15 @@ func NewRowValue(identifier string) Evaluator {
 	}
 }
 
-func (rv *rowValue) Evaluate(ctx EvaluationContext) Value {
-	rv.lock.Lock()
-	defer rv.lock.Unlock()
-	value, err := rv.getValue(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return value
-}
-
-func (rv *rowValue) getValue(ctx EvaluationContext) (Value, error) {
+func (rv rowValue) Evaluate(ctx EvaluationContext) Value {
 	val := ctx.Get(rv.identifier)
 	if val.IsPresent() {
-		return val.Value(), nil
+		return val.Value()
 	} else {
-		return nil, fmt.Errorf("unknown column %s", rv.identifier)
+		panic(fmt.Errorf("unknown column %s", rv.identifier))
 	}
+}
+
+func (rv rowValue) Identifier() string {
+	return rv.identifier
 }
