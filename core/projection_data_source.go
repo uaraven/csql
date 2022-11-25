@@ -48,7 +48,7 @@ func newHeaderWithProjection(src DataSource, projection []ProjectionColumn) (Dat
 	columns := make([]ColumnMetadata, len(projection))
 	for idx, prjColumn := range projection {
 		var columnMeta columnMetadata
-		if rowId, ok := prjColumn.source.(Idintifiable); ok {
+		if rowId, ok := prjColumn.source.(Identifiable); ok {
 			// projection column references datasource column
 			sourceColumn := rowId.Identifier()
 			columnIdx := src.Header().IndexByName(sourceColumn)

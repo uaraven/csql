@@ -51,20 +51,20 @@ func NewNullValue() Value {
 	return nullV
 }
 
-func (rv stringValue) Type() DataType {
+func (sv stringValue) Type() DataType {
 	return TypeString
 }
 
-func (rv stringValue) Value() interface{} {
-	return rv.value
+func (sv stringValue) Value() interface{} {
+	return sv.value
 }
 
-func (rv stringValue) AsString() Value {
-	return &rv
+func (sv stringValue) AsString() Value {
+	return &sv
 }
 
-func (rv stringValue) AsInt() Value {
-	iv, err := strconv.ParseInt(rv.value, 10, 64)
+func (sv stringValue) AsInt() Value {
+	iv, err := strconv.ParseInt(sv.value, 10, 64)
 	if err == nil {
 		return NewIntValue(iv)
 	} else {
@@ -72,8 +72,8 @@ func (rv stringValue) AsInt() Value {
 	}
 }
 
-func (rv stringValue) AsFloat() Value {
-	fv, err := strconv.ParseFloat(rv.value, 64)
+func (sv stringValue) AsFloat() Value {
+	fv, err := strconv.ParseFloat(sv.value, 64)
 	if err == nil {
 		return NewFloatValue(fv)
 	} else {
@@ -81,8 +81,8 @@ func (rv stringValue) AsFloat() Value {
 	}
 }
 
-func (rv stringValue) AsBool() Value {
-	b, err := strconv.ParseBool(rv.value)
+func (sv stringValue) AsBool() Value {
+	b, err := strconv.ParseBool(sv.value)
 	if err == nil {
 		return NewBoolValue(b)
 	} else {
@@ -90,12 +90,16 @@ func (rv stringValue) AsBool() Value {
 	}
 }
 
-func (rv stringValue) String() string {
-	return fmt.Sprintf("\"%s\"", rv.value)
+func (sv stringValue) String() string {
+	return fmt.Sprintf("\"%s\"", sv.value)
 }
 
-func (rv stringValue) Evaluate(_ EvaluationContext) Value {
-	return &rv
+func (sv stringValue) Equals(other Value) bool {
+	return other.Type() == sv.Type() && other.Value().(string) == sv.value
+}
+
+func (sv stringValue) Evaluate(_ EvaluationContext) Value {
+	return &sv
 }
 
 func (iv intValue) Type() DataType {
@@ -124,6 +128,10 @@ func (iv intValue) AsBool() Value {
 
 func (iv intValue) String() string {
 	return fmt.Sprintf("%d", iv.value)
+}
+
+func (iv intValue) Equals(other Value) bool {
+	return other.Type() == iv.Type() && other.Value().(int64) == iv.value
 }
 
 func (iv intValue) Evaluate(_ EvaluationContext) Value {
@@ -160,6 +168,10 @@ func (fv floatValue) Evaluate(_ EvaluationContext) Value {
 
 func (fv floatValue) String() string {
 	return fmt.Sprintf("%f", fv.value)
+}
+
+func (fv floatValue) Equals(other Value) bool {
+	return other.Type() == fv.Type() && other.Value().(float64) == fv.value
 }
 
 func (bv boolValue) Type() DataType {
@@ -202,6 +214,10 @@ func (bv boolValue) Evaluate(_ EvaluationContext) Value {
 	return &bv
 }
 
+func (bv boolValue) Equals(other Value) bool {
+	return other.Type() == bv.Type() && other.Value().(bool) == bv.value
+}
+
 func (n nullValue) Evaluate(_ EvaluationContext) Value {
 	return &n
 }
@@ -234,7 +250,11 @@ func (n nullValue) String() string {
 	return NullValueString
 }
 
-type Idintifiable interface {
+func (n nullValue) Equals(other Value) bool {
+	return false
+}
+
+type Identifiable interface {
 	Identifier() string
 }
 

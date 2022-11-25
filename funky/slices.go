@@ -25,6 +25,15 @@ func Find[T any](data []T, matcher func(T) bool) (int, Option[T]) {
 	return -1, None[T]{}
 }
 
+func AnyMatches[T any](data []T, matcher func(T) bool) bool {
+	for _, elem := range data {
+		if matcher(elem) {
+			return true
+		}
+	}
+	return false
+}
+
 func Filter[T any](data []T, matcher func(T) bool) []T {
 	result := make([]T, 0)
 	for idx, elem := range data {
