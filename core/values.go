@@ -260,3 +260,10 @@ func (rv rowValue) Evaluate(ctx EvaluationContext) Value {
 func (rv rowValue) Identifier() string {
 	return rv.identifier
 }
+
+func EnsureString(v Value) Value {
+	if v.Type() != TypeString {
+		panic(fmt.Sprintf("expected %v to have type 'string'", v))
+	}
+	return v
+}

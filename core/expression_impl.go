@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-type arithmeticsOperator int
+type BinaryOperator int
 
 const (
 	addition       = '+'
@@ -23,13 +23,13 @@ func wrapInInt(i int64, err error) (Value, error) {
 	return NewIntValue(i), err
 }
 
-type arithExpression struct {
-	operation arithmeticsOperator
+type binaryExpression struct {
+	operation BinaryOperator
 	left      Evaluator
 	right     Evaluator
 }
 
-func operationExecutor[T int64 | float64](oper arithmeticsOperator, a T, b T) (T, error) {
+func operationExecutor[T int64 | float64](oper BinaryOperator, a T, b T) (T, error) {
 	switch oper {
 	case addition:
 		return a + b, nil
@@ -47,7 +47,7 @@ func operationExecutor[T int64 | float64](oper arithmeticsOperator, a T, b T) (T
 	}
 }
 
-func (ae arithExpression) Evaluate(context EvaluationContext) Value {
+func (ae binaryExpression) Evaluate(context EvaluationContext) Value {
 	left := ae.left.Evaluate(context)
 	right := ae.right.Evaluate(context)
 
@@ -65,10 +65,28 @@ func (ae arithExpression) Evaluate(context EvaluationContext) Value {
 	}
 }
 
-func NewExpression(operation arithmeticsOperator, left Evaluator, right Evaluator) Evaluator {
-	return &arithExpression{
+func NewExpression(operation BinaryOperator, left Evaluator, right Evaluator) Evaluator {
+	return &binaryExpression{
 		operation: operation,
 		left:      left,
 		right:     right,
 	}
+}
+
+type concatExpression struct {
+	left  Evaluator
+	right Evaluator
+}
+
+func NewConcat(left Evaluator, right Evaluator) Evaluator {
+	return &concatExpression{
+		left:  left,
+		right: right,
+	}
+}
+
+func (c concatExpression) Evaluate(context EvaluationContext) Value {
+	ls := EnsureString(c.left.Evaluate(context)).AsString().Value().(string)
+	rs := EnsureString(c.right.Evaluate(context)).AsString().Value().(string)
+	return NewStringValue(ls + rs)
 }

@@ -139,7 +139,20 @@ func TestArithExpression_EvaluateInvalidOp(t *testing.T) {
 	g := NewGomegaWithT(t)
 	context := newMapContext()
 
-	expr := NewExpression(arithmeticsOperator('&'), NewIntValue(10), NewIntValue(2))
+	expr := NewExpression(BinaryOperator('&'), NewIntValue(10), NewIntValue(2))
 	g.Expect(func() { expr.Evaluate(context) }).To(Panic())
 
+}
+
+func TestConcatExpression_Evaluate(t *testing.T) {
+	g := NewGomegaWithT(t)
+	context := newMapContext()
+	context.SetValue("s", "321-")
+	context.SetValue("i", "321")
+
+	expr := NewConcat(NewRowValue("s"), NewStringValue("123"))
+	g.Expect(expr.Evaluate(context)).To(Equal(NewStringValue("321-123")))
+
+	expr = NewConcat(NewRowValue("i"), NewStringValue("123"))
+	g.Expect(func() { expr.Evaluate(context) }).To(Panic())
 }
