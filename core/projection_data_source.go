@@ -3,60 +3,73 @@ package core
 import "fmt"
 
 type ProjectionColumn struct {
-	name  string
-	alias string
+	source Evaluator
+	alias  string
 }
 
-func NewProjectionColumn(name string) ProjectionColumn {
-	return ProjectionColumn{name: name}
+func NewColumn(name string) ProjectionColumn {
+	return ProjectionColumn{source: NewRowValue(name)}
 }
 
-func NewProjectionColumnWithAlias(name string, alias string) ProjectionColumn {
-	return ProjectionColumn{name: name, alias: alias}
+func NewColumnWithAlias(name string, alias string) ProjectionColumn {
+	return ProjectionColumn{source: NewRowValue(name), alias: alias}
 }
 
-func NewProjection(sourceNames []string, aliases []string) []ProjectionColumn {
+func NewExpressionColumn(src Evaluator, alias string) ProjectionColumn {
+	return ProjectionColumn{source: src, alias: alias}
+}
+
+func NewSimpleProjection(sourceNames []string, aliases []string) []ProjectionColumn {
 	if len(sourceNames) != len(aliases) {
 		panic(fmt.Errorf("projection requires equal number of names and aliases.\nNames:%v\nAliases:%v", sourceNames, aliases))
 	}
 	projection := make([]ProjectionColumn, len(sourceNames))
 	for idx, src := range sourceNames {
-		projection[idx] = NewProjectionColumnWithAlias(src, aliases[idx])
+		projection[idx] = NewColumnWithAlias(src, aliases[idx])
 	}
 	return projection
 }
 
-type projectionDataSource struct {
-	source     DataSource
-	header     DataSourceHeader
-	projection []ProjectionColumn
-}
-
-func NewProjectionDataSource(src DataSource, projection []ProjectionColumn) DataSource {
-	pds := &projectionDataSource{
-		source:     src,
-		header:     newHeaderWithProjection(src, projection),
-		projection: projection,
+func NewProjectionDataSource(src DataSource, projection []ProjectionColumn) (DataSource, error) {
+	headers, err := newHeaderWithProjection(src, projection)
+	if err != nil {
+		return nil, err
 	}
 
-	return pds
+	rows, err := performProjection(src, headers, projection)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewMemDataSource(src.GetName(), headers.ColumnsMetadata(), rows)
 }
 
-func newHeaderWithProjection(src DataSource, projection []ProjectionColumn) DataSourceHeader {
+func newHeaderWithProjection(src DataSource, projection []ProjectionColumn) (DataSourceHeader, error) {
 	columns := make([]ColumnMetadata, len(projection))
 	for idx, prjColumn := range projection {
-		columnIdx := src.Header().IndexByName(prjColumn.name)
-		if columnIdx == InvalidFieldIndex {
-			panic(fmt.Errorf("unknown column: %v", prjColumn.name))
-		}
-		columnMeta := columnMetadata{
-			parentName: src.Header().ColumnsMetadata()[columnIdx].ParentName(),
-			index:      idx,
+		var columnMeta columnMetadata
+		if rowId, ok := prjColumn.source.(Idintifiable); ok {
+			// projection column references datasource column
+			sourceColumn := rowId.Identifier()
+			columnIdx := src.Header().IndexByName(sourceColumn)
+			if columnIdx == InvalidFieldIndex {
+				return nil, fmt.Errorf("unknown column: %v", sourceColumn)
+			}
+			columnMeta = columnMetadata{
+				parentName: src.Header().ColumnsMetadata()[columnIdx].ParentName(),
+				index:      idx,
+				name:       sourceColumn,
+			}
+		} else {
+			// projection column is an expression
+			columnMeta = columnMetadata{
+				parentName: "",
+				index:      idx,
+				name:       "",
+			}
 		}
 		if prjColumn.alias != "" {
 			columnMeta.name = prjColumn.alias
-		} else {
-			columnMeta.name = prjColumn.name
 		}
 		columns[idx] = &columnMeta
 	}
@@ -64,48 +77,33 @@ func newHeaderWithProjection(src DataSource, projection []ProjectionColumn) Data
 	return &dataSourceHeader{
 		parent:  src,
 		columns: columns,
-	}
+	}, nil
 }
 
-func (p *projectionDataSource) Header() DataSourceHeader {
-	return p.header
-}
-
-func (p *projectionDataSource) GetName() string {
-	return p.source.GetName()
-}
-
-func (p *projectionDataSource) NextRow() (Row, error) {
-	row, err := p.source.NextRow()
-	if row == nil {
-		return row, err
-	}
+func performProjection(ds DataSource, header DataSourceHeader, projection []ProjectionColumn) ([]Row, error) {
+	result := make([]Row, 0)
+	srcRow, err := ds.NextRow()
 	if err != nil {
 		return nil, err
 	}
-	return p.Project(row)
-}
 
-func (p *projectionDataSource) CurrentRow() (Row, error) {
-	row, err := p.source.CurrentRow()
-	if err != nil {
-		return nil, err
-	}
-	return p.Project(row)
-}
-
-func (p *projectionDataSource) Rewind() error {
-	return p.source.Rewind()
-}
-
-func (p *projectionDataSource) Project(row Row) (Row, error) {
-	resultValues := make([]Value, len(p.projection))
-	for idx, prj := range p.projection {
-		v := row.Get(prj.name)
-		if v.IsEmpty() {
-			return nil, fmt.Errorf("expected column '%v' is not found in the dataset", prj.name)
+	for srcRow != nil {
+		newRow := projectRow(projection, header, srcRow)
+		result = append(result, newRow)
+		srcRow, err = ds.NextRow()
+		if err != nil {
+			return nil, err
 		}
-		resultValues[idx] = v.Value()
+
 	}
-	return newRowWithId(row.Id(), p.Header(), resultValues), nil
+	return result, nil
+}
+
+func projectRow(projection []ProjectionColumn, header DataSourceHeader, row Row) Row {
+	resultValues := make([]Value, len(projection))
+	for idx, prj := range projection {
+		v := prj.source.Evaluate(row)
+		resultValues[idx] = v
+	}
+	return newRowWithId(row.Id(), header, resultValues)
 }

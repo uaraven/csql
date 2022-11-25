@@ -39,6 +39,8 @@ type Row interface {
 	Header() DataSourceHeader
 	Values() []Value
 	Get(string) funky.Option[Value]
+	Count() int
+	GetByIndex(index int) Value
 	Satisfies(c Condition) bool
 }
 

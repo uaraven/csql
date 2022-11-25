@@ -74,6 +74,14 @@ func (r rowImpl) Values() []Value {
 	return r.values
 }
 
+func (r rowImpl) Count() int {
+	return len(r.values)
+}
+
+func (r rowImpl) GetByIndex(index int) Value {
+	return r.values[index]
+}
+
 func (r rowImpl) Get(column string) funky.Option[Value] {
 	index := r.Header().IndexByName(column)
 	if index == RowIdIndex {
