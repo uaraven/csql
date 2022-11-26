@@ -35,6 +35,7 @@ type Value interface {
 	AsFloat() Value
 	AsBool() Value
 	Equals(Value) bool
+	Less(Value) bool
 }
 
 func IsNumeric(v Value) bool {

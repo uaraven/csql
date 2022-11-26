@@ -119,3 +119,9 @@ func (cds *memDataSource) Rewind() error {
 	cds.index = -1
 	return nil
 }
+
+func (cds *memDataSource) GetRows() []Row {
+	dest := make([]Row, len(cds.data))
+	copy(dest, cds.data)
+	return dest
+}

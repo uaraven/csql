@@ -98,6 +98,10 @@ func (sv stringValue) Equals(other Value) bool {
 	return other.Type() == sv.Type() && other.Value().(string) == sv.value
 }
 
+func (sv stringValue) Less(other Value) bool {
+	return other.Type() == sv.Type() && other.Value().(string) > sv.value
+}
+
 func (sv stringValue) Evaluate(_ EvaluationContext) Value {
 	return &sv
 }
@@ -132,6 +136,10 @@ func (iv intValue) String() string {
 
 func (iv intValue) Equals(other Value) bool {
 	return other.Type() == iv.Type() && other.Value().(int64) == iv.value
+}
+
+func (iv intValue) Less(other Value) bool {
+	return other.Type() == iv.Type() && other.Value().(int64) > iv.value
 }
 
 func (iv intValue) Evaluate(_ EvaluationContext) Value {
@@ -172,6 +180,10 @@ func (fv floatValue) String() string {
 
 func (fv floatValue) Equals(other Value) bool {
 	return other.Type() == fv.Type() && other.Value().(float64) == fv.value
+}
+
+func (fv floatValue) Less(other Value) bool {
+	return other.Type() == fv.Type() && other.Value().(float64) > fv.value
 }
 
 func (bv boolValue) Type() DataType {
@@ -218,6 +230,10 @@ func (bv boolValue) Equals(other Value) bool {
 	return other.Type() == bv.Type() && other.Value().(bool) == bv.value
 }
 
+func (bv boolValue) Less(other Value) bool {
+	return false
+}
+
 func (n nullValue) Evaluate(_ EvaluationContext) Value {
 	return &n
 }
@@ -251,6 +267,10 @@ func (n nullValue) String() string {
 }
 
 func (n nullValue) Equals(other Value) bool {
+	return false
+}
+
+func (n nullValue) Less(other Value) bool {
 	return false
 }
 
