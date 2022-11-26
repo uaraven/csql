@@ -1,0 +1,3 @@
+SELECT t.a, b beta,c as field_c, d.*, 4 + 5 AS Yop FROM "data.csv" t, file a left join file2 b on (b.a = a.b)
+WHERE
+  t.a > 123 AND c != 'string'
