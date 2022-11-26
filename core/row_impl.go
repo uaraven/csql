@@ -4,6 +4,7 @@ import (
 	"csql/funky"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 type rowImpl struct {
@@ -103,6 +104,15 @@ func (r rowImpl) Id() int {
 
 func (r rowImpl) String() string {
 	return fmt.Sprintf("%v", r.values)
+}
+
+func (r rowImpl) Key() string {
+	var sb strings.Builder
+	for _, v := range r.values {
+		sb.WriteRune('-')
+		sb.WriteString(v.Evaluate(r).String())
+	}
+	return sb.String()
 }
 
 func decodeToValue(value string) Value {

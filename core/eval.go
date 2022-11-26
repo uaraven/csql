@@ -1,6 +1,9 @@
 package core
 
-import "csql/funky"
+import (
+	"csql/funky"
+	"fmt"
+)
 
 type DataType int
 
@@ -28,6 +31,7 @@ type Condition interface {
 
 type Value interface {
 	Evaluator
+	fmt.Stringer
 	Type() DataType
 	Value() interface{}
 	AsString() Value

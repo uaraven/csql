@@ -1,6 +1,9 @@
 package core
 
-import "fmt"
+import (
+	"fmt"
+	mapset "github.com/deckarep/golang-set/v2"
+)
 
 type ProjectionColumn struct {
 	source Evaluator
@@ -30,13 +33,18 @@ func NewSimpleProjection(sourceNames []string, aliases []string) []ProjectionCol
 	return projection
 }
 
-func NewProjectionDataSource(src DataSource, projection []ProjectionColumn) (DataSource, error) {
+func NewProjectionDataSource(src DataSource, projection []ProjectionColumn, distinct bool) (DataSource, error) {
+	var err error
 	headers, err := newHeaderWithProjection(src, projection)
 	if err != nil {
 		return nil, err
 	}
-
-	rows, err := performProjection(src, headers, projection)
+	var rows []Row
+	if distinct {
+		rows, err = performProjectionDistinct(src, headers, projection)
+	} else {
+		rows, err = performProjection(src, headers, projection)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -90,6 +98,29 @@ func performProjection(ds DataSource, header DataSourceHeader, projection []Proj
 	for srcRow != nil {
 		newRow := projectRow(projection, header, srcRow)
 		result = append(result, newRow)
+		srcRow, err = ds.NextRow()
+		if err != nil {
+			return nil, err
+		}
+
+	}
+	return result, nil
+}
+
+func performProjectionDistinct(ds DataSource, header DataSourceHeader, projection []ProjectionColumn) ([]Row, error) {
+	keySet := mapset.NewThreadUnsafeSet[string]()
+	result := make([]Row, 0)
+	srcRow, err := ds.NextRow()
+	if err != nil {
+		return nil, err
+	}
+
+	for srcRow != nil {
+		newRow := projectRow(projection, header, srcRow)
+		if !keySet.Contains(newRow.Key()) {
+			result = append(result, newRow)
+			keySet.Add(newRow.Key())
+		}
 		srcRow, err = ds.NextRow()
 		if err != nil {
 			return nil, err

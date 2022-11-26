@@ -1,6 +1,7 @@
 package core
 
 import (
+	"csql/funky"
 	. "github.com/onsi/gomega"
 	"testing"
 )
@@ -10,7 +11,7 @@ func TestProjectionDataSource_NextRow(t *testing.T) {
 
 	ds := loadDefaultTestMemDatasource()
 
-	pds, err := NewProjectionDataSource(ds, NewSimpleProjection([]string{"first_name", "last_name"}, []string{"", "ln"}))
+	pds, err := NewProjectionDataSource(ds, NewSimpleProjection([]string{"first_name", "last_name"}, []string{"", "ln"}), false)
 	g.Expect(err).ToNot(HaveOccurred())
 
 	rows, err := ReadAllRows(pds)
@@ -32,6 +33,24 @@ func TestProjectionDataSource_NextRow(t *testing.T) {
 	g.Expect(rows[3].Get("ln").Value()).To(Equal(NewStringValue("May")))
 }
 
+func TestProjectionDataSource_NextRowDistinct(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ds := loadDefaultTestMemDatasource()
+
+	pds, err := NewProjectionDataSource(ds, NewSimpleProjection([]string{"first_name"}, []string{""}), true)
+	g.Expect(err).ToNot(HaveOccurred())
+
+	rows, err := ReadAllRows(pds)
+	g.Expect(err).ToNot(HaveOccurred())
+
+	g.Expect(rows).To(HaveLen(3))
+	firstNames := funky.Map(rows, func(r Row) string {
+		return r.GetByIndex(0).Value().(string)
+	})
+	g.Expect(firstNames).To(ContainElements("James", "John", "Jeremy"))
+}
+
 func TestProjectionDataSource_WithExpressions(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -41,7 +60,7 @@ func TestProjectionDataSource_WithExpressions(t *testing.T) {
 		NewColumn("first_name"),
 		NewExpressionColumn(NewExpression(addition, NewRowValue("id"), NewIntValue(10)), "sum"),
 	}
-	pds, err := NewProjectionDataSource(ds, projection)
+	pds, err := NewProjectionDataSource(ds, projection, false)
 	g.Expect(err).ToNot(HaveOccurred())
 
 	rows, err := ReadAllRows(pds)
@@ -70,7 +89,7 @@ func TestProjectionDataSource_WithUnnamedExpressions(t *testing.T) {
 		NewColumn("first_name"),
 		NewExpressionColumn(NewExpression(addition, NewRowValue("id"), NewIntValue(10)), ""),
 	}
-	pds, err := NewProjectionDataSource(ds, projection)
+	pds, err := NewProjectionDataSource(ds, projection, false)
 	g.Expect(err).ToNot(HaveOccurred())
 
 	rows, err := ReadAllRows(pds)

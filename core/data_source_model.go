@@ -42,6 +42,7 @@ type Row interface {
 	Count() int
 	GetByIndex(index int) Value
 	Satisfies(c Condition) bool
+	Key() string
 }
 
 // DataSource is a representation of rows of columns
