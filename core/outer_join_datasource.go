@@ -1,7 +1,7 @@
 package core
 
 import (
-	"csql/data"
+	"csql/collection"
 	"fmt"
 )
 
@@ -63,8 +63,8 @@ func leftOuterJoin(left DataSource, right DataSource, header DataSourceHeader, j
 
 }
 
-func selectRight(counter int, header DataSourceHeader, leftRow Row, right DataSource, joinOn Condition) (data.LinkedList[Row], error) {
-	var rightSelected data.LinkedList[Row] = data.NewLinkedList[Row]()
+func selectRight(counter int, header DataSourceHeader, leftRow Row, right DataSource, joinOn Condition) (collection.LinkedList[Row], error) {
+	var rightSelected collection.LinkedList[Row] = collection.NewLinkedList[Row]()
 	err := right.Rewind()
 	if err != nil {
 		return nil, err
@@ -114,8 +114,8 @@ func rightOuterJoin(left DataSource, right DataSource, header DataSourceHeader, 
 
 }
 
-func selectLeft(counter int, header DataSourceHeader, rightRow Row, left DataSource, joinOn Condition) (data.LinkedList[Row], error) {
-	var leftSelected data.LinkedList[Row] = data.NewLinkedList[Row]()
+func selectLeft(counter int, header DataSourceHeader, rightRow Row, left DataSource, joinOn Condition) (collection.LinkedList[Row], error) {
+	var leftSelected collection.LinkedList[Row] = collection.NewLinkedList[Row]()
 	err := left.Rewind()
 	if err != nil {
 		return nil, err

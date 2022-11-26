@@ -1,4 +1,4 @@
-package data
+package collection
 
 import (
 	. "github.com/onsi/gomega"
