@@ -62,3 +62,7 @@ type DataSource interface {
 	// Rewind the dataset to ahead of the first row
 	Rewind() error
 }
+
+type SliceDataSource interface {
+	GetRows() []Row
+}

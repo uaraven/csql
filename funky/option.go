@@ -7,6 +7,7 @@ type Option[T any] interface {
 	IsPresent() bool
 	Value() T
 	OrGet(v T) T
+	OrPanic(err error) T
 	IfPresent(func(T))
 }
 
@@ -27,6 +28,10 @@ func (s Some[T]) Value() T {
 }
 
 func (s Some[T]) OrGet(_ T) T {
+	return s.value
+}
+
+func (s Some[T]) OrPanic(_ error) T {
 	return s.value
 }
 
@@ -55,6 +60,10 @@ func (n None[T]) Value() T {
 
 func (n None[T]) OrGet(v T) T {
 	return v
+}
+
+func (n None[T]) OrPanic(err error) T {
+	panic(err)
 }
 
 func (n None[T]) IfPresent(_ func(v T)) {
