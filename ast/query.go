@@ -63,24 +63,45 @@ func (sp SelectProjection) String() string {
 	return sb.String()
 }
 
-// ProjectionField is one field in projection. ProjectionField consist of optional TableName
+// NamedProjectionField is one field in projection. ProjectionField consist of optional TableName
 // Field Name and optional Alias
-type ProjectionField struct {
+type NamedProjectionField struct {
 	TableName *Identifier
 	Name      Identifier
 	Alias     *Identifier
 }
 
-func (pf ProjectionField) String() string {
+func (npf NamedProjectionField) String() string {
 	var sb strings.Builder
-	if pf.TableName != nil {
-		sb.WriteString(fmt.Sprintf("%v.", pf.TableName))
+	if npf.TableName != nil {
+		sb.WriteString(fmt.Sprintf("%v.", npf.TableName))
 	}
-	sb.WriteString(string(pf.Name))
-	if pf.Alias != nil {
-		sb.WriteString(fmt.Sprintf(" AS %v", pf.Alias))
+	sb.WriteString(string(npf.Name))
+	if npf.Alias != nil {
+		sb.WriteString(fmt.Sprintf(" AS %v", npf.Alias))
 	}
 	return sb.String()
+}
+
+type EvaluatedProjectionField struct {
+	Expr Expression
+}
+
+func (epf EvaluatedProjectionField) String() string {
+	return epf.Expr.String()
+}
+
+type ProjectionField struct {
+	NamedField     *NamedProjectionField
+	EvaluatedField *EvaluatedProjectionField
+}
+
+func (pf ProjectionField) String() string {
+	if pf.NamedField != nil {
+		return pf.NamedField.String()
+	} else {
+		return pf.EvaluatedField.String()
+	}
 }
 
 // SourceName is a name of a Table/Data file with optional Alias
@@ -136,6 +157,10 @@ const (
 	LikeOperator = "LIKE"
 	// NotLikeOperator is just that
 	NotLikeOperator = "NOT LIKE"
+	// MatchOperator is just that
+	MatchOperator = "MATCH"
+	// NotMatchOperator is just that
+	NotMatchOperator = "NOT MATCH"
 )
 
 func (jt JoinType) String() string {
@@ -303,15 +328,15 @@ func (like LikeExpression) String() string {
 type MatchExpression struct {
 	What    Term
 	Pattern string
-	NotLike bool
+	Not     bool
 }
 
 func (match MatchExpression) String() string {
 	var op string
-	if match.NotLike {
-		op = NotLikeOperator
+	if match.Not {
+		op = NotMatchOperator
 	} else {
-		op = LikeOperator
+		op = MatchOperator
 	}
 	return fmt.Sprintf("%v %s '%s'", match.What, op, match.Pattern)
 }

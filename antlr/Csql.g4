@@ -2,7 +2,9 @@ grammar Csql;
 
 query: selectStatement ';'? EOF;
 
-operator: '<' | '<=' | '>' | '>=' | '=' | '!=' | '<>' | '||';
+comparisonOperator: '<' | '<=' | '>' | '>=' | '=' | '!=' | '<>';
+
+binaryOperation: '+' | '-' | '*' | '/' | '%' | '||';
 
 list: '(' literalValue (',' literalValue)* ')';
 
@@ -10,7 +12,8 @@ term: compoundName | literalValue;
 
 expr:
 	term										# termItem
-	| term operator term						# condition
+	| term comparisonOperator term				# condition
+	| term binaryOperation term                 # evaluation
 	| expr K_AND expr							# andExpr
 	| expr K_OR expr							# orExpr
 	| K_NOT expr								# notExpr
@@ -26,7 +29,7 @@ distinct: K_DISTINCT;
 
 evaluatedExpression:
     term                                        # evalTerm
-    | term operator term                        # evalBinaryExpression
+    | term binaryOperation term                 # evalBinaryExpression
     | '(' evaluatedExpression ')'               # evalParens
     ;
 

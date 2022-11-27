@@ -11,14 +11,20 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#query.
 	VisitQuery(ctx *QueryContext) interface{}
 
-	// Visit a parse tree produced by CsqlParser#operator.
-	VisitOperator(ctx *OperatorContext) interface{}
+	// Visit a parse tree produced by CsqlParser#comparisonOperator.
+	VisitComparisonOperator(ctx *ComparisonOperatorContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#binaryOperation.
+	VisitBinaryOperation(ctx *BinaryOperationContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#list.
 	VisitList(ctx *ListContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#term.
 	VisitTerm(ctx *TermContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#evaluation.
+	VisitEvaluation(ctx *EvaluationContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#condition.
 	VisitCondition(ctx *ConditionContext) interface{}

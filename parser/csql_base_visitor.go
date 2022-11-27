@@ -12,7 +12,11 @@ func (v *BaseCsqlVisitor) VisitQuery(ctx *QueryContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseCsqlVisitor) VisitOperator(ctx *OperatorContext) interface{} {
+func (v *BaseCsqlVisitor) VisitComparisonOperator(ctx *ComparisonOperatorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitBinaryOperation(ctx *BinaryOperationContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -21,6 +25,10 @@ func (v *BaseCsqlVisitor) VisitList(ctx *ListContext) interface{} {
 }
 
 func (v *BaseCsqlVisitor) VisitTerm(ctx *TermContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitEvaluation(ctx *EvaluationContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

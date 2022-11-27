@@ -11,7 +11,7 @@ func TestSimpleQuery(t *testing.T) {
 
 	g.Expect(s.Projection.Distinct).To(BeFalse())
 	g.Expect(s.Projection.ProjectionFields).To(HaveLen(1))
-	g.Expect(s.Projection.ProjectionFields[0].Name).To(Equal(Identifier("col")))
+	g.Expect(s.Projection.ProjectionFields[0].NamedField.Name).To(Equal(Identifier("col")))
 
 	g.Expect(s.From.TableName).ToNot(BeNil())
 	g.Expect(s.From.TableName.Name).To(Equal(Identifier("Table")))
@@ -43,6 +43,20 @@ func TestLeftOuterJoin(t *testing.T) {
 func TestImplicitCrossJoin(t *testing.T) {
 	g := NewGomegaWithT(t)
 	s := ParseSQL("SELECT col FROM Table1, Table2, Table3")
+	if s.From.Join.Type != CrossJoin {
+		t.Errorf("Expected join type to bo CROSS JOIN, Got: %v", s.From.Join.Type)
+	}
+
+	g.Expect(s.From.Join.Type).To(Equal(CrossJoin))
+	g.Expect(s.From.Join.Source.TableName.Name).To(Equal(Identifier("Table1")))
+	g.Expect(s.From.Join.Target.Join.Type).To(Equal(CrossJoin))
+	g.Expect(s.From.Join.Target.Join.Source.TableName.Name).To(Equal(Identifier("Table2")))
+	g.Expect(s.From.Join.Target.Join.Target.TableName.Name).To(Equal(Identifier("Table3")))
+}
+
+func TestExplicitCrossJoin(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT col FROM Table1 cross join Table2 cross join Table3")
 	if s.From.Join.Type != CrossJoin {
 		t.Errorf("Expected join type to bo CROSS JOIN, Got: %v", s.From.Join.Type)
 	}
@@ -160,6 +174,29 @@ func TestBetweenExpression(t *testing.T) {
 		What: Term{Name: &CompoundName{Name: "col2"}},
 		Low:  Term{Value: &Literal{NumericValue: &v1}},
 		High: Term{Name: &CompoundName{Name: "col1"}},
+	}))
+
+}
+
+func TestSelectEvaluation(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT 1+2 FROM Table1")
+	g.Expect(s.Filter).To(BeNil())
+	v1 := "1"
+	v2 := "2"
+	g.Expect(s.Projection).To(BeEquivalentTo(SelectProjection{
+		Distinct: false,
+		ProjectionFields: []ProjectionField{
+			{
+				EvaluatedField: &EvaluatedProjectionField{
+					Expr: BinaryExpression{
+						LHS:      Term{Value: &Literal{NumericValue: &v1}},
+						RHS:      Term{Value: &Literal{NumericValue: &v2}},
+						Operator: "+",
+					},
+				},
+			},
+		},
 	}))
 
 }

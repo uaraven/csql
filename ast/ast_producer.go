@@ -64,14 +64,6 @@ type CsqlVisitorImpl struct {
 	antlr.ParseTreeVisitor
 }
 
-func (c CsqlVisitorImpl) VisitMatchExpr(ctx *parser.MatchExprContext) interface{} {
-	return c.VisitChildren(ctx)
-}
-
-func (c CsqlVisitorImpl) VisitEvaluatedExpression(ctx *parser.EvaluatedExpressionContext) interface{} {
-	return c.VisitChildren(ctx)
-}
-
 func removeStringQuotes(text string) string {
 	return strings.Trim(text, "'")
 }
@@ -146,8 +138,14 @@ func (c CsqlVisitorImpl) VisitProjection(ctx *parser.ProjectionContext) interfac
 	return astProjection
 }
 
-// VisitOperator visits a parse tree produced by CsqlParser#operator.
-func (c CsqlVisitorImpl) VisitOperator(ctx *parser.OperatorContext) interface{} {
+// VisitComparisonOperator visits a parse tree produced by CsqlParser#logicalOperator.
+func (c CsqlVisitorImpl) VisitComparisonOperator(ctx *parser.ComparisonOperatorContext) interface{} {
+	operator := ctx.GetText()
+	return operator
+}
+
+// VisitBinaryOperation visits a parse tree produced by CsqlParser#binaryOperation.
+func (c CsqlVisitorImpl) VisitBinaryOperation(ctx *parser.BinaryOperationContext) interface{} {
 	operator := ctx.GetText()
 	return operator
 }
@@ -182,7 +180,15 @@ func (c CsqlVisitorImpl) VisitCondition(ctx *parser.ConditionContext) interface{
 	return ComparisonExpression{
 		LHS:      ctx.Term(0).Accept(c).(Term),
 		RHS:      ctx.Term(1).Accept(c).(Term),
-		Operator: ctx.Operator().GetText(),
+		Operator: ctx.ComparisonOperator().GetText(),
+	}
+}
+
+func (c CsqlVisitorImpl) VisitEvaluation(ctx *parser.EvaluationContext) interface{} {
+	return BinaryExpression{
+		LHS:      ctx.Term(0).Accept(c).(Term),
+		RHS:      ctx.Term(1).Accept(c).(Term),
+		Operator: ctx.BinaryOperation().GetText(),
 	}
 }
 
@@ -259,18 +265,27 @@ func (c CsqlVisitorImpl) VisitDistinct(ctx *parser.DistinctContext) interface{} 
 
 // VisitProjectionField visits a parse tree produced by CsqlParser#projectionField.
 func (c CsqlVisitorImpl) VisitProjectionField(ctx *parser.ProjectionFieldContext) interface{} {
-	field := ctx.ProjectionFieldName().Accept(c).(ProjectionField)
-	if ctx.Alias() != nil {
-		field.Alias = ctx.Alias().Accept(c).(*Identifier)
+	var projectionField ProjectionField
+	if ctx.ProjectionFieldName() != nil {
+		field := ctx.ProjectionFieldName().Accept(c).(NamedProjectionField)
+		if ctx.Alias() != nil {
+			field.Alias = ctx.Alias().Accept(c).(*Identifier)
+		} else {
+			field.Alias = nil
+		}
+		projectionField.NamedField = &field
 	} else {
-		field.Alias = nil
+		expr := ctx.EvaluatedExpression().Accept(c).(Expression)
+		projectionField.EvaluatedField = &EvaluatedProjectionField{
+			Expr: expr,
+		}
 	}
-	return field
+	return projectionField
 }
 
 // VisitProjectionFieldName visits a parse tree produced by CsqlParser#projectionFieldName.
 func (c CsqlVisitorImpl) VisitProjectionFieldName(ctx *parser.ProjectionFieldNameContext) interface{} {
-	field := ProjectionField{}
+	field := NamedProjectionField{}
 	if ctx.Qualifier() != nil {
 		tableName := ctx.Qualifier().Accept(c).(Identifier)
 		field.TableName = &tableName
@@ -284,6 +299,32 @@ func (c CsqlVisitorImpl) VisitProjectionFieldName(ctx *parser.ProjectionFieldNam
 // VisitFieldName visits a parse tree produced by CsqlParser#fieldName.
 func (c CsqlVisitorImpl) VisitFieldName(ctx *parser.FieldNameContext) interface{} {
 	return Identifier(ctx.GetText())
+}
+
+func (c CsqlVisitorImpl) VisitEvalTerm(ctx *parser.EvalTermContext) interface{} {
+	return ctx.Term().Accept(c).(Term)
+}
+
+func (c CsqlVisitorImpl) VisitEvalBinaryExpression(ctx *parser.EvalBinaryExpressionContext) interface{} {
+	return BinaryExpression{
+		LHS:      ctx.Term(0).Accept(c).(Term),
+		RHS:      ctx.Term(1).Accept(c).(Term),
+		Operator: ctx.BinaryOperation().GetText(),
+	}
+}
+
+func (c CsqlVisitorImpl) VisitEvalParens(ctx *parser.EvalParensContext) interface{} {
+	return ParensExpression{
+		Child: ctx.EvaluatedExpression().Accept(c).(Expression),
+	}
+}
+
+func (c CsqlVisitorImpl) VisitMatchExpr(ctx *parser.MatchExprContext) interface{} {
+	return MatchExpression{
+		What:    ctx.Term().Accept(c).(Term),
+		Pattern: removeStringQuotes(ctx.StringValue().GetText()),
+		Not:     ctx.K_NOT() != nil,
+	}
 }
 
 // // VisitJoinType visits a parse tree produced by CsqlParser#joinType.
@@ -380,17 +421,6 @@ func (c CsqlVisitorImpl) VisitDataSourceCrossJoin(ctx *parser.DataSourceCrossJoi
 	}
 	dataSource.Join.Source = ctx.DataSource().Accept(c).(DataSource)
 	dataSource.Join.Target = ctx.UnconditionalJoinTarget().Accept(c).(DataSource)
-	return dataSource
-}
-
-func (c CsqlVisitorImpl) VisitDataConditionalJoin(ctx *parser.DataSourceConditionalJoinContext) interface{} {
-	dataSource := DataSource{}
-	joinType := ctx.ConditionalJoinType().Accept(c).(JoinType)
-	dataSource.Join = &JoinedSource{
-		Type:   joinType,
-		Source: ctx.DataSource().Accept(c).(DataSource),
-		Target: ctx.ConditionalJoinTarget().Accept(c).(DataSource),
-	}
 	return dataSource
 }
 
