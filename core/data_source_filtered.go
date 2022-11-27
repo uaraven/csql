@@ -1,6 +1,6 @@
 package core
 
-import "csql/funky"
+import "github.com/uaraven/csql/funky"
 
 func NewFilteredDataSource(source DataSource, condition Condition) (DataSource, error) {
 	rows, err := ReadAllRows(source)

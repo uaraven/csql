@@ -1,8 +1,8 @@
 package core
 
 import (
-	"csql/util"
 	"fmt"
+	"github.com/uaraven/csql/util"
 )
 
 type BinaryOperator int
