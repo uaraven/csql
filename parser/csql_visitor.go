@@ -56,8 +56,14 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#distinct.
 	VisitDistinct(ctx *DistinctContext) interface{}
 
-	// Visit a parse tree produced by CsqlParser#evaluatedExpression.
-	VisitEvaluatedExpression(ctx *EvaluatedExpressionContext) interface{}
+	// Visit a parse tree produced by CsqlParser#evalTerm.
+	VisitEvalTerm(ctx *EvalTermContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#evalBinaryExpression.
+	VisitEvalBinaryExpression(ctx *EvalBinaryExpressionContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#evalParens.
+	VisitEvalParens(ctx *EvalParensContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#projection.
 	VisitProjection(ctx *ProjectionContext) interface{}

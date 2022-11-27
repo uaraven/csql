@@ -25,9 +25,9 @@ where: K_WHERE expr;
 distinct: K_DISTINCT;
 
 evaluatedExpression:
-    term
-    | term operator term
-    | '(' evaluatedExpression ')'
+    term                                        # evalTerm
+    | term operator term                        # evalBinaryExpression
+    | '(' evaluatedExpression ')'               # evalParens
     ;
 
 projection: distinct? projectionField (',' projectionField)*;

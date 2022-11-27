@@ -2029,7 +2029,81 @@ func NewEvaluatedExpressionContext(parser antlr.Parser, parent antlr.ParserRuleC
 
 func (s *EvaluatedExpressionContext) GetParser() antlr.Parser { return s.parser }
 
-func (s *EvaluatedExpressionContext) AllTerm() []ITermContext {
+func (s *EvaluatedExpressionContext) CopyFrom(ctx *EvaluatedExpressionContext) {
+	s.BaseParserRuleContext.CopyFrom(ctx.BaseParserRuleContext)
+}
+
+func (s *EvaluatedExpressionContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *EvaluatedExpressionContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
+	return antlr.TreesStringTree(s, ruleNames, recog)
+}
+
+type EvalParensContext struct {
+	*EvaluatedExpressionContext
+}
+
+func NewEvalParensContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *EvalParensContext {
+	var p = new(EvalParensContext)
+
+	p.EvaluatedExpressionContext = NewEmptyEvaluatedExpressionContext()
+	p.parser = parser
+	p.CopyFrom(ctx.(*EvaluatedExpressionContext))
+
+	return p
+}
+
+func (s *EvalParensContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *EvalParensContext) EvaluatedExpression() IEvaluatedExpressionContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IEvaluatedExpressionContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IEvaluatedExpressionContext)
+}
+
+func (s *EvalParensContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+	switch t := visitor.(type) {
+	case CsqlVisitor:
+		return t.VisitEvalParens(s)
+
+	default:
+		return t.VisitChildren(s)
+	}
+}
+
+type EvalBinaryExpressionContext struct {
+	*EvaluatedExpressionContext
+}
+
+func NewEvalBinaryExpressionContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *EvalBinaryExpressionContext {
+	var p = new(EvalBinaryExpressionContext)
+
+	p.EvaluatedExpressionContext = NewEmptyEvaluatedExpressionContext()
+	p.parser = parser
+	p.CopyFrom(ctx.(*EvaluatedExpressionContext))
+
+	return p
+}
+
+func (s *EvalBinaryExpressionContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *EvalBinaryExpressionContext) AllTerm() []ITermContext {
 	children := s.GetChildren()
 	len := 0
 	for _, ctx := range children {
@@ -2050,7 +2124,7 @@ func (s *EvaluatedExpressionContext) AllTerm() []ITermContext {
 	return tst
 }
 
-func (s *EvaluatedExpressionContext) Term(i int) ITermContext {
+func (s *EvalBinaryExpressionContext) Term(i int) ITermContext {
 	var t antlr.RuleContext
 	j := 0
 	for _, ctx := range s.GetChildren() {
@@ -2070,7 +2144,7 @@ func (s *EvaluatedExpressionContext) Term(i int) ITermContext {
 	return t.(ITermContext)
 }
 
-func (s *EvaluatedExpressionContext) Operator() IOperatorContext {
+func (s *EvalBinaryExpressionContext) Operator() IOperatorContext {
 	var t antlr.RuleContext
 	for _, ctx := range s.GetChildren() {
 		if _, ok := ctx.(IOperatorContext); ok {
@@ -2086,10 +2160,38 @@ func (s *EvaluatedExpressionContext) Operator() IOperatorContext {
 	return t.(IOperatorContext)
 }
 
-func (s *EvaluatedExpressionContext) EvaluatedExpression() IEvaluatedExpressionContext {
+func (s *EvalBinaryExpressionContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+	switch t := visitor.(type) {
+	case CsqlVisitor:
+		return t.VisitEvalBinaryExpression(s)
+
+	default:
+		return t.VisitChildren(s)
+	}
+}
+
+type EvalTermContext struct {
+	*EvaluatedExpressionContext
+}
+
+func NewEvalTermContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *EvalTermContext {
+	var p = new(EvalTermContext)
+
+	p.EvaluatedExpressionContext = NewEmptyEvaluatedExpressionContext()
+	p.parser = parser
+	p.CopyFrom(ctx.(*EvaluatedExpressionContext))
+
+	return p
+}
+
+func (s *EvalTermContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *EvalTermContext) Term() ITermContext {
 	var t antlr.RuleContext
 	for _, ctx := range s.GetChildren() {
-		if _, ok := ctx.(IEvaluatedExpressionContext); ok {
+		if _, ok := ctx.(ITermContext); ok {
 			t = ctx.(antlr.RuleContext)
 			break
 		}
@@ -2099,21 +2201,13 @@ func (s *EvaluatedExpressionContext) EvaluatedExpression() IEvaluatedExpressionC
 		return nil
 	}
 
-	return t.(IEvaluatedExpressionContext)
+	return t.(ITermContext)
 }
 
-func (s *EvaluatedExpressionContext) GetRuleContext() antlr.RuleContext {
-	return s
-}
-
-func (s *EvaluatedExpressionContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
-	return antlr.TreesStringTree(s, ruleNames, recog)
-}
-
-func (s *EvaluatedExpressionContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+func (s *EvalTermContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 	switch t := visitor.(type) {
 	case CsqlVisitor:
-		return t.VisitEvaluatedExpression(s)
+		return t.VisitEvalTerm(s)
 
 	default:
 		return t.VisitChildren(s)
@@ -2147,6 +2241,7 @@ func (p *CsqlParser) EvaluatedExpression() (localctx IEvaluatedExpressionContext
 	p.GetErrorHandler().Sync(p)
 	switch p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 9, p.GetParserRuleContext()) {
 	case 1:
+		localctx = NewEvalTermContext(p, localctx)
 		p.EnterOuterAlt(localctx, 1)
 		{
 			p.SetState(142)
@@ -2154,6 +2249,7 @@ func (p *CsqlParser) EvaluatedExpression() (localctx IEvaluatedExpressionContext
 		}
 
 	case 2:
+		localctx = NewEvalBinaryExpressionContext(p, localctx)
 		p.EnterOuterAlt(localctx, 2)
 		{
 			p.SetState(143)
@@ -2169,6 +2265,7 @@ func (p *CsqlParser) EvaluatedExpression() (localctx IEvaluatedExpressionContext
 		}
 
 	case 3:
+		localctx = NewEvalParensContext(p, localctx)
 		p.EnterOuterAlt(localctx, 3)
 		{
 			p.SetState(147)

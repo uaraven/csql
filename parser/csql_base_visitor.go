@@ -72,7 +72,15 @@ func (v *BaseCsqlVisitor) VisitDistinct(ctx *DistinctContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseCsqlVisitor) VisitEvaluatedExpression(ctx *EvaluatedExpressionContext) interface{} {
+func (v *BaseCsqlVisitor) VisitEvalTerm(ctx *EvalTermContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitEvalBinaryExpression(ctx *EvalBinaryExpressionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitEvalParens(ctx *EvalParensContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
