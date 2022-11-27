@@ -61,7 +61,15 @@ func ParseSQL(sql string) Select {
 
 // CsqlVisitorImpl is a visitor for the antlr CST
 type CsqlVisitorImpl struct {
-	parser.BaseCsqlVisitor
+	antlr.ParseTreeVisitor
+}
+
+func (c CsqlVisitorImpl) VisitMatchExpr(ctx *parser.MatchExprContext) interface{} {
+	return c.VisitChildren(ctx)
+}
+
+func (c CsqlVisitorImpl) VisitEvaluatedExpression(ctx *parser.EvaluatedExpressionContext) interface{} {
+	return c.VisitChildren(ctx)
 }
 
 func removeStringQuotes(text string) string {
@@ -94,10 +102,10 @@ func joinParts(context *antlr.BaseParserRuleContext) string {
 
 // NewCsqlVisitor creates new instance of the visitor
 func NewCsqlVisitor() parser.CsqlVisitor {
-	return &CsqlVisitorImpl{
-		BaseCsqlVisitor: parser.BaseCsqlVisitor{},
+	visitor := CsqlVisitorImpl{
+		ParseTreeVisitor: &parser.BaseCsqlVisitor{},
 	}
-
+	return &visitor
 }
 
 // Visit starts visiting of the Antlr's parse tree
@@ -111,8 +119,6 @@ func (c CsqlVisitorImpl) Visit(tree antlr.ParseTree) interface{} {
 
 // VisitQuery visits a parse tree produced by CsqlParser#query.
 func (c CsqlVisitorImpl) VisitQuery(ctx *parser.QueryContext) interface{} {
-	children := ctx.GetChildren()
-	fmt.Print(children)
 	return ctx.SelectStatement().Accept(c).(Select)
 }
 
