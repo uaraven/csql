@@ -17,6 +17,8 @@ type ColumnMetadata interface {
 	Index() int
 	// MatchesName returns true if the requested name matches the name or alias (or index) of this column
 	MatchesName(string) bool
+	// Name returns the name of the column
+	Name() string
 	// ParentName returns the qualified name of the datasource
 	ParentName() string
 }

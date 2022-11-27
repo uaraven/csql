@@ -26,7 +26,11 @@ func (cm columnMetadata) MatchesName(name string) bool {
 		return false
 
 	}
-	return util.EqualsIgnoreCase(column, cm.name)
+	return column == "*" || util.EqualsIgnoreCase(column, cm.name)
+}
+
+func (cm columnMetadata) Name() string {
+	return cm.name
 }
 
 type dataSourceHeader struct {

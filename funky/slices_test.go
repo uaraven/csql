@@ -45,3 +45,27 @@ func TestMap(t *testing.T) {
 
 	g.Expect(result).To(ContainElements(2, 4, 6, 8, 10, 12))
 }
+
+func TestAnyMatches(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	list := []int{1, 2, 3, 4, 5, 6}
+
+	result := AnyMatches(list, func(i int) bool { return i == 4 })
+	g.Expect(result).To(BeTrue())
+
+	result = AnyMatches(list, func(i int) bool { return i == -1 })
+	g.Expect(result).To(BeFalse())
+}
+
+func TestNoneMatches(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	list := []int{1, 2, 3, 4, 5, 6}
+
+	result := NoneMatches(list, func(i int) bool { return i == 4 })
+	g.Expect(result).To(BeFalse())
+
+	result = NoneMatches(list, func(i int) bool { return i == -1 })
+	g.Expect(result).To(BeTrue())
+}

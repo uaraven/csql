@@ -1,9 +1,12 @@
 package core
 
 import (
+	"csql/funky"
 	"fmt"
 	mapset "github.com/deckarep/golang-set/v2"
 )
+
+const AllColumns = "*"
 
 type ProjectionColumn struct {
 	source Evaluator
@@ -34,11 +37,10 @@ func NewSimpleProjection(sourceNames []string, aliases []string) []ProjectionCol
 }
 
 func NewProjectionDataSource(src DataSource, projection []ProjectionColumn, distinct bool) (DataSource, error) {
+	projection = expandProjection(projection, src.Header())
+	headers := newHeaderWithProjection(src, projection)
+
 	var err error
-	headers, err := newHeaderWithProjection(src, projection)
-	if err != nil {
-		return nil, err
-	}
 	var rows []Row
 	if distinct {
 		rows, err = performProjectionDistinct(src, headers, projection)
@@ -52,7 +54,42 @@ func NewProjectionDataSource(src DataSource, projection []ProjectionColumn, dist
 	return NewMemDataSource(src.GetName(), headers.ColumnsMetadata(), rows)
 }
 
-func newHeaderWithProjection(src DataSource, projection []ProjectionColumn) (DataSourceHeader, error) {
+func isAsterisk(pc ProjectionColumn) bool {
+	if rowId, ok := pc.source.(Identifiable); ok {
+		_, sourceColumn := qualified(rowId.Identifier())
+		return sourceColumn == AllColumns
+	}
+	return false
+}
+
+func expandProjection(projection []ProjectionColumn, headers DataSourceHeader) []ProjectionColumn {
+	if funky.NoneMatches(projection, isAsterisk) {
+		return projection
+	}
+	result := make([]ProjectionColumn, 0)
+	for _, column := range projection {
+		if isAsterisk(column) {
+			fullAsterisk := column.source.(Identifiable).Identifier()
+			table, _ := qualified(fullAsterisk)
+			for _, cmd := range headers.ColumnsMetadata() {
+				if cmd.MatchesName(fullAsterisk) {
+					var newName string
+					if table != "" {
+						newName = table + "." + cmd.Name()
+					} else {
+						newName = cmd.Name()
+					}
+					result = append(result, NewColumn(newName))
+				}
+			}
+		} else {
+			result = append(result, column)
+		}
+	}
+	return result
+}
+
+func newHeaderWithProjection(src DataSource, projection []ProjectionColumn) DataSourceHeader {
 	columns := make([]ColumnMetadata, len(projection))
 	for idx, prjColumn := range projection {
 		var columnMeta columnMetadata
@@ -61,12 +98,13 @@ func newHeaderWithProjection(src DataSource, projection []ProjectionColumn) (Dat
 			sourceColumn := rowId.Identifier()
 			columnIdx := src.Header().IndexByName(sourceColumn)
 			if columnIdx == InvalidFieldIndex {
-				return nil, fmt.Errorf("unknown column: %v", sourceColumn)
+				panic(UnknownColumnError(sourceColumn))
 			}
+			sourceColumnMetadata := src.Header().ColumnsMetadata()[columnIdx]
 			columnMeta = columnMetadata{
-				parentName: src.Header().ColumnsMetadata()[columnIdx].ParentName(),
+				parentName: sourceColumnMetadata.ParentName(),
 				index:      idx,
-				name:       sourceColumn,
+				name:       sourceColumnMetadata.Name(),
 			}
 		} else {
 			// projection column is an expression
@@ -85,7 +123,7 @@ func newHeaderWithProjection(src DataSource, projection []ProjectionColumn) (Dat
 	return &dataSourceHeader{
 		parent:  src,
 		columns: columns,
-	}, nil
+	}
 }
 
 func performProjection(ds DataSource, header DataSourceHeader, projection []ProjectionColumn) ([]Row, error) {
@@ -131,7 +169,7 @@ func performProjectionDistinct(ds DataSource, header DataSourceHeader, projectio
 }
 
 func projectRow(projection []ProjectionColumn, header DataSourceHeader, row Row) Row {
-	resultValues := make([]Value, len(projection))
+	resultValues := make([]Value, header.ColumnCount())
 	for idx, prj := range projection {
 		v := prj.source.Evaluate(row)
 		resultValues[idx] = v

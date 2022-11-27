@@ -34,6 +34,10 @@ func AnyMatches[T any](data []T, matcher func(T) bool) bool {
 	return false
 }
 
+func NoneMatches[T any](data []T, matcher func(T) bool) bool {
+	return !AnyMatches(data, matcher)
+}
+
 func Filter[T any](data []T, matcher func(T) bool) []T {
 	result := make([]T, 0)
 	for idx, elem := range data {

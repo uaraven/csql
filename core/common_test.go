@@ -29,6 +29,14 @@ func loadTestMemDatasource(name string) DataSource {
 	return ds
 }
 
+func loadDsWithAlias(name string, alias string) DataSource {
+	ds, err := NewMemDataSourceWithAlias(fmt.Sprintf("../test-data/%s.csv", name), alias)
+	if err != nil {
+		panic(err)
+	}
+	return ds
+}
+
 func loadTestMemDatasourceWithAlias(alias string) DataSource {
 	ds, err := NewMemDataSourceWithAlias("../test-data/employees.csv", alias)
 	if err != nil {
