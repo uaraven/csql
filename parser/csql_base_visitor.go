@@ -44,6 +44,10 @@ func (v *BaseCsqlVisitor) VisitTermItem(ctx *TermItemContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseCsqlVisitor) VisitIsNullExpr(ctx *IsNullExprContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseCsqlVisitor) VisitInExpr(ctx *InExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -64,11 +68,11 @@ func (v *BaseCsqlVisitor) VisitParensExpr(ctx *ParensExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseCsqlVisitor) VisitBetweenExpr(ctx *BetweenExprContext) interface{} {
+func (v *BaseCsqlVisitor) VisitAndExpr(ctx *AndExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseCsqlVisitor) VisitAndExpr(ctx *AndExprContext) interface{} {
+func (v *BaseCsqlVisitor) VisitBetweenExpr(ctx *BetweenExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

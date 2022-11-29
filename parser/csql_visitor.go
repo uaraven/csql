@@ -35,6 +35,9 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#termItem.
 	VisitTermItem(ctx *TermItemContext) interface{}
 
+	// Visit a parse tree produced by CsqlParser#isNullExpr.
+	VisitIsNullExpr(ctx *IsNullExprContext) interface{}
+
 	// Visit a parse tree produced by CsqlParser#inExpr.
 	VisitInExpr(ctx *InExprContext) interface{}
 
@@ -50,11 +53,11 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#parensExpr.
 	VisitParensExpr(ctx *ParensExprContext) interface{}
 
-	// Visit a parse tree produced by CsqlParser#betweenExpr.
-	VisitBetweenExpr(ctx *BetweenExprContext) interface{}
-
 	// Visit a parse tree produced by CsqlParser#andExpr.
 	VisitAndExpr(ctx *AndExprContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#betweenExpr.
+	VisitBetweenExpr(ctx *BetweenExprContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#where.
 	VisitWhere(ctx *WhereContext) interface{}

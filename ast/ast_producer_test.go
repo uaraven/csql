@@ -164,6 +164,17 @@ func TestSimpleWhereLikeExpression(t *testing.T) {
 	}))
 }
 
+func TestSimpleWhereMatchExpression(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT col FROM Table1 WHERE col2 MATCH 'abc.*'")
+	g.Expect(s.Filter).ToNot(BeNil())
+	g.Expect(s.Filter).To(BeEquivalentTo(MatchExpression{
+		What:    Term{Name: &CompoundName{Name: Identifier("col2")}},
+		Pattern: "abc.*",
+		Not:     false,
+	}))
+}
+
 func TestSimpleAndOrWhereExpression(t *testing.T) {
 	g := NewGomegaWithT(t)
 	s := ParseSQL("SELECT col FROM Table1 WHERE col2 > 10 and col2 < 20 OR col3 >= 0")
@@ -208,6 +219,32 @@ func TestInListExpression(t *testing.T) {
 		NotIn: true,
 		List: ListLiteral{
 			Values: []Literal{{NumericValue: &v1}, {NumericValue: &v2}, {NumericValue: &v3}},
+		},
+	}))
+}
+
+func TestIsNullExpression(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT col FROM Table1 WHERE col1 IS NULL")
+	g.Expect(s.Filter).ToNot(BeNil())
+	g.Expect(s.Filter).To(BeEquivalentTo(&IsNullExpression{
+		What: Term{Name: &CompoundName{Name: "col1"}},
+		Not:  false,
+	}))
+
+	s = ParseSQL("SELECT col FROM Table1 WHERE col1 IS NOT NULL")
+	g.Expect(s.Filter).ToNot(BeNil())
+	g.Expect(s.Filter).To(BeEquivalentTo(&IsNullExpression{
+		What: Term{Name: &CompoundName{Name: "col1"}},
+		Not:  true,
+	}))
+
+	s = ParseSQL("SELECT col FROM Table1 WHERE NOT col1 IS NULL")
+	g.Expect(s.Filter).ToNot(BeNil())
+	g.Expect(s.Filter).To(BeEquivalentTo(NotExpression{
+		Child: &IsNullExpression{
+			What: Term{Name: &CompoundName{Name: "col1"}},
+			Not:  false,
 		},
 	}))
 }

@@ -195,9 +195,9 @@ func (c CsqlVisitorImpl) VisitEvaluation(ctx *parser.EvaluationContext) interfac
 // VisitBetweenExpr visits a parse tree produced by CsqlParser#betweenExpr.
 func (c CsqlVisitorImpl) VisitBetweenExpr(ctx *parser.BetweenExprContext) interface{} {
 	return BetweenExpression{
-		What: ctx.Term().Accept(c).(Term),
-		Low:  ctx.Expr(0).Accept(c).(Expression),
-		High: ctx.Expr(1).Accept(c).(Expression),
+		What: ctx.Expr(0).Accept(c).(Expression),
+		Low:  ctx.Expr(1).Accept(c).(Expression),
+		High: ctx.Expr(2).Accept(c).(Expression),
 	}
 }
 
@@ -215,9 +215,33 @@ func (c CsqlVisitorImpl) VisitNotExpr(ctx *parser.NotExprContext) interface{} {
 // VisitInExpr visits a parse tree produced by CsqlParser#inExpr.
 func (c CsqlVisitorImpl) VisitInExpr(ctx *parser.InExprContext) interface{} {
 	return InListExpression{
-		What:  ctx.Term().Accept(c).(Term),
+		What:  ctx.Expr().Accept(c).(Expression),
 		List:  ctx.List().Accept(c).(ListLiteral),
 		NotIn: ctx.K_NOT() != nil,
+	}
+}
+
+type IsNullExpression struct {
+	What Expression
+	Not  bool
+}
+
+func (ine IsNullExpression) String() string {
+	var sb strings.Builder
+	sb.WriteString(ine.What.String())
+	sb.WriteRune(' ')
+	sb.WriteString("IS ")
+	if ine.Not {
+		sb.WriteString("NOT ")
+	}
+	sb.WriteString("NULL")
+	return sb.String()
+}
+
+func (c CsqlVisitorImpl) VisitIsNullExpr(ctx *parser.IsNullExprContext) interface{} {
+	return &IsNullExpression{
+		What: ctx.Expr().Accept(c).(Expression),
+		Not:  ctx.K_NOT() != nil,
 	}
 }
 
@@ -245,7 +269,7 @@ func (c CsqlVisitorImpl) VisitAndExpr(ctx *parser.AndExprContext) interface{} {
 // VisitLikeExpr visits a parse tree produced by CsqlParser#likeExpr.
 func (c CsqlVisitorImpl) VisitLikeExpr(ctx *parser.LikeExprContext) interface{} {
 	return LikeExpression{
-		What:    ctx.Term().Accept(c).(Term),
+		What:    ctx.Expr().Accept(c).(Expression),
 		Pattern: removeStringQuotes(ctx.StringValue().GetText()),
 		NotLike: ctx.K_NOT() != nil,
 	}
@@ -319,7 +343,7 @@ func (c CsqlVisitorImpl) VisitEvalParens(ctx *parser.EvalParensContext) interfac
 
 func (c CsqlVisitorImpl) VisitMatchExpr(ctx *parser.MatchExprContext) interface{} {
 	return MatchExpression{
-		What:    ctx.Term().Accept(c).(Term),
+		What:    ctx.Expr().Accept(c).(Expression),
 		Pattern: removeStringQuotes(ctx.StringValue().GetText()),
 		Not:     ctx.K_NOT() != nil,
 	}

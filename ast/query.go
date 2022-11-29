@@ -310,7 +310,7 @@ func (be BinaryExpression) String() string {
 }
 
 type LikeExpression struct {
-	What    Term
+	What    Expression
 	Pattern string
 	NotLike bool
 }
@@ -326,7 +326,7 @@ func (like LikeExpression) String() string {
 }
 
 type MatchExpression struct {
-	What    Term
+	What    Expression
 	Pattern string
 	Not     bool
 }
@@ -342,7 +342,7 @@ func (match MatchExpression) String() string {
 }
 
 type BetweenExpression struct {
-	What Term
+	What Expression
 	Low  Expression
 	High Expression
 }
@@ -352,7 +352,7 @@ func (be BetweenExpression) String() string {
 }
 
 type InListExpression struct {
-	What  Term
+	What  Expression
 	List  ListLiteral
 	NotIn bool
 }
