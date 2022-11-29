@@ -61,7 +61,7 @@ func ParseSQL(sql string) Select {
 
 // CsqlVisitorImpl is a visitor for the antlr CST
 type CsqlVisitorImpl struct {
-	antlr.ParseTreeVisitor
+	*parser.BaseCsqlVisitor
 }
 
 func removeStringQuotes(text string) string {
@@ -81,7 +81,6 @@ func parseIdentifier(identifier string) Identifier {
 		return Identifier(removeIdentifierQuotes(identifier))
 	}
 	return Identifier(identifier)
-
 }
 
 func joinParts(context *antlr.BaseParserRuleContext) string {
@@ -94,8 +93,9 @@ func joinParts(context *antlr.BaseParserRuleContext) string {
 
 // NewCsqlVisitor creates new instance of the visitor
 func NewCsqlVisitor() parser.CsqlVisitor {
+	baseVisitor := parser.BaseCsqlVisitor{}
 	visitor := CsqlVisitorImpl{
-		ParseTreeVisitor: &parser.BaseCsqlVisitor{},
+		BaseCsqlVisitor: &baseVisitor,
 	}
 	return &visitor
 }
@@ -180,7 +180,7 @@ func (c CsqlVisitorImpl) VisitCondition(ctx *parser.ConditionContext) interface{
 	return ComparisonExpression{
 		LHS:      ctx.Expr(0).Accept(c).(Expression),
 		RHS:      ctx.Expr(1).Accept(c).(Expression),
-		Operator: ctx.ComparisonOperator().GetText(),
+		Operator: ctx.ComparisonOperator().Accept(c).(string),
 	}
 }
 
@@ -188,7 +188,7 @@ func (c CsqlVisitorImpl) VisitEvaluation(ctx *parser.EvaluationContext) interfac
 	return BinaryExpression{
 		LHS:      ctx.Expr(0).Accept(c).(Expression),
 		RHS:      ctx.Expr(1).Accept(c).(Expression),
-		Operator: ctx.BinaryOperation().GetText(),
+		Operator: ctx.BinaryOperation().Accept(c).(string),
 	}
 }
 
@@ -219,23 +219,6 @@ func (c CsqlVisitorImpl) VisitInExpr(ctx *parser.InExprContext) interface{} {
 		List:  ctx.List().Accept(c).(ListLiteral),
 		NotIn: ctx.K_NOT() != nil,
 	}
-}
-
-type IsNullExpression struct {
-	What Expression
-	Not  bool
-}
-
-func (ine IsNullExpression) String() string {
-	var sb strings.Builder
-	sb.WriteString(ine.What.String())
-	sb.WriteRune(' ')
-	sb.WriteString("IS ")
-	if ine.Not {
-		sb.WriteString("NOT ")
-	}
-	sb.WriteString("NULL")
-	return sb.String()
 }
 
 func (c CsqlVisitorImpl) VisitIsNullExpr(ctx *parser.IsNullExprContext) interface{} {
@@ -281,9 +264,9 @@ func (c CsqlVisitorImpl) VisitWhere(ctx *parser.WhereContext) interface{} {
 }
 
 // VisitDistinct visits a parse tree produced by CsqlParser#distinct.
-func (c CsqlVisitorImpl) VisitDistinct(ctx *parser.DistinctContext) interface{} {
-	return !ctx.IsEmpty()
-}
+//func (c CsqlVisitorImpl) VisitDistinct(ctx *parser.DistinctContext) interface{} {
+//	return ctx != nil
+//}
 
 // VisitProjectionField visits a parse tree produced by CsqlParser#projectionField.
 func (c CsqlVisitorImpl) VisitProjectionField(ctx *parser.ProjectionFieldContext) interface{} {
@@ -320,7 +303,7 @@ func (c CsqlVisitorImpl) VisitProjectionFieldName(ctx *parser.ProjectionFieldNam
 
 // VisitFieldName visits a parse tree produced by CsqlParser#fieldName.
 func (c CsqlVisitorImpl) VisitFieldName(ctx *parser.FieldNameContext) interface{} {
-	return Identifier(ctx.GetText())
+	return parseIdentifier(ctx.GetText())
 }
 
 func (c CsqlVisitorImpl) VisitEvalTerm(ctx *parser.EvalTermContext) interface{} {
@@ -349,20 +332,6 @@ func (c CsqlVisitorImpl) VisitMatchExpr(ctx *parser.MatchExprContext) interface{
 	}
 }
 
-// // VisitJoinType visits a parse tree produced by CsqlParser#joinType.
-// func (c CsqlVisitorImpl) VisitJoinType(ctx *parser.JoinTypeContext) interface{} {
-// 	if ctx.InnerJoin() != nil {
-// 		return InnerJoin
-// 	} else if ctx.RightJoin() != nil {
-// 		return RightOuterJoin
-// 	} else if ctx.LeftJoin() != nil {
-// 		return LeftOuterJoin
-// 	} else if ctx.CrossJoin() != nil {
-// 		return CrossJoin
-// 	}
-// 	return InvalidJoin
-// }
-
 type joinTarget struct {
 	dataSource DataSource
 	condition  Expression
@@ -379,27 +348,6 @@ func (c CsqlVisitorImpl) VisitConditionalJoinTarget(ctx *parser.ConditionalJoinT
 	}
 	return result
 }
-
-// VisitDataSource visits a parse tree produced by CsqlParser#dataSource.
-// func (c CsqlVisitorImpl) VisitDataSource(ctx *parser.DataSourceContext) interface{} {
-// 	if ctx.SourceName() != nil { // we only have table name
-// 		dataSource := DataSource{}
-// 		v := ctx.SourceName().Accept(c).(SourceName)
-// 		dataSource.TableName = &v
-// 		return dataSource
-// 	}
-// 	if ctx.DataSource() != nil && ctx.ConditionalJoinType() == nil { // this is just nested join, unwrap it
-// 		return ctx.DataSource().Accept(c).(DataSource)
-// 	}
-// 	dataSource := DataSource{}
-// 	dataSource.Join = &JoinedSource{}
-// 	dataSource.Join.Source = ctx.DataSource().Accept(c).(DataSource)
-// 	dataSource.Join.Type = ctx.JoinType().Accept(c).(JoinType)
-// 	target := ctx.JoinTarget().Accept(c).(joinTarget)
-// 	dataSource.Join.Target = target.dataSource
-// 	dataSource.Join.Condition = target.condition
-// 	return dataSource
-// }
 
 func (c CsqlVisitorImpl) VisitUnconditionalJoinTarget(ctx *parser.UnconditionalJoinTargetContext) interface{} {
 	return ctx.DataSource().Accept(c).(DataSource)

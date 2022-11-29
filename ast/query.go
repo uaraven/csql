@@ -366,3 +366,20 @@ func (ile InListExpression) String() string {
 	}
 	return fmt.Sprintf("%v %s %v", ile.What, op, ile.List)
 }
+
+type IsNullExpression struct {
+	What Expression
+	Not  bool
+}
+
+func (ine IsNullExpression) String() string {
+	var sb strings.Builder
+	sb.WriteString(ine.What.String())
+	sb.WriteRune(' ')
+	sb.WriteString("IS ")
+	if ine.Not {
+		sb.WriteString("NOT ")
+	}
+	sb.WriteString("NULL")
+	return sb.String()
+}

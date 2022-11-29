@@ -18,6 +18,34 @@ func TestSimpleQuery(t *testing.T) {
 	g.Expect(s.From.TableName.Alias).To(BeNil())
 }
 
+func TestSimpleQueryQuotedIdentifier(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT \"col\" FROM \"Table\"")
+
+	g.Expect(s.Projection.Distinct).To(BeFalse())
+	g.Expect(s.Projection.ProjectionFields).To(HaveLen(1))
+	g.Expect(s.Projection.ProjectionFields[0].NamedField.Name).To(Equal(Identifier("col")))
+
+	g.Expect(s.From.TableName).ToNot(BeNil())
+	g.Expect(s.From.TableName.Name).To(Equal(Identifier("Table")))
+	g.Expect(s.From.TableName.Alias).To(BeNil())
+}
+
+func TestSimpleQueryQuotedQualifiedIdentifier(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT \"t\".\"col\" FROM \"Table\"")
+
+	g.Expect(s.Projection.Distinct).To(BeFalse())
+	g.Expect(s.Projection.ProjectionFields).To(HaveLen(1))
+	identifier := Identifier("t")
+	g.Expect(s.Projection.ProjectionFields[0].NamedField.TableName).To(Equal(&identifier))
+	g.Expect(s.Projection.ProjectionFields[0].NamedField.Name).To(Equal(Identifier("col")))
+
+	g.Expect(s.From.TableName).ToNot(BeNil())
+	g.Expect(s.From.TableName.Name).To(Equal(Identifier("Table")))
+	g.Expect(s.From.TableName.Alias).To(BeNil())
+}
+
 func TestSimpleQueryWithQualifiedProjection(t *testing.T) {
 	g := NewGomegaWithT(t)
 	s := ParseSQL("SELECT Table.col FROM Table")
