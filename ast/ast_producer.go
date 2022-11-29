@@ -178,16 +178,16 @@ func (c CsqlVisitorImpl) VisitTerm(ctx *parser.TermContext) interface{} {
 // VisitCondition visits a parse tree produced by CsqlParser#condition.
 func (c CsqlVisitorImpl) VisitCondition(ctx *parser.ConditionContext) interface{} {
 	return ComparisonExpression{
-		LHS:      ctx.Term(0).Accept(c).(Term),
-		RHS:      ctx.Term(1).Accept(c).(Term),
+		LHS:      ctx.Expr(0).Accept(c).(Expression),
+		RHS:      ctx.Expr(1).Accept(c).(Expression),
 		Operator: ctx.ComparisonOperator().GetText(),
 	}
 }
 
 func (c CsqlVisitorImpl) VisitEvaluation(ctx *parser.EvaluationContext) interface{} {
 	return BinaryExpression{
-		LHS:      ctx.Term(0).Accept(c).(Term),
-		RHS:      ctx.Term(1).Accept(c).(Term),
+		LHS:      ctx.Expr(0).Accept(c).(Expression),
+		RHS:      ctx.Expr(1).Accept(c).(Expression),
 		Operator: ctx.BinaryOperation().GetText(),
 	}
 }
@@ -231,9 +231,7 @@ func (c CsqlVisitorImpl) VisitOrExpr(ctx *parser.OrExprContext) interface{} {
 
 // VisitParensExpr visits a parse tree produced by CsqlParser#parensExpr.
 func (c CsqlVisitorImpl) VisitParensExpr(ctx *parser.ParensExprContext) interface{} {
-	return ParensExpression{
-		Child: ctx.Expr().Accept(c).(Expression),
-	}
+	return ctx.Expr().Accept(c).(Expression)
 }
 
 // VisitAndExpr visits a parse tree produced by CsqlParser#andExpr.
@@ -307,8 +305,8 @@ func (c CsqlVisitorImpl) VisitEvalTerm(ctx *parser.EvalTermContext) interface{} 
 
 func (c CsqlVisitorImpl) VisitEvalBinaryExpression(ctx *parser.EvalBinaryExpressionContext) interface{} {
 	return BinaryExpression{
-		LHS:      ctx.Term(0).Accept(c).(Term),
-		RHS:      ctx.Term(1).Accept(c).(Term),
+		LHS:      ctx.Expr(0).Accept(c).(Expression),
+		RHS:      ctx.Expr(1).Accept(c).(Expression),
 		Operator: ctx.BinaryOperation().GetText(),
 	}
 }
@@ -425,7 +423,7 @@ func (c CsqlVisitorImpl) VisitDataSourceCrossJoin(ctx *parser.DataSourceCrossJoi
 }
 
 func (c CsqlVisitorImpl) VisitDataSourceItem(ctx *parser.DataSourceItemContext) interface{} {
-	return nil
+	return ctx.DataSource().Accept(c).(DataSource)
 }
 
 // VisitSources visits a parse tree produced by CsqlParser#sources.

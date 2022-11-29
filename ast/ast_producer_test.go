@@ -18,6 +18,24 @@ func TestSimpleQuery(t *testing.T) {
 	g.Expect(s.From.TableName.Alias).To(BeNil())
 }
 
+func TestSimpleQueryWithQualifiedProjection(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT Table.col FROM Table")
+
+	g.Expect(s.Projection.Distinct).To(BeFalse())
+	g.Expect(s.Projection.ProjectionFields).To(HaveLen(1))
+	tName := Identifier("Table")
+	g.Expect(s.Projection.ProjectionFields[0].NamedField).To(BeEquivalentTo(&NamedProjectionField{
+		TableName: &tName,
+		Name:      Identifier("col"),
+		Alias:     nil,
+	}))
+
+	g.Expect(s.From.TableName).ToNot(BeNil())
+	g.Expect(s.From.TableName.Name).To(Equal(Identifier("Table")))
+	g.Expect(s.From.TableName.Alias).To(BeNil())
+}
+
 func TestSimpleErrorQuery(t *testing.T) {
 	g := NewGomegaWithT(t)
 	g.Expect(func() { ParseSQL("SELECT col FROM") }).To(Panic())
@@ -35,6 +53,16 @@ func TestLeftOuterJoin(t *testing.T) {
 	s := ParseSQL("SELECT col FROM Table1 left outer join Table2 ON A = B")
 
 	g.Expect(s.From.Join.Type).To(Equal(LeftOuterJoin))
+	g.Expect(s.From.Join.Source.TableName.Name).To(Equal(Identifier("Table1")))
+	g.Expect(s.From.Join.Target.TableName.Name).To(Equal(Identifier("Table2")))
+	g.Expect(s.From.Join.Condition).ToNot(BeNil())
+}
+
+func TestRightOuterJoin(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT col FROM Table1 right join Table2 ON A = B")
+
+	g.Expect(s.From.Join.Type).To(Equal(RightOuterJoin))
 	g.Expect(s.From.Join.Source.TableName.Name).To(Equal(Identifier("Table1")))
 	g.Expect(s.From.Join.Target.TableName.Name).To(Equal(Identifier("Table2")))
 	g.Expect(s.From.Join.Condition).ToNot(BeNil())
@@ -101,6 +129,26 @@ func TestSimpleWhereExpression(t *testing.T) {
 			},
 		},
 		RHS:      Term{Value: &Literal{NumericValue: &val}},
+		Operator: ">",
+	}))
+}
+
+func TestParensWhereExpression(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT col FROM Table1 WHERE col2 > (col1 - 10)")
+	g.Expect(s.Filter).ToNot(BeNil())
+	val := "10"
+	g.Expect(s.Filter).To(BeEquivalentTo(ComparisonExpression{
+		LHS: Term{
+			Name: &CompoundName{
+				Name: Identifier("col2"),
+			},
+		},
+		RHS: BinaryExpression{
+			LHS:      Term{Name: &CompoundName{Name: Identifier("col1")}},
+			RHS:      Term{Value: &Literal{NumericValue: &val}},
+			Operator: "-",
+		},
 		Operator: ">",
 	}))
 }

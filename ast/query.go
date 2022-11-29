@@ -290,8 +290,8 @@ func (ne NotExpression) String() string {
 }
 
 type ComparisonExpression struct {
-	LHS      Term
-	RHS      Term
+	LHS      Expression
+	RHS      Expression
 	Operator string
 }
 
@@ -300,8 +300,8 @@ func (ce ComparisonExpression) String() string {
 }
 
 type BinaryExpression struct {
-	LHS      Term
-	RHS      Term
+	LHS      Expression
+	RHS      Expression
 	Operator string
 }
 

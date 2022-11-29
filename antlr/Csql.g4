@@ -12,8 +12,8 @@ term: compoundName | literalValue;
 
 expr:
 	term										# termItem
-	| term comparisonOperator term				# condition
-	| term binaryOperation term                 # evaluation
+	| expr comparisonOperator expr				# condition
+	| expr binaryOperation expr                 # evaluation
 	| expr K_AND expr							# andExpr
 	| expr K_OR expr							# orExpr
 	| K_NOT expr								# notExpr
@@ -29,7 +29,7 @@ distinct: K_DISTINCT;
 
 evaluatedExpression:
     term                                        # evalTerm
-    | term binaryOperation term                 # evalBinaryExpression
+    | expr binaryOperation expr                 # evalBinaryExpression
     | '(' evaluatedExpression ')'               # evalParens
     ;
 
