@@ -1,6 +1,6 @@
 package core
 
-import "csql/funky"
+import "github.com/uaraven/csql/funky"
 
 type inCondition struct {
 	left  Evaluator

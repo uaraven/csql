@@ -1,8 +1,8 @@
 package core
 
 import (
-	"csql/funky"
 	"fmt"
+	"github.com/uaraven/csql/funky"
 )
 
 func loadTestDatasource() DataSource {

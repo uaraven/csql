@@ -1,8 +1,8 @@
 package core
 
 import (
-	"csql/collection"
 	"fmt"
+	"github.com/uaraven/csql/collection"
 )
 
 func NewLeftOuterJoinDatasource(left DataSource, right DataSource, joinOn Condition) (DataSource, error) {

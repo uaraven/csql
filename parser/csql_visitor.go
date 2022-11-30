@@ -11,14 +11,20 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#query.
 	VisitQuery(ctx *QueryContext) interface{}
 
-	// Visit a parse tree produced by CsqlParser#operator.
-	VisitOperator(ctx *OperatorContext) interface{}
+	// Visit a parse tree produced by CsqlParser#comparisonOperator.
+	VisitComparisonOperator(ctx *ComparisonOperatorContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#binaryOperation.
+	VisitBinaryOperation(ctx *BinaryOperationContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#list.
 	VisitList(ctx *ListContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#term.
 	VisitTerm(ctx *TermContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#evaluation.
+	VisitEvaluation(ctx *EvaluationContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#condition.
 	VisitCondition(ctx *ConditionContext) interface{}
@@ -28,6 +34,9 @@ type CsqlVisitor interface {
 
 	// Visit a parse tree produced by CsqlParser#termItem.
 	VisitTermItem(ctx *TermItemContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#isNullExpr.
+	VisitIsNullExpr(ctx *IsNullExprContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#inExpr.
 	VisitInExpr(ctx *InExprContext) interface{}
@@ -44,11 +53,11 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#parensExpr.
 	VisitParensExpr(ctx *ParensExprContext) interface{}
 
-	// Visit a parse tree produced by CsqlParser#betweenExpr.
-	VisitBetweenExpr(ctx *BetweenExprContext) interface{}
-
 	// Visit a parse tree produced by CsqlParser#andExpr.
 	VisitAndExpr(ctx *AndExprContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#betweenExpr.
+	VisitBetweenExpr(ctx *BetweenExprContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#where.
 	VisitWhere(ctx *WhereContext) interface{}
@@ -56,8 +65,14 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#distinct.
 	VisitDistinct(ctx *DistinctContext) interface{}
 
-	// Visit a parse tree produced by CsqlParser#evaluatedExpression.
-	VisitEvaluatedExpression(ctx *EvaluatedExpressionContext) interface{}
+	// Visit a parse tree produced by CsqlParser#evalTerm.
+	VisitEvalTerm(ctx *EvalTermContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#evalBinaryExpression.
+	VisitEvalBinaryExpression(ctx *EvalBinaryExpressionContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#evalParens.
+	VisitEvalParens(ctx *EvalParensContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#projection.
 	VisitProjection(ctx *ProjectionContext) interface{}

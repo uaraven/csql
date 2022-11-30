@@ -2,7 +2,9 @@ grammar Csql;
 
 query: selectStatement ';'? EOF;
 
-operator: '<' | '<=' | '>' | '>=' | '=' | '!=' | '<>' | '||';
+comparisonOperator: '<' | '<=' | '>' | '>=' | '=' | '!=' | '<>';
+
+binaryOperation: '+' | '-' | '*' | '/' | '%' | '||';
 
 list: '(' literalValue (',' literalValue)* ')';
 
@@ -10,24 +12,27 @@ term: compoundName | literalValue;
 
 expr:
 	term										# termItem
-	| term operator term						# condition
+	| expr comparisonOperator expr				# condition
+	| expr binaryOperation expr                 # evaluation
+	| expr K_IS K_NOT? K_NULL                   # isNullExpr
 	| expr K_AND expr							# andExpr
 	| expr K_OR expr							# orExpr
 	| K_NOT expr								# notExpr
 	| '(' expr ')'								# parensExpr
-	| term K_BETWEEN expr K_AND expr			# betweenExpr
-	| term K_NOT? K_LIKE stringValue			# likeExpr
-	| term K_NOT? K_MATCH stringValue           # matchExpr
-	| term K_NOT? K_IN list						# inExpr;
+	| expr K_BETWEEN expr K_AND expr			# betweenExpr
+	| expr K_NOT? K_LIKE stringValue			# likeExpr
+	| expr K_NOT? K_MATCH stringValue           # matchExpr
+	| expr K_NOT? K_IN list						# inExpr
+	;
 
 where: K_WHERE expr;
 
 distinct: K_DISTINCT;
 
 evaluatedExpression:
-    term
-    | term operator term
-    | '(' evaluatedExpression ')'
+    term                                        # evalTerm
+    | expr binaryOperation expr                 # evalBinaryExpression
+    | '(' evaluatedExpression ')'               # evalParens
     ;
 
 projection: distinct? projectionField (',' projectionField)*;
@@ -88,6 +93,7 @@ K_AS: A S;
 K_BETWEEN: B E T W E E N;
 K_FROM: F R O M;
 K_IN: I N;
+K_IS: I S;
 K_NOT: N O T;
 K_NULL: N U L L;
 K_OR: O R;

@@ -1,4 +1,4 @@
-module csql
+module github.com/uaraven/csql
 
 go 1.19
 

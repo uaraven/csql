@@ -1,8 +1,8 @@
 package core
 
 import (
-	"csql/funky"
 	. "github.com/onsi/gomega"
+	"github.com/uaraven/csql/funky"
 	"testing"
 )
 

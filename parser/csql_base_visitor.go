@@ -12,7 +12,11 @@ func (v *BaseCsqlVisitor) VisitQuery(ctx *QueryContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseCsqlVisitor) VisitOperator(ctx *OperatorContext) interface{} {
+func (v *BaseCsqlVisitor) VisitComparisonOperator(ctx *ComparisonOperatorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitBinaryOperation(ctx *BinaryOperationContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -21,6 +25,10 @@ func (v *BaseCsqlVisitor) VisitList(ctx *ListContext) interface{} {
 }
 
 func (v *BaseCsqlVisitor) VisitTerm(ctx *TermContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitEvaluation(ctx *EvaluationContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -33,6 +41,10 @@ func (v *BaseCsqlVisitor) VisitNotExpr(ctx *NotExprContext) interface{} {
 }
 
 func (v *BaseCsqlVisitor) VisitTermItem(ctx *TermItemContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitIsNullExpr(ctx *IsNullExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -56,11 +68,11 @@ func (v *BaseCsqlVisitor) VisitParensExpr(ctx *ParensExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseCsqlVisitor) VisitBetweenExpr(ctx *BetweenExprContext) interface{} {
+func (v *BaseCsqlVisitor) VisitAndExpr(ctx *AndExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseCsqlVisitor) VisitAndExpr(ctx *AndExprContext) interface{} {
+func (v *BaseCsqlVisitor) VisitBetweenExpr(ctx *BetweenExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -72,7 +84,15 @@ func (v *BaseCsqlVisitor) VisitDistinct(ctx *DistinctContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseCsqlVisitor) VisitEvaluatedExpression(ctx *EvaluatedExpressionContext) interface{} {
+func (v *BaseCsqlVisitor) VisitEvalTerm(ctx *EvalTermContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitEvalBinaryExpression(ctx *EvalBinaryExpressionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitEvalParens(ctx *EvalParensContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

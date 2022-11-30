@@ -1,9 +1,9 @@
 package core
 
 import (
-	"csql/funky"
 	"fmt"
 	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/uaraven/csql/funky"
 )
 
 const AllColumns = "*"
