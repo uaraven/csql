@@ -311,5 +311,61 @@ func TestSelectEvaluation(t *testing.T) {
 			},
 		},
 	}))
+}
 
+func TestSelectLiteralValue(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT 1,2.0, '3' FROM Table1")
+	v1 := "1"
+	v2 := "2.0"
+	v3 := "3"
+
+	g.Expect(s.Projection.ProjectionFields).To(BeEquivalentTo([]ProjectionField{
+		{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{NumericValue: &v1}}}},
+		{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{NumericValue: &v2}}}},
+		{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{StringValue: &v3}}}},
+	}))
+}
+
+func TestSelectParenExpr(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT (1 / 2) FROM Table1")
+	v1 := "1"
+	v2 := "2"
+
+	g.Expect(s.Projection.ProjectionFields).To(BeEquivalentTo([]ProjectionField{
+		{
+			EvaluatedField: &EvaluatedProjectionField{Expr: ParensExpression{
+				Child: BinaryExpression{
+					LHS:      Term{Value: &Literal{NumericValue: &v1}},
+					RHS:      Term{Value: &Literal{NumericValue: &v2}},
+					Operator: "/",
+				},
+			}},
+		},
+	}))
+}
+
+func TestSelectTableAlias(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT T.col as tcol FROM Table1 T")
+
+	tableAlias := Identifier("T")
+	g.Expect(s.From).To(BeEquivalentTo(DataSource{TableName: &SourceName{Name: "Table1", Alias: &tableAlias}}))
+
+	renamedCol := Identifier("tcol")
+	g.Expect(s.Projection.ProjectionFields).To(BeEquivalentTo([]ProjectionField{
+		{NamedField: &NamedProjectionField{TableName: &tableAlias, Name: Identifier("col"), Alias: &renamedCol}},
+	}))
+}
+
+func TestSelectNull(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT NULL FROM Table1 T")
+
+	g.Expect(s.Projection.ProjectionFields).To(BeEquivalentTo([]ProjectionField{
+		{
+			EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{IsNull: true}}},
+		},
+	}))
 }

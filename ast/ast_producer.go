@@ -83,14 +83,6 @@ func parseIdentifier(identifier string) Identifier {
 	return Identifier(identifier)
 }
 
-func joinParts(context *antlr.BaseParserRuleContext) string {
-	parts := make([]string, 0)
-	for _, part := range context.GetChildren() {
-		parts = append(parts, part.GetPayload().(*antlr.CommonToken).GetText())
-	}
-	return strings.Join(parts, " ")
-}
-
 // NewCsqlVisitor creates new instance of the visitor
 func NewCsqlVisitor() parser.CsqlVisitor {
 	baseVisitor := parser.BaseCsqlVisitor{}
@@ -263,18 +255,14 @@ func (c CsqlVisitorImpl) VisitWhere(ctx *parser.WhereContext) interface{} {
 	return ctx.Expr().Accept(c).(Expression)
 }
 
-// VisitDistinct visits a parse tree produced by CsqlParser#distinct.
-//func (c CsqlVisitorImpl) VisitDistinct(ctx *parser.DistinctContext) interface{} {
-//	return ctx != nil
-//}
-
 // VisitProjectionField visits a parse tree produced by CsqlParser#projectionField.
 func (c CsqlVisitorImpl) VisitProjectionField(ctx *parser.ProjectionFieldContext) interface{} {
 	var projectionField ProjectionField
 	if ctx.ProjectionFieldName() != nil {
 		field := ctx.ProjectionFieldName().Accept(c).(NamedProjectionField)
 		if ctx.Alias() != nil {
-			field.Alias = ctx.Alias().Accept(c).(*Identifier)
+			alias := ctx.Alias().Accept(c).(Identifier)
+			field.Alias = &alias
 		} else {
 			field.Alias = nil
 		}
