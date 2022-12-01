@@ -5,49 +5,35 @@ import (
 	"github.com/uaraven/csql/collection"
 )
 
-func NewLeftOuterJoinDatasource(left DataSource, right DataSource, joinOn Condition) (DataSource, error) {
+func NewLeftOuterJoinDatasource(left DataSource, right DataSource, joinOn Condition) DataSource {
 	mds := &memDataSource{
 		name:  fmt.Sprintf("(%s LEFT JOIN %s)", left.GetName(), right.GetName()),
 		index: -1,
 	}
 	mds.headers = NewHeadersFromOtherHeaders(mds, left.Header().ColumnsMetadata(), right.Header().ColumnsMetadata())
-	var err error
-	mds.data, err = leftOuterJoin(left, right, mds.headers, joinOn)
-	if err != nil {
-		return nil, err
-	}
-	return mds, nil
+	mds.data = leftOuterJoin(left, right, mds.headers, joinOn)
+	return mds
 }
 
-func NewRightOuterJoinDatasource(left DataSource, right DataSource, joinOn Condition) (DataSource, error) {
+func NewRightOuterJoinDatasource(left DataSource, right DataSource, joinOn Condition) DataSource {
 	mds := &memDataSource{
 		name:  fmt.Sprintf("(%s RIGHT JOIN %s)", left.GetName(), right.GetName()),
 		index: -1,
 	}
 	mds.headers = NewHeadersFromOtherHeaders(mds, left.Header().ColumnsMetadata(), right.Header().ColumnsMetadata())
-	var err error
-	mds.data, err = rightOuterJoin(left, right, mds.headers, joinOn)
-	if err != nil {
-		return nil, err
-	}
-	return mds, nil
+	mds.data = rightOuterJoin(left, right, mds.headers, joinOn)
+	return mds
 }
 
-func leftOuterJoin(left DataSource, right DataSource, header DataSourceHeader, joinOn Condition) ([]Row, error) {
+func leftOuterJoin(left DataSource, right DataSource, header DataSourceHeader, joinOn Condition) []Row {
 	result := make([]Row, 0)
 	counter := 0
 	for {
-		leftRow, err := left.NextRow()
-		if err != nil {
-			return nil, err
-		}
+		leftRow := left.NextRow()
 		if leftRow == nil {
-			return result, nil
+			return result
 		}
-		joined, err := selectRight(counter, header, leftRow, right, joinOn)
-		if err != nil {
-			return nil, err
-		}
+		joined := selectRight(counter, header, leftRow, right, joinOn)
 		if joined.Empty() {
 			joinedRow := joinRows(counter, header, leftRow, nullRow(right.Header()))
 			counter++
@@ -63,19 +49,13 @@ func leftOuterJoin(left DataSource, right DataSource, header DataSourceHeader, j
 
 }
 
-func selectRight(counter int, header DataSourceHeader, leftRow Row, right DataSource, joinOn Condition) (collection.LinkedList[Row], error) {
+func selectRight(counter int, header DataSourceHeader, leftRow Row, right DataSource, joinOn Condition) collection.LinkedList[Row] {
 	var rightSelected collection.LinkedList[Row] = collection.NewLinkedList[Row]()
-	err := right.Rewind()
-	if err != nil {
-		return nil, err
-	}
+	right.Rewind()
 	for {
-		rightRow, err := right.NextRow()
-		if err != nil {
-			return nil, err
-		}
+		rightRow := right.NextRow()
 		if rightRow == nil {
-			return rightSelected, nil
+			return rightSelected
 		}
 		joined := joinRows(counter, header, leftRow, rightRow)
 		if joined.Satisfies(joinOn) {
@@ -84,21 +64,15 @@ func selectRight(counter int, header DataSourceHeader, leftRow Row, right DataSo
 	}
 }
 
-func rightOuterJoin(left DataSource, right DataSource, header DataSourceHeader, joinOn Condition) ([]Row, error) {
+func rightOuterJoin(left DataSource, right DataSource, header DataSourceHeader, joinOn Condition) []Row {
 	result := make([]Row, 0)
 	counter := 0
 	for {
-		rightRow, err := right.NextRow()
-		if err != nil {
-			return nil, err
-		}
+		rightRow := right.NextRow()
 		if rightRow == nil {
-			return result, nil
+			return result
 		}
-		joined, err := selectLeft(counter, header, rightRow, left, joinOn)
-		if err != nil {
-			return nil, err
-		}
+		joined := selectLeft(counter, header, rightRow, left, joinOn)
 		if joined.Empty() {
 			joinedRow := joinRows(counter, header, nullRow(left.Header()), rightRow)
 			counter++
@@ -114,19 +88,13 @@ func rightOuterJoin(left DataSource, right DataSource, header DataSourceHeader, 
 
 }
 
-func selectLeft(counter int, header DataSourceHeader, rightRow Row, left DataSource, joinOn Condition) (collection.LinkedList[Row], error) {
+func selectLeft(counter int, header DataSourceHeader, rightRow Row, left DataSource, joinOn Condition) collection.LinkedList[Row] {
 	var leftSelected collection.LinkedList[Row] = collection.NewLinkedList[Row]()
-	err := left.Rewind()
-	if err != nil {
-		return nil, err
-	}
+	left.Rewind()
 	for {
-		leftRow, err := left.NextRow()
-		if err != nil {
-			return nil, err
-		}
+		leftRow := left.NextRow()
 		if leftRow == nil {
-			return leftSelected, nil
+			return leftSelected
 		}
 		joined := joinRows(counter, header, leftRow, rightRow)
 		if joined.Satisfies(joinOn) {

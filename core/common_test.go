@@ -6,43 +6,23 @@ import (
 )
 
 func loadTestDatasource() DataSource {
-	ds, err := NewMemDataSourceFromCsv("../test-data/employees.csv")
-	if err != nil {
-		panic(err)
-	}
-	return ds
+	return NewMemDataSourceFromCsv("../test-data/employees.csv")
 }
 
 func loadDefaultTestMemDatasource() DataSource {
-	ds, err := NewMemDataSourceFromCsv("../test-data/employees.csv")
-	if err != nil {
-		panic(err)
-	}
-	return ds
+	return NewMemDataSourceFromCsv("../test-data/employees.csv")
 }
 
 func loadTestMemDatasource(name string) DataSource {
-	ds, err := NewMemDataSourceFromCsv(fmt.Sprintf("../test-data/%s.csv", name))
-	if err != nil {
-		panic(err)
-	}
-	return ds
+	return NewMemDataSourceFromCsv(fmt.Sprintf("../test-data/%s.csv", name))
 }
 
 func loadDsWithAlias(name string, alias string) DataSource {
-	ds, err := NewMemDataSourceWithAlias(fmt.Sprintf("../test-data/%s.csv", name), alias)
-	if err != nil {
-		panic(err)
-	}
-	return ds
+	return NewMemDataSourceWithAlias(fmt.Sprintf("../test-data/%s.csv", name), alias)
 }
 
 func loadTestMemDatasourceWithAlias(alias string) DataSource {
-	ds, err := NewMemDataSourceWithAlias("../test-data/employees.csv", alias)
-	if err != nil {
-		panic(err)
-	}
-	return ds
+	return NewMemDataSourceWithAlias("../test-data/employees.csv", alias)
 }
 
 type mapContext struct {
@@ -54,13 +34,6 @@ type mapContext struct {
 func newMapContext() *mapContext {
 	return &mapContext{
 		id:     0,
-		values: make(map[string]string),
-	}
-}
-
-func newMapContextWithId(id int) *mapContext {
-	return &mapContext{
-		id:     id,
 		values: make(map[string]string),
 	}
 }

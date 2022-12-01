@@ -10,14 +10,12 @@ func TestCrossJoinDatasource_NextRow(t *testing.T) {
 	emp := loadDefaultTestMemDatasource()
 	dept := loadTestMemDatasource("dept")
 
-	cj, err := NewCrossJoin(emp, dept)
-	g.Expect(err).ToNot(HaveOccurred())
+	cj := NewCrossJoin(emp, dept)
 	g.Expect(cj).ToNot(BeNil())
 
 	g.Expect(cj.CurrentRow()).To(BeNil())
 
-	rows, err := ReadAllRows(cj)
-	g.Expect(err).ToNot(HaveOccurred())
+	rows := ReadAllRows(cj)
 	g.Expect(rows).To(HaveLen(8))
 
 	g.Expect(rows[0].Get("employees.dept_id").Value()).To(Equal(NewIntValue(1)))

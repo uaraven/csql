@@ -10,27 +10,22 @@ func TestRowImpl_GetRowId(t *testing.T) {
 
 	ds := loadTestDatasource()
 
-	row, err := ds.NextRow()
-	if err != nil {
-		t.Fatal(err)
-	}
+	row := ds.NextRow()
 
 	val := row.Get(RowId)
 
 	g.Expect(val.IsPresent()).To(BeTrue())
 	g.Expect(val.Value()).To(Equal(NewIntValue(0)))
 
-	row, err = ds.NextRow()
-	g.Expect(err).ShouldNot(HaveOccurred())
+	row = ds.NextRow()
 
 	val = row.Get(RowId)
 
 	g.Expect(val.IsPresent()).To(BeTrue())
 	g.Expect(val.Value()).To(Equal(NewIntValue(1)))
 
-	g.Expect(ds.Rewind()).ShouldNot(HaveOccurred())
-	row, err = ds.NextRow()
-	g.Expect(err).ShouldNot(HaveOccurred())
+	g.Expect(func() { ds.Rewind() }).ToNot(Panic())
+	row = ds.NextRow()
 
 	val = row.Get(RowId)
 
@@ -43,8 +38,7 @@ func TestRowImpl_Satisfies(t *testing.T) {
 
 	ds := loadTestDatasource()
 
-	row, err := ds.NextRow()
-	g.Expect(err).ShouldNot(HaveOccurred())
+	row := ds.NextRow()
 
 	condT := NewAnd(
 		NewEq(NewRowValue("first_name"), NewStringValue("John")),

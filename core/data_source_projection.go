@@ -36,19 +36,15 @@ func NewSimpleProjection(sourceNames []string, aliases []string) []ProjectionCol
 	return projection
 }
 
-func NewProjectionDataSource(src DataSource, projection []ProjectionColumn, distinct bool) (DataSource, error) {
+func NewProjectionDataSource(src DataSource, projection []ProjectionColumn, distinct bool) DataSource {
 	projection = expandProjection(projection, src.Header())
 	headers := newHeaderWithProjection(src, projection)
 
-	var err error
 	var rows []Row
 	if distinct {
-		rows, err = performProjectionDistinct(src, headers, projection)
+		rows = performProjectionDistinct(src, headers, projection)
 	} else {
-		rows, err = performProjection(src, headers, projection)
-	}
-	if err != nil {
-		return nil, err
+		rows = performProjection(src, headers, projection)
 	}
 
 	return NewMemDataSource(src.GetName(), headers.ColumnsMetadata(), rows)
@@ -126,32 +122,22 @@ func newHeaderWithProjection(src DataSource, projection []ProjectionColumn) Data
 	}
 }
 
-func performProjection(ds DataSource, header DataSourceHeader, projection []ProjectionColumn) ([]Row, error) {
+func performProjection(ds DataSource, header DataSourceHeader, projection []ProjectionColumn) []Row {
 	result := make([]Row, 0)
-	srcRow, err := ds.NextRow()
-	if err != nil {
-		return nil, err
-	}
+	srcRow := ds.NextRow()
 
 	for srcRow != nil {
 		newRow := projectRow(projection, header, srcRow)
 		result = append(result, newRow)
-		srcRow, err = ds.NextRow()
-		if err != nil {
-			return nil, err
-		}
-
+		srcRow = ds.NextRow()
 	}
-	return result, nil
+	return result
 }
 
-func performProjectionDistinct(ds DataSource, header DataSourceHeader, projection []ProjectionColumn) ([]Row, error) {
+func performProjectionDistinct(ds DataSource, header DataSourceHeader, projection []ProjectionColumn) []Row {
 	keySet := mapset.NewThreadUnsafeSet[string]()
 	result := make([]Row, 0)
-	srcRow, err := ds.NextRow()
-	if err != nil {
-		return nil, err
-	}
+	srcRow := ds.NextRow()
 
 	for srcRow != nil {
 		newRow := projectRow(projection, header, srcRow)
@@ -159,13 +145,9 @@ func performProjectionDistinct(ds DataSource, header DataSourceHeader, projectio
 			result = append(result, newRow)
 			keySet.Add(newRow.Key())
 		}
-		srcRow, err = ds.NextRow()
-		if err != nil {
-			return nil, err
-		}
-
+		srcRow = ds.NextRow()
 	}
-	return result, nil
+	return result
 }
 
 func projectRow(projection []ProjectionColumn, header DataSourceHeader, row Row) Row {

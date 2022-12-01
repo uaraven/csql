@@ -11,11 +11,9 @@ func TestProjectionDataSource_NextRow(t *testing.T) {
 
 	ds := loadDefaultTestMemDatasource()
 
-	pds, err := NewProjectionDataSource(ds, NewSimpleProjection([]string{"first_name", "last_name"}, []string{"", "ln"}), false)
-	g.Expect(err).ToNot(HaveOccurred())
+	pds := NewProjectionDataSource(ds, NewSimpleProjection([]string{"first_name", "last_name"}, []string{"", "ln"}), false)
 
-	rows, err := ReadAllRows(pds)
-	g.Expect(err).ToNot(HaveOccurred())
+	rows := ReadAllRows(pds)
 
 	g.Expect(rows).To(HaveLen(4))
 	g.Expect(rows[0].Values()).To(HaveLen(2))
@@ -38,11 +36,9 @@ func TestProjectionDataSource_NextRowDistinct(t *testing.T) {
 
 	ds := loadDefaultTestMemDatasource()
 
-	pds, err := NewProjectionDataSource(ds, NewSimpleProjection([]string{"first_name"}, []string{""}), true)
-	g.Expect(err).ToNot(HaveOccurred())
+	pds := NewProjectionDataSource(ds, NewSimpleProjection([]string{"first_name"}, []string{""}), true)
 
-	rows, err := ReadAllRows(pds)
-	g.Expect(err).ToNot(HaveOccurred())
+	rows := ReadAllRows(pds)
 
 	g.Expect(rows).To(HaveLen(3))
 	firstNames := funky.Map(rows, func(r Row) string {
@@ -60,11 +56,9 @@ func TestProjectionDataSource_WithExpressions(t *testing.T) {
 		NewColumn("first_name"),
 		NewExpressionColumn(NewExpression(addition, NewRowValue("id"), NewIntValue(10)), "sum"),
 	}
-	pds, err := NewProjectionDataSource(ds, projection, false)
-	g.Expect(err).ToNot(HaveOccurred())
+	pds := NewProjectionDataSource(ds, projection, false)
 
-	rows, err := ReadAllRows(pds)
-	g.Expect(err).ToNot(HaveOccurred())
+	rows := ReadAllRows(pds)
 
 	g.Expect(rows).To(HaveLen(4))
 	g.Expect(rows[0].Values()).To(HaveLen(2))
@@ -89,11 +83,9 @@ func TestProjectionDataSource_WithUnnamedExpressions(t *testing.T) {
 		NewColumn("first_name"),
 		NewExpressionColumn(NewExpression(addition, NewRowValue("id"), NewIntValue(10)), ""),
 	}
-	pds, err := NewProjectionDataSource(ds, projection, false)
-	g.Expect(err).ToNot(HaveOccurred())
+	pds := NewProjectionDataSource(ds, projection, false)
 
-	rows, err := ReadAllRows(pds)
-	g.Expect(err).ToNot(HaveOccurred())
+	rows := ReadAllRows(pds)
 
 	g.Expect(rows).To(HaveLen(4))
 	g.Expect(rows[0].Values()).To(HaveLen(2))
@@ -118,11 +110,9 @@ func TestProjectionDataSource_WithStar(t *testing.T) {
 		NewColumn("*"),
 		NewExpressionColumn(NewExpression(addition, NewRowValue("id"), NewIntValue(10)), ""),
 	}
-	pds, err := NewProjectionDataSource(ds, projection, false)
-	g.Expect(err).ToNot(HaveOccurred())
+	pds := NewProjectionDataSource(ds, projection, false)
 
-	rows, err := ReadAllRows(pds)
-	g.Expect(err).ToNot(HaveOccurred())
+	rows := ReadAllRows(pds)
 
 	g.Expect(rows).To(HaveLen(4))
 	g.Expect(rows[0].Values()).To(HaveLen(6))
@@ -145,19 +135,16 @@ func TestProjectionDataSource_WithTableStar(t *testing.T) {
 	g := NewGomegaWithT(t)
 	emps := loadDsWithAlias("employees", "e")
 	depts := loadDsWithAlias("dept", "d")
-	jds, err := NewInnerJoin(emps, depts, NewEq(NewRowValue("e.dept_id"), NewRowValue("d.id")))
-	g.Expect(err).ToNot(HaveOccurred())
+	jds := NewInnerJoin(emps, depts, NewEq(NewRowValue("e.dept_id"), NewRowValue("d.id")))
 
 	projection := []ProjectionColumn{
 		NewColumn("e.first_name"),
 		NewColumn("e.last_name"),
 		NewColumn("d.*"),
 	}
-	pds, err := NewProjectionDataSource(jds, projection, false)
-	g.Expect(err).ToNot(HaveOccurred())
+	pds := NewProjectionDataSource(jds, projection, false)
 
-	rows, err := ReadAllRows(pds)
-	g.Expect(err).ToNot(HaveOccurred())
+	rows := ReadAllRows(pds)
 
 	g.Expect(rows).To(HaveLen(4))
 	g.Expect(rows[0].Values()).To(HaveLen(4))

@@ -2,11 +2,8 @@ package core
 
 import "github.com/uaraven/csql/funky"
 
-func NewFilteredDataSource(source DataSource, condition Condition) (DataSource, error) {
-	rows, err := ReadAllRows(source)
-	if err != nil {
-		return nil, err
-	}
+func NewFilteredDataSource(source DataSource, condition Condition) DataSource {
+	rows := ReadAllRows(source)
 	filteredRows := funky.Filter(rows, func(r Row) bool {
 		return r.Satisfies(condition)
 	})

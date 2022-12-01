@@ -10,14 +10,12 @@ func TestInnerJoinDatasource_NextRow(t *testing.T) {
 	emp := loadDefaultTestMemDatasource()
 	dept := loadTestMemDatasource("dept")
 
-	cj, err := NewInnerJoin(emp, dept, NewEq(NewRowValue("dept_id"), NewRowValue("dept.id")))
-	g.Expect(err).ToNot(HaveOccurred())
+	cj := NewInnerJoin(emp, dept, NewEq(NewRowValue("dept_id"), NewRowValue("dept.id")))
 	g.Expect(cj).ToNot(BeNil())
 
 	g.Expect(cj.CurrentRow()).To(BeNil())
 
-	rows, err := ReadAllRows(cj)
-	g.Expect(err).ToNot(HaveOccurred())
+	rows := ReadAllRows(cj)
 	g.Expect(rows).To(HaveLen(4))
 
 	g.Expect(rows[0].Get("employees.dept_id").Value()).To(Equal(NewIntValue(1)))
@@ -43,31 +41,25 @@ func TestInnerJoinDataSource_CurrentRow(t *testing.T) {
 			NewEq(NewRowValue("first_name"), NewStringValue("James")),
 			NewEq(NewRowValue("last_name"), NewStringValue("May"))))
 
-	fds, err := NewInnerJoin(emp, dept, cond)
-	g.Expect(err).ToNot(HaveOccurred())
+	fds := NewInnerJoin(emp, dept, cond)
 
-	nrow, err := fds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	nrow := fds.NextRow()
 
 	g.Expect(nrow.Id()).To(Equal(0))
 	g.Expect(nrow.Get("first_name").Value()).To(Equal(NewStringValue("James")))
 	g.Expect(nrow.Get("last_name").Value()).To(Equal(NewStringValue("May")))
 
-	crow, err := fds.CurrentRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	crow := fds.CurrentRow()
 	g.Expect(crow).To(Equal(nrow))
 
-	nrow, err = fds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	nrow = fds.NextRow()
 	g.Expect(nrow).To(BeNil())
 
-	crow, err = fds.CurrentRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	crow = fds.CurrentRow()
 	g.Expect(crow).ToNot(BeNil())
 
-	g.Expect(fds.Rewind()).To(Succeed())
-	crow, err = fds.CurrentRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	g.Expect(func() { fds.Rewind() }).ToNot(Panic())
+	crow = fds.CurrentRow()
 	g.Expect(crow).To(BeNil())
 
 }
@@ -80,8 +72,7 @@ func TestInnerJoinDatasource_Header(t *testing.T) {
 
 	cond := NewEq(NewRowValue("employees.dept_id"), NewRowValue("dept.id"))
 
-	fds, err := NewInnerJoin(emp, dept, cond)
-	g.Expect(err).ToNot(HaveOccurred())
+	fds := NewInnerJoin(emp, dept, cond)
 	header := fds.Header()
 	g.Expect(header.ColumnCount()).To(Equal(7))
 	g.Expect(header.IndexByName("first_name")).To(Equal(2))
@@ -95,8 +86,7 @@ func TestInnerJoinDatasource_GetName(t *testing.T) {
 	emp := loadDefaultTestMemDatasource()
 	dept := loadTestMemDatasource("dept")
 
-	fds, err := NewCrossJoin(emp, dept)
-	g.Expect(err).ToNot(HaveOccurred())
+	fds := NewCrossJoin(emp, dept)
 	g.Expect(fds.GetName()).To(Equal("(employees JOIN dept)"))
 
 }
@@ -106,29 +96,24 @@ func TestInnerJoinDatasource_Rewind(t *testing.T) {
 	emp := loadDefaultTestMemDatasource()
 	dept := loadTestMemDatasource("dept")
 
-	cj, err := NewInnerJoin(emp, dept, NewEq(NewRowValue("dept_id"), NewRowValue("dept.id")))
-	g.Expect(err).ToNot(HaveOccurred())
+	cj := NewInnerJoin(emp, dept, NewEq(NewRowValue("dept_id"), NewRowValue("dept.id")))
 	g.Expect(cj).ToNot(BeNil())
 
 	g.Expect(cj.CurrentRow()).To(BeNil())
 
-	row, err := cj.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	row := cj.NextRow()
 
 	g.Expect(row.Id()).To(Equal(0))
 	g.Expect(row.Get("first_name").Value()).To(Equal(NewStringValue("John")))
 
-	row, err = cj.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	row = cj.NextRow()
 
 	g.Expect(row.Id()).To(Equal(1))
 	g.Expect(row.Get("first_name").Value()).To(Equal(NewStringValue("James")))
 
-	err = cj.Rewind()
-	g.Expect(err).ToNot(HaveOccurred())
+	cj.Rewind()
 
-	row, err = cj.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	row = cj.NextRow()
 	g.Expect(row.Id()).To(Equal(0))
 	g.Expect(row.Get("first_name").Value()).To(Equal(NewStringValue("John")))
 
