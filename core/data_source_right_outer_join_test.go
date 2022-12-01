@@ -8,18 +8,15 @@ import (
 func TestRightOuterJoinDatasource_NextRow(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	left, err := NewMemDataSourceFromCsv("../test-data/authors.csv")
-	g.Expect(err).ToNot(HaveOccurred())
-	right, err := NewMemDataSourceFromCsv("../test-data/books.csv")
-	g.Expect(err).ToNot(HaveOccurred())
+	left := NewMemDataSourceFromCsv("../test-data/authors.csv")
+	right := NewMemDataSourceFromCsv("../test-data/books.csv")
 
 	joinCondition := NewEq(NewRowValue("authors.id"),
 		NewRowValue("books.author_id"))
-	jds, err := NewRightOuterJoinDatasource(left, right, joinCondition)
+	jds := NewRightOuterJoinDatasource(left, right, joinCondition)
 
 	g.Expect(jds.Header().ColumnCount()).To(Equal(5))
-	rows, err := ReadAllRows(jds)
-	g.Expect(err).ToNot(HaveOccurred())
+	rows := ReadAllRows(jds)
 
 	g.Expect(rows).To(HaveLen(5))
 	g.Expect(rows[0].Values()).To(Equal([]Value{
@@ -42,57 +39,47 @@ func TestRightOuterJoinDatasource_NextRow(t *testing.T) {
 func TestRightOuterJoinDatasource_CurrentRow(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	left, err := NewMemDataSourceFromCsv("../test-data/authors.csv")
-	g.Expect(err).ToNot(HaveOccurred())
-	right, err := NewMemDataSourceFromCsv("../test-data/books.csv")
-	g.Expect(err).ToNot(HaveOccurred())
+	left := NewMemDataSourceFromCsv("../test-data/authors.csv")
+	right := NewMemDataSourceFromCsv("../test-data/books.csv")
 
 	joinCondition := NewEq(NewRowValue("authors.id"),
 		NewRowValue("books.author_id"))
-	jds, err := NewLeftOuterJoinDatasource(left, right, joinCondition)
+	jds := NewLeftOuterJoinDatasource(left, right, joinCondition)
 
 	g.Expect(jds.CurrentRow()).To(BeNil())
 
-	row, err := jds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	row := jds.NextRow()
 	g.Expect(jds.CurrentRow()).To(Equal(row))
 }
 
 func TestRightOuterJoinDatasource_Rewind(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	left, err := NewMemDataSourceFromCsv("../test-data/authors.csv")
-	g.Expect(err).ToNot(HaveOccurred())
-	right, err := NewMemDataSourceFromCsv("../test-data/books.csv")
-	g.Expect(err).ToNot(HaveOccurred())
+	left := NewMemDataSourceFromCsv("../test-data/authors.csv")
+	right := NewMemDataSourceFromCsv("../test-data/books.csv")
 
 	joinCondition := NewEq(NewRowValue("authors.id"),
 		NewRowValue("books.author_id"))
-	jds, err := NewLeftOuterJoinDatasource(left, right, joinCondition)
+	jds := NewLeftOuterJoinDatasource(left, right, joinCondition)
 
-	row, err := jds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	row := jds.NextRow()
 	g.Expect(row.Values()).To(Equal([]Value{NewIntValue(1), NewStringValue("J.R.R. Tolkien"), NewIntValue(1), NewIntValue(1), NewStringValue("Lord Of The Rings")}))
 
-	g.Expect(jds.Rewind()).ToNot(HaveOccurred())
+	g.Expect(func() { jds.Rewind() }).ToNot(Panic())
 
-	row, err = jds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	row = jds.NextRow()
 	g.Expect(row.Values()).To(Equal([]Value{NewIntValue(1), NewStringValue("J.R.R. Tolkien"), NewIntValue(1), NewIntValue(1), NewStringValue("Lord Of The Rings")}))
 }
 
 func TestRightOuterJoinDatasource_GetName(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	left, err := NewMemDataSourceFromCsv("../test-data/authors.csv")
-	g.Expect(err).ToNot(HaveOccurred())
-	right, err := NewMemDataSourceFromCsv("../test-data/books.csv")
-	g.Expect(err).ToNot(HaveOccurred())
+	left := NewMemDataSourceFromCsv("../test-data/authors.csv")
+	right := NewMemDataSourceFromCsv("../test-data/books.csv")
 
 	joinCondition := NewEq(NewRowValue("authors.id"),
 		NewRowValue("books.author_id"))
-	jds, err := NewRightOuterJoinDatasource(left, right, joinCondition)
-	g.Expect(err).ToNot(HaveOccurred())
+	jds := NewRightOuterJoinDatasource(left, right, joinCondition)
 
 	g.Expect(jds.GetName()).To(Equal("(authors RIGHT JOIN books)"))
 }

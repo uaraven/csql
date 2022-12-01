@@ -18,11 +18,11 @@ type memDataSource struct {
 	headers DataSourceHeader
 }
 
-func NewMemDataSourceFromCsv(csvFile string) (DataSource, error) {
+func NewMemDataSourceFromCsv(csvFile string) DataSource {
 	return NewMemDataSourceWithAlias(csvFile, "")
 }
 
-func NewMemDataSource(name string, headers []ColumnMetadata, rows []Row) (DataSource, error) {
+func NewMemDataSource(name string, headers []ColumnMetadata, rows []Row) DataSource {
 	ds := &memDataSource{
 		lock:  sync.Mutex{},
 		name:  name,
@@ -35,10 +35,10 @@ func NewMemDataSource(name string, headers []ColumnMetadata, rows []Row) (DataSo
 		columns: headers,
 	}
 
-	return ds, nil
+	return ds
 }
 
-func NewMemDataSourceWithAlias(csvFile string, alias string) (DataSource, error) {
+func NewMemDataSourceWithAlias(csvFile string, alias string) DataSource {
 	_, nameExt := filepath.Split(csvFile)
 	var justName string
 	if alias != "" {
@@ -48,14 +48,14 @@ func NewMemDataSourceWithAlias(csvFile string, alias string) (DataSource, error)
 	}
 	file, err := os.Open(csvFile)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	defer func() { _ = file.Close() }()
 	csvReader := csv.NewReader(bufio.NewReader(file))
 	csvReader.TrimLeadingSpace = true
 	headers, err := csvReader.Read()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	cds := &memDataSource{
 		name:  justName,
@@ -64,9 +64,9 @@ func NewMemDataSourceWithAlias(csvFile string, alias string) (DataSource, error)
 	cds.headers = NewHeadersFromSlice(cds, headers)
 	err = cds.loadCsv(csvReader)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	return cds, nil
+	return cds
 }
 
 func (cds *memDataSource) loadCsv(csvReader *csv.Reader) error {
@@ -94,30 +94,29 @@ func (cds *memDataSource) GetName() string {
 	return cds.name
 }
 
-func (cds *memDataSource) NextRow() (Row, error) {
+func (cds *memDataSource) NextRow() Row {
 	cds.lock.Lock()
 	defer cds.lock.Unlock()
 	if cds.index+1 >= len(cds.data) {
-		return nil, nil
+		return nil
 	}
 	cds.index++
-	return cds.data[cds.index], nil
+	return cds.data[cds.index]
 }
 
-func (cds *memDataSource) CurrentRow() (Row, error) {
+func (cds *memDataSource) CurrentRow() Row {
 	cds.lock.Lock()
 	defer cds.lock.Unlock()
 	if cds.index < 0 {
-		return nil, nil
+		return nil
 	}
-	return cds.data[cds.index], nil
+	return cds.data[cds.index]
 }
 
-func (cds *memDataSource) Rewind() error {
+func (cds *memDataSource) Rewind() {
 	cds.lock.Lock()
 	defer cds.lock.Unlock()
 	cds.index = -1
-	return nil
 }
 
 func (cds *memDataSource) GetRows() []Row {

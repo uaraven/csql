@@ -56,14 +56,14 @@ type DataSource interface {
 	// NextRow returns the next row of values.
 	//
 	// If returned row is nil and error is also nil, then this DataSource does not contain any more rows
-	NextRow() (Row, error)
+	NextRow() Row
 
 	// CurrentRow returns the row of values that internal DataSource pointer is currently pointed to
 	//
 	// If nil is returned that means that the pointer is positioned before the first row and NextRow() should be called
-	CurrentRow() (Row, error)
+	CurrentRow() Row
 	// Rewind the dataset to ahead of the first row
-	Rewind() error
+	Rewind()
 }
 
 type SliceDataSource interface {

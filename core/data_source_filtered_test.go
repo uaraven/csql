@@ -12,8 +12,7 @@ func TestFilteredDataSource_GetName(t *testing.T) {
 
 	cond := NewEq(NewRowValue("dept_id"), NewIntValue(2))
 
-	fds, err := NewFilteredDataSource(ds, cond)
-	g.Expect(err).ToNot(HaveOccurred())
+	fds := NewFilteredDataSource(ds, cond)
 
 	g.Expect(fds.GetName()).To(Equal(ds.GetName()))
 }
@@ -25,8 +24,7 @@ func TestFilteredDataSource_Header(t *testing.T) {
 
 	cond := NewEq(NewRowValue("dept_id"), NewIntValue(2))
 
-	fds, err := NewFilteredDataSource(ds, cond)
-	g.Expect(err).ToNot(HaveOccurred())
+	fds := NewFilteredDataSource(ds, cond)
 
 	g.Expect(fds.Header().ColumnsMetadata()).To(Equal(ds.Header().ColumnsMetadata()))
 }
@@ -38,37 +36,30 @@ func TestFilteredDataSource_CurrentRow(t *testing.T) {
 
 	cond := NewEq(NewRowValue("first_name"), NewStringValue("James"))
 
-	fds, err := NewFilteredDataSource(ds, cond)
-	g.Expect(err).ToNot(HaveOccurred())
+	fds := NewFilteredDataSource(ds, cond)
 
-	nrow, err := fds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	nrow := fds.NextRow()
 
 	g.Expect(nrow.Id()).To(Equal(0))
 	g.Expect(nrow.Get("first_name").Value()).To(Equal(NewStringValue("James")))
 	g.Expect(nrow.Get("last_name").Value()).To(Equal(NewStringValue("Snow")))
 
-	crow, err := fds.CurrentRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	crow := fds.CurrentRow()
 	g.Expect(crow).To(Equal(nrow))
 
-	nrow, err = fds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	nrow = fds.NextRow()
 
 	g.Expect(nrow.Id()).To(Equal(1))
 	g.Expect(nrow.Get("first_name").Value()).To(Equal(NewStringValue("James")))
 	g.Expect(nrow.Get("last_name").Value()).To(Equal(NewStringValue("May")))
 
-	crow, err = fds.CurrentRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	crow = fds.CurrentRow()
 	g.Expect(crow).To(Equal(nrow))
 
-	nrow, err = fds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	nrow = fds.NextRow()
 	g.Expect(nrow).To(BeNil())
 
-	crow, err = fds.CurrentRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	crow = fds.CurrentRow()
 	g.Expect(crow).ToNot(BeNil())
 
 }
@@ -80,18 +71,15 @@ func TestFilteredDataSource_NextRow(t *testing.T) {
 
 	cond := NewEq(NewRowValue("dept_id"), NewIntValue(2))
 
-	fds, err := NewFilteredDataSource(ds, cond)
-	g.Expect(err).ToNot(HaveOccurred())
+	fds := NewFilteredDataSource(ds, cond)
 
-	row, err := fds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	row := fds.NextRow()
 
 	g.Expect(row.Id()).To(Equal(0))
 	g.Expect(row.Get("first_name").Value()).To(Equal(NewStringValue("Jeremy")))
 	g.Expect(row.Get("last_name").Value()).To(Equal(NewStringValue("Clarkson")))
 
-	row, err = fds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	row = fds.NextRow()
 
 	g.Expect(row.Id()).To(Equal(1))
 	g.Expect(row.Get("first_name").Value()).To(Equal(NewStringValue("James")))
@@ -105,18 +93,14 @@ func TestFilteredDataSource_Rewind(t *testing.T) {
 
 	cond := NewEq(NewRowValue("dept_id"), NewIntValue(2))
 
-	fds, err := NewFilteredDataSource(ds, cond)
-	g.Expect(err).ToNot(HaveOccurred())
+	fds := NewFilteredDataSource(ds, cond)
 
-	row, err := fds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
-	row, err = fds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	row := fds.NextRow()
+	row = fds.NextRow()
 
-	g.Expect(fds.Rewind()).To(Succeed())
+	g.Expect(func() { fds.Rewind() }).ToNot(Panic())
 
-	row, err = fds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	row = fds.NextRow()
 
 	g.Expect(row.Id()).To(Equal(0))
 	g.Expect(row.Get("first_name").Value()).To(Equal(NewStringValue("Jeremy")))

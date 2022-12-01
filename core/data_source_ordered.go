@@ -27,16 +27,12 @@ func NewOrderByIndex(index int, desc bool) OrderByField {
 	}
 }
 
-func NewOrderedDatasource(ds DataSource, orderBy []OrderByField, limit int) (DataSource, error) {
+func NewOrderedDatasource(ds DataSource, orderBy []OrderByField, limit int) DataSource {
 	var rows []Row
-	var err error
 	if mds, ok := ds.(SliceDataSource); ok {
 		rows = mds.GetRows()
 	} else {
-		rows, err = ReadAllRows(ds)
-		if err != nil {
-			return nil, err
-		}
+		rows = ReadAllRows(ds)
 	}
 
 	if len(orderBy) > 0 {

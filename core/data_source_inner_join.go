@@ -5,46 +5,33 @@ import (
 	"sync"
 )
 
-func NewCrossJoin(left DataSource, right DataSource) (DataSource, error) {
+func NewCrossJoin(left DataSource, right DataSource) DataSource {
 	return NewInnerJoin(left, right, nil)
 }
 
-func NewInnerJoin(left DataSource, right DataSource, joinCondition Condition) (DataSource, error) {
+func NewInnerJoin(left DataSource, right DataSource, joinCondition Condition) DataSource {
 	mds := &memDataSource{
 		lock:  sync.Mutex{},
 		name:  fmt.Sprintf("(%s JOIN %s)", left.GetName(), right.GetName()),
 		index: -1,
 	}
 	mds.headers = NewHeadersFromOtherHeaders(mds, left.Header().ColumnsMetadata(), right.Header().ColumnsMetadata())
-	var err error
-	mds.data, err = innerJoin(left, right, mds.headers, joinCondition)
-	if err != nil {
-		return nil, err
-	}
-	return mds, nil
+	mds.data = innerJoin(left, right, mds.headers, joinCondition)
+	return mds
 }
 
-func innerJoin(left DataSource, right DataSource, header DataSourceHeader, joinCondition Condition) ([]Row, error) {
+func innerJoin(left DataSource, right DataSource, header DataSourceHeader, joinCondition Condition) []Row {
 	rows := make([]Row, 0)
 	counter := 0
 	for {
-		leftRow, err := left.NextRow()
-		if err != nil {
-			return nil, err
-		}
+		leftRow := left.NextRow()
 		if leftRow == nil {
-			return rows, nil
+			return rows
 		}
 		for {
-			rightRow, err := right.NextRow()
-			if err != nil {
-				return nil, err
-			}
+			rightRow := right.NextRow()
 			if rightRow == nil {
-				err := right.Rewind()
-				if err != nil {
-					return nil, err
-				}
+				right.Rewind()
 				break
 			}
 			newRow := joinRows(counter, header, leftRow, rightRow)

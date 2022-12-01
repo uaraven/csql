@@ -39,14 +39,6 @@ func newRowWithId(id int, headers DataSourceHeader, values []Value) Row {
 	}
 }
 
-func copyRowWithId(id int, row Row) Row {
-	return &rowImpl{
-		id:     id,
-		header: row.Header(),
-		values: row.Values(),
-	}
-}
-
 func joinRows(id int, header DataSourceHeader, row1 Row, row2 Row) Row {
 	rowData := make([]Value, len(row1.Values()))
 	copy(rowData, row1.Values())
@@ -130,18 +122,12 @@ func decodeToValue(value string) Value {
 	return NewIntValue(i64)
 }
 
-func ReadAllRows(ds DataSource) ([]Row, error) {
+func ReadAllRows(ds DataSource) []Row {
 	result := make([]Row, 0)
-	row, err := ds.NextRow()
-	if err != nil {
-		return nil, err
-	}
+	row := ds.NextRow()
 	for row != nil {
 		result = append(result, row)
-		row, err = ds.NextRow()
-		if err != nil {
-			return nil, err
-		}
+		row = ds.NextRow()
 	}
-	return result, nil
+	return result
 }

@@ -10,8 +10,7 @@ func TestRowValue_Evaluate(t *testing.T) {
 
 	ds := loadDefaultTestMemDatasource()
 
-	row, err := ds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	row := ds.NextRow()
 
 	firstName := NewRowValue("first_name")
 	g.Expect(firstName.Evaluate(row).Type()).To(Equal(TypeString))
@@ -35,8 +34,7 @@ func TestRowImpl_Get_QualifiedAccess(t *testing.T) {
 
 	ds := loadDefaultTestMemDatasource()
 
-	row, err := ds.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	row := ds.NextRow()
 
 	v := row.Get("first_name")
 	g.Expect(v.IsPresent()).To(BeTrue())
@@ -58,8 +56,7 @@ func TestRowImpl_Get_QualifiedAccessAlias(t *testing.T) {
 
 	dsa := loadTestMemDatasourceWithAlias("emp")
 
-	row, err := dsa.NextRow()
-	g.Expect(err).ToNot(HaveOccurred())
+	row := dsa.NextRow()
 
 	v := row.Get("first_name")
 	g.Expect(v.IsPresent()).To(BeTrue())
