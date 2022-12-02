@@ -260,18 +260,16 @@ func (c CsqlVisitorImpl) VisitProjectionField(ctx *parser.ProjectionFieldContext
 	var projectionField ProjectionField
 	if ctx.ProjectionFieldName() != nil {
 		field := ctx.ProjectionFieldName().Accept(c).(NamedProjectionField)
-		if ctx.Alias() != nil {
-			alias := ctx.Alias().Accept(c).(Identifier)
-			field.Alias = &alias
-		} else {
-			field.Alias = nil
-		}
 		projectionField.NamedField = &field
 	} else {
 		expr := ctx.EvaluatedExpression().Accept(c).(Expression)
 		projectionField.EvaluatedField = &EvaluatedProjectionField{
 			Expr: expr,
 		}
+	}
+	if ctx.Alias() != nil {
+		alias := ctx.Alias().Accept(c).(Identifier)
+		projectionField.Alias = &alias
 	}
 	return projectionField
 }
@@ -307,9 +305,7 @@ func (c CsqlVisitorImpl) VisitEvalBinaryExpression(ctx *parser.EvalBinaryExpress
 }
 
 func (c CsqlVisitorImpl) VisitEvalParens(ctx *parser.EvalParensContext) interface{} {
-	return ParensExpression{
-		Child: ctx.EvaluatedExpression().Accept(c).(Expression),
-	}
+	return ctx.EvaluatedExpression().Accept(c).(Expression)
 }
 
 func (c CsqlVisitorImpl) VisitMatchExpr(ctx *parser.MatchExprContext) interface{} {

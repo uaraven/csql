@@ -56,7 +56,6 @@ func TestSimpleQueryWithQualifiedProjection(t *testing.T) {
 	g.Expect(s.Projection.ProjectionFields[0].NamedField).To(BeEquivalentTo(&NamedProjectionField{
 		TableName: &tName,
 		Name:      Identifier("col"),
-		Alias:     nil,
 	}))
 
 	g.Expect(s.From.TableName).ToNot(BeNil())
@@ -335,13 +334,12 @@ func TestSelectParenExpr(t *testing.T) {
 
 	g.Expect(s.Projection.ProjectionFields).To(BeEquivalentTo([]ProjectionField{
 		{
-			EvaluatedField: &EvaluatedProjectionField{Expr: ParensExpression{
-				Child: BinaryExpression{
-					LHS:      Term{Value: &Literal{NumericValue: &v1}},
-					RHS:      Term{Value: &Literal{NumericValue: &v2}},
-					Operator: "/",
-				},
-			}},
+			EvaluatedField: &EvaluatedProjectionField{Expr: BinaryExpression{
+				LHS:      Term{Value: &Literal{NumericValue: &v1}},
+				RHS:      Term{Value: &Literal{NumericValue: &v2}},
+				Operator: "/",
+			},
+			},
 		},
 	}))
 }
@@ -355,7 +353,7 @@ func TestSelectTableAlias(t *testing.T) {
 
 	renamedCol := Identifier("tcol")
 	g.Expect(s.Projection.ProjectionFields).To(BeEquivalentTo([]ProjectionField{
-		{NamedField: &NamedProjectionField{TableName: &tableAlias, Name: Identifier("col"), Alias: &renamedCol}},
+		{NamedField: &NamedProjectionField{TableName: &tableAlias, Name: Identifier("col")}, Alias: &renamedCol},
 	}))
 }
 
