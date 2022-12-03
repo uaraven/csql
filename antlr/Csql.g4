@@ -43,18 +43,18 @@ projectionFieldName: (qualifier '.')? fieldName;
 
 fieldName: IDENTIFIER | '*';
 
-innerJoin: K_INNER;
-leftJoin: K_LEFT K_OUTER?;
-rightJoin: K_RIGHT K_OUTER?;
+innerJoin: K_INNER? K_JOIN;
+leftJoin: K_LEFT K_OUTER? K_JOIN;
+rightJoin: K_RIGHT K_OUTER? K_JOIN;
 //fullJoin: K_FULL K_OUTER?;
 crossJoin: K_CROSS K_JOIN;
 
-conditionalJoinType: (
-		innerJoin
+conditionalJoinType
+        : innerJoin
 		| leftJoin
-		| rightJoin
+		| rightJoin;
 //		| fullJoin
-	)? K_JOIN;
+
 
 conditionalJoinTarget: dataSource K_ON expr;
 

@@ -1,4 +1,4 @@
-package ast
+package sql
 
 import (
 	"fmt"
@@ -68,7 +68,6 @@ func (sp SelectProjection) String() string {
 type NamedProjectionField struct {
 	TableName *Identifier
 	Name      Identifier
-	Alias     *Identifier
 }
 
 func (npf NamedProjectionField) String() string {
@@ -77,9 +76,6 @@ func (npf NamedProjectionField) String() string {
 		sb.WriteString(fmt.Sprintf("%v.", npf.TableName))
 	}
 	sb.WriteString(string(npf.Name))
-	if npf.Alias != nil {
-		sb.WriteString(fmt.Sprintf(" AS %v", npf.Alias))
-	}
 	return sb.String()
 }
 
@@ -94,14 +90,21 @@ func (epf EvaluatedProjectionField) String() string {
 type ProjectionField struct {
 	NamedField     *NamedProjectionField
 	EvaluatedField *EvaluatedProjectionField
+	Alias          *Identifier
 }
 
 func (pf ProjectionField) String() string {
+	var sb strings.Builder
 	if pf.NamedField != nil {
-		return pf.NamedField.String()
+		sb.WriteString(pf.NamedField.String())
 	} else {
-		return pf.EvaluatedField.String()
+		sb.WriteString(pf.EvaluatedField.String())
 	}
+	if pf.Alias != nil {
+		sb.WriteString(" AS ")
+		sb.WriteString(string(*pf.Alias))
+	}
+	return sb.String()
 }
 
 // SourceName is a name of a Table/Data file with optional Alias
@@ -178,7 +181,7 @@ func (jt JoinType) String() string {
 	}
 }
 
-// JoinedSource represends a DataSource that is a result of Join of two other DataSources
+// JoinedSource represents a DataSource that is a result of Join of two other DataSources
 type JoinedSource struct {
 	Source    DataSource
 	Type      JoinType
