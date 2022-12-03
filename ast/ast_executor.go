@@ -71,6 +71,8 @@ func (ae AstExecutor) VisitExpression(condition Expression) core.Condition {
 		return nil
 	}
 	switch cond := condition.(type) {
+	case Term:
+		return ae.VisitTerm(cond)
 	case AndExpression:
 		return ae.VisitAndExpression(cond)
 	case OrExpression:
@@ -79,12 +81,14 @@ func (ae AstExecutor) VisitExpression(condition Expression) core.Condition {
 		return ae.VisitNotExpression(cond)
 	case ComparisonExpression:
 		return ae.VisitComparisionExpression(cond)
+	case BinaryExpression:
+		return ae.VisitBinaryExpression(cond)
 	case LikeExpression:
 		return ae.VisitLikeExpression(cond)
 	case MatchExpression:
 		return ae.VisitMatchExpression(cond)
 	}
-	panic(fmt.Errorf("not supported expression: %v", condition))
+	panic(fmt.Errorf("unsupported expression: %v", condition))
 	return nil
 }
 
@@ -109,7 +113,7 @@ func (ae AstExecutor) VisitComparisionExpression(cond ComparisonExpression) core
 	left := ae.VisitExpression(cond.LHS)
 	right := ae.VisitExpression(cond.RHS)
 	switch cond.Operator {
-	case "==":
+	case "=":
 		return core.NewEq(left, right)
 	case "<>":
 		return core.NewNeq(left, right)
@@ -186,4 +190,40 @@ func (ae AstExecutor) VisitEvaluatedField(field *EvaluatedProjectionField, alias
 		aliasStr = string(*alias)
 	}
 	return core.NewExpressionColumn(expr, aliasStr)
+}
+
+func (ae AstExecutor) VisitTerm(cond Term) core.Condition {
+	if cond.Name != nil {
+		return ae.VisitCompoundName(cond.Name)
+	} else {
+		return ae.VisitLiteral(*cond.Value)
+	}
+}
+
+func (ae AstExecutor) VisitCompoundName(name *CompoundName) core.Condition {
+	var sb strings.Builder
+	if name.Qualifier != nil {
+		sb.WriteString(string(*name.Qualifier))
+		sb.WriteRune('.')
+	}
+	sb.WriteString(string(name.Name))
+	return core.NewRowValue(sb.String())
+}
+
+func (ae AstExecutor) VisitLiteral(value Literal) core.Condition {
+	if value.IsNull {
+		return core.NewNullValue()
+	} else if value.StringValue != nil {
+		return core.NewStringValue(*value.StringValue)
+	} else {
+		return core.DecodeNumeric(*value.NumericValue)
+	}
+}
+
+func (ae AstExecutor) VisitBinaryExpression(cond BinaryExpression) core.Condition {
+	left := ae.VisitExpression(cond.LHS)
+	right := ae.VisitExpression(cond.RHS)
+	var op core.BinaryOperator = core.BinaryOperator(cond.Operator[0])
+
+	return core.NewExpression(op, left, right)
 }

@@ -307,3 +307,15 @@ func EnsureString(v Value) Value {
 	}
 	return v
 }
+
+func DecodeNumeric(value string) Value {
+	i64, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		f64, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			panic(fmt.Errorf("%v is not numeric", value))
+		}
+		return NewFloatValue(f64)
+	}
+	return NewIntValue(i64)
+}
