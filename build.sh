@@ -5,7 +5,7 @@ mkdir bin
 
 function build() {
   echo "Building for $1 ($2)"
-  GOOS=$1 GOARCH=$2  go build -ldflags="-X 'main.Version=$(cat version.txt)'"
+  GOOS=$1 GOARCH=$2  go build -ldflags="-s -w -X 'main.Version=$(cat version.txt)'"
   mkdir bin/$1_$2
   mv csql* bin/$1_$2
 }
