@@ -312,9 +312,22 @@ func (be BinaryExpression) String() string {
 	return fmt.Sprintf("%v %s %v", be.LHS, be.Operator, be.RHS)
 }
 
+type LikePattern struct {
+	Text string
+	Expr Expression
+}
+
+func (lp LikePattern) String() string {
+	if lp.Expr == nil {
+		return `"` + lp.Text + `""`
+	} else {
+		return lp.Expr.String()
+	}
+}
+
 type LikeExpression struct {
 	What    Expression
-	Pattern string
+	Pattern LikePattern
 	NotLike bool
 }
 
@@ -330,7 +343,7 @@ func (like LikeExpression) String() string {
 
 type MatchExpression struct {
 	What    Expression
-	Pattern string
+	Pattern LikePattern
 	Not     bool
 }
 

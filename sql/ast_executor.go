@@ -136,8 +136,12 @@ func (ae AstExecutor) VisitComparisionExpression(cond ComparisonExpression) core
 func (ae AstExecutor) VisitLikeExpression(cond LikeExpression) core.Condition {
 	what := ae.VisitExpression(cond.What)
 
-	// TODO: cond.Pattern should be an expression
-	like := core.NewLikeCondition(what, core.NewStringValue(cond.Pattern))
+	var like core.Condition
+	if cond.Pattern.Expr != nil {
+		like = core.NewLikeCondition(what, ae.VisitExpression(cond.Pattern.Expr))
+	} else {
+		like = core.NewLikeCondition(what, core.NewStringValue(cond.Pattern.Text))
+	}
 	if cond.NotLike {
 		return core.NewNot(like)
 	} else {
@@ -148,12 +152,16 @@ func (ae AstExecutor) VisitLikeExpression(cond LikeExpression) core.Condition {
 func (ae AstExecutor) VisitMatchExpression(cond MatchExpression) core.Condition {
 	what := ae.VisitExpression(cond.What)
 
-	// TODO: cond.Pattern should be an expression
-	like := core.NewMatchCondition(what, core.NewStringValue(cond.Pattern))
-	if cond.Not {
-		return core.NewNot(like)
+	var match core.Condition
+	if cond.Pattern.Expr != nil {
+		match = core.NewMatchCondition(what, ae.VisitExpression(cond.Pattern.Expr))
 	} else {
-		return like
+		match = core.NewMatchCondition(what, core.NewStringValue(cond.Pattern.Text))
+	}
+	if cond.Not {
+		return core.NewNot(match)
+	} else {
+		return match
 	}
 }
 
@@ -225,9 +233,14 @@ func (ae AstExecutor) VisitLiteral(value Literal) core.Condition {
 func (ae AstExecutor) VisitBinaryExpression(cond BinaryExpression) core.Condition {
 	left := ae.VisitExpression(cond.LHS)
 	right := ae.VisitExpression(cond.RHS)
-	var op core.BinaryOperator = core.BinaryOperator(cond.Operator[0])
 
-	return core.NewExpression(op, left, right)
+	if cond.Operator == "||" {
+		return core.NewConcat(left, right)
+	} else {
+		var op core.BinaryOperator = core.BinaryOperator(cond.Operator[0])
+
+		return core.NewExpression(op, left, right)
+	}
 }
 
 func (ae AstExecutor) VisitIsNull(cond IsNullExpression) core.Condition {

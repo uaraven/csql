@@ -12,6 +12,10 @@ term: compoundName | literalValue;
 
 expr:
 	term										# termItem
+	| expr K_BETWEEN expr K_AND expr			# betweenExpr
+	| expr K_NOT? K_LIKE likePatternExpression	# likeExpr
+	| expr K_NOT? K_MATCH likePatternExpression # matchExpr
+	| expr K_NOT? K_IN list						# inExpr
 	| expr comparisonOperator expr				# condition
 	| expr binaryOperation expr                 # evaluation
 	| expr K_IS K_NOT? K_NULL                   # isNullExpr
@@ -19,18 +23,19 @@ expr:
 	| expr K_OR expr							# orExpr
 	| K_NOT expr								# notExpr
 	| '(' expr ')'								# parensExpr
-	| expr K_BETWEEN expr K_AND expr			# betweenExpr
-	| expr K_NOT? K_LIKE stringValue			# likeExpr
-	| expr K_NOT? K_MATCH stringValue           # matchExpr
-	| expr K_NOT? K_IN list						# inExpr
 	;
 
 where: K_WHERE expr;
 
 distinct: K_DISTINCT;
 
-evaluatedExpression:
-    term                                        # evalTerm
+likePatternExpression
+    : expr binaryOperation expr                 # likePatternBinaryExpr
+    | stringValue                               # likePatternText
+    ;
+
+evaluatedExpression
+    : term                                      # evalTerm
     | expr binaryOperation expr                 # evalBinaryExpression
     | '(' evaluatedExpression ')'               # evalParens
     ;

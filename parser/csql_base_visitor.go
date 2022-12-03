@@ -44,11 +44,11 @@ func (v *BaseCsqlVisitor) VisitTermItem(ctx *TermItemContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseCsqlVisitor) VisitIsNullExpr(ctx *IsNullExprContext) interface{} {
+func (v *BaseCsqlVisitor) VisitInExpr(ctx *InExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseCsqlVisitor) VisitInExpr(ctx *InExprContext) interface{} {
+func (v *BaseCsqlVisitor) VisitIsNullExpr(ctx *IsNullExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -68,11 +68,11 @@ func (v *BaseCsqlVisitor) VisitParensExpr(ctx *ParensExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseCsqlVisitor) VisitAndExpr(ctx *AndExprContext) interface{} {
+func (v *BaseCsqlVisitor) VisitBetweenExpr(ctx *BetweenExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseCsqlVisitor) VisitBetweenExpr(ctx *BetweenExprContext) interface{} {
+func (v *BaseCsqlVisitor) VisitAndExpr(ctx *AndExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -81,6 +81,14 @@ func (v *BaseCsqlVisitor) VisitWhere(ctx *WhereContext) interface{} {
 }
 
 func (v *BaseCsqlVisitor) VisitDistinct(ctx *DistinctContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitLikePatternBinaryExpr(ctx *LikePatternBinaryExprContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitLikePatternText(ctx *LikePatternTextContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

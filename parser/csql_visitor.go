@@ -35,11 +35,11 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#termItem.
 	VisitTermItem(ctx *TermItemContext) interface{}
 
-	// Visit a parse tree produced by CsqlParser#isNullExpr.
-	VisitIsNullExpr(ctx *IsNullExprContext) interface{}
-
 	// Visit a parse tree produced by CsqlParser#inExpr.
 	VisitInExpr(ctx *InExprContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#isNullExpr.
+	VisitIsNullExpr(ctx *IsNullExprContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#likeExpr.
 	VisitLikeExpr(ctx *LikeExprContext) interface{}
@@ -53,17 +53,23 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#parensExpr.
 	VisitParensExpr(ctx *ParensExprContext) interface{}
 
-	// Visit a parse tree produced by CsqlParser#andExpr.
-	VisitAndExpr(ctx *AndExprContext) interface{}
-
 	// Visit a parse tree produced by CsqlParser#betweenExpr.
 	VisitBetweenExpr(ctx *BetweenExprContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#andExpr.
+	VisitAndExpr(ctx *AndExprContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#where.
 	VisitWhere(ctx *WhereContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#distinct.
 	VisitDistinct(ctx *DistinctContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#likePatternBinaryExpr.
+	VisitLikePatternBinaryExpr(ctx *LikePatternBinaryExprContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#likePatternText.
+	VisitLikePatternText(ctx *LikePatternTextContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#evalTerm.
 	VisitEvalTerm(ctx *EvalTermContext) interface{}

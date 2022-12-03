@@ -241,11 +241,23 @@ func (c CsqlVisitorImpl) VisitAndExpr(ctx *parser.AndExprContext) interface{} {
 	}
 }
 
+func (c CsqlVisitorImpl) VisitLikePatternText(ctx *parser.LikePatternTextContext) interface{} {
+	return LikePattern{Text: removeStringQuotes(ctx.GetText())}
+}
+
+func (c CsqlVisitorImpl) VisitLikePatternBinaryExpr(ctx *parser.LikePatternBinaryExprContext) interface{} {
+	return LikePattern{Expr: BinaryExpression{
+		LHS:      ctx.Expr(0).Accept(c).(Expression),
+		RHS:      ctx.Expr(1).Accept(c).(Expression),
+		Operator: ctx.BinaryOperation().Accept(c).(string),
+	}}
+}
+
 // VisitLikeExpr visits a parse tree produced by CsqlParser#likeExpr.
 func (c CsqlVisitorImpl) VisitLikeExpr(ctx *parser.LikeExprContext) interface{} {
 	return LikeExpression{
 		What:    ctx.Expr().Accept(c).(Expression),
-		Pattern: removeStringQuotes(ctx.StringValue().GetText()),
+		Pattern: ctx.LikePatternExpression().Accept(c).(LikePattern),
 		NotLike: ctx.K_NOT() != nil,
 	}
 }
@@ -311,7 +323,7 @@ func (c CsqlVisitorImpl) VisitEvalParens(ctx *parser.EvalParensContext) interfac
 func (c CsqlVisitorImpl) VisitMatchExpr(ctx *parser.MatchExprContext) interface{} {
 	return MatchExpression{
 		What:    ctx.Expr().Accept(c).(Expression),
-		Pattern: removeStringQuotes(ctx.StringValue().GetText()),
+		Pattern: ctx.LikePatternExpression().Accept(c).(LikePattern),
 		Not:     ctx.K_NOT() != nil,
 	}
 }
