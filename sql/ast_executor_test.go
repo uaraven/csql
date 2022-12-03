@@ -256,6 +256,12 @@ func TestAstExecutor_Like(t *testing.T) {
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(4)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
+                                               first_name not like 'Jam%'`)
+	g.Expect(rows).To(HaveLen(2))
+	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
+	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(3)))
+
+	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
                                                first_name like 'J' || 'am%'`)
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(2)))
@@ -270,6 +276,12 @@ func TestAstExecutor_Match(t *testing.T) {
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(2)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(4)))
+
+	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
+                                               first_name not match 'Jam.*'`)
+	g.Expect(rows).To(HaveLen(2))
+	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
+	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(3)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
                                                first_name match 'J[ae].*' || 'm.*'`)
