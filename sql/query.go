@@ -224,7 +224,7 @@ func (lit Literal) String() string {
 }
 
 type ListLiteral struct {
-	Values []Literal
+	Values []ListValue
 }
 
 func (ll ListLiteral) String() string {
@@ -397,5 +397,20 @@ func (ine IsNullExpression) String() string {
 		sb.WriteString("NOT ")
 	}
 	sb.WriteString("NULL")
+	return sb.String()
+}
+
+type ListValue struct {
+	Element           *Term
+	ExpressionElement Expression
+}
+
+func (lv ListValue) String() string {
+	var sb strings.Builder
+	if lv.Element != nil {
+		sb.WriteString(lv.Element.String())
+	} else {
+		sb.WriteString(lv.ExpressionElement.String())
+	}
 	return sb.String()
 }

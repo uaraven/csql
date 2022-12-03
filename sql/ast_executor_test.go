@@ -11,7 +11,7 @@ func TestAstExecutor_Select(t *testing.T) {
 
 	sql := ParseSQL("select * from \"../test-data/employees.csv\"")
 
-	ds := Execute(&sql)
+	ds := Transform(&sql)
 	g.Expect(ds.Header().ColumnCount()).To(Equal(5))
 	rows := core.ReadAllRows(ds)
 	g.Expect(rows).To(HaveLen(4))
@@ -22,7 +22,7 @@ func TestAstExecutor_SelectWhere(t *testing.T) {
 
 	sql := ParseSQL("select * from \"../test-data/employees.csv\" where dept_id = 1")
 
-	ds := Execute(&sql)
+	ds := Transform(&sql)
 	g.Expect(ds.Header().ColumnCount()).To(Equal(5))
 	rows := core.ReadAllRows(ds)
 	g.Expect(rows).To(HaveLen(2))
@@ -37,7 +37,7 @@ func TestAstExecutor_SelectProjection(t *testing.T) {
 
 	sql := ParseSQL(`select first_name, width*2 as w2 from "../test-data/employees.csv"`)
 
-	ds := Execute(&sql)
+	ds := Transform(&sql)
 	g.Expect(ds.Header().ColumnCount()).To(Equal(2))
 	rows := core.ReadAllRows(ds)
 	g.Expect(rows).To(HaveLen(4))
@@ -56,7 +56,7 @@ func TestAstExecutor_SelectProjectionAliases(t *testing.T) {
 
 	sql := ParseSQL(`select emp.first_name as fn, emp.last_name from "../test-data/employees.csv" emp`)
 
-	ds := Execute(&sql)
+	ds := Transform(&sql)
 	g.Expect(ds.Header().ColumnCount()).To(Equal(2))
 	rows := core.ReadAllRows(ds)
 	g.Expect(rows).To(HaveLen(4))
@@ -72,7 +72,7 @@ func TestAstExecutor_LeftOuterJoin(t *testing.T) {
     left join "../test-data/books.csv"
 	on authors.id = books.author_id`)
 
-	jds := Execute(&sql)
+	jds := Transform(&sql)
 
 	rows := core.ReadAllRows(jds)
 	g.Expect(rows[0].Values()).To(Equal([]core.Value{
@@ -102,7 +102,7 @@ func TestAstExecutor_RightOuterJoin(t *testing.T) {
     right join "../test-data/books.csv"
 	on authors.id = books.author_id`)
 
-	jds := Execute(&sql)
+	jds := Transform(&sql)
 
 	rows := core.ReadAllRows(jds)
 	g.Expect(rows).To(HaveLen(5))
@@ -128,7 +128,7 @@ func TestAstExecutor_CrossJoin(t *testing.T) {
 
 	ast := ParseSQL(`select * from "../test-data/employees.csv", "../test-data/dept.csv"`)
 
-	cj := Execute(&ast)
+	cj := Transform(&ast)
 
 	rows := core.ReadAllRows(cj)
 	g.Expect(rows).To(HaveLen(8))
@@ -149,7 +149,7 @@ func TestAstExecutor_InnerJoin(t *testing.T) {
 
 	ast := ParseSQL(`select * from "../test-data/employees.csv" join "../test-data/dept.csv" on dept_id = dept.id`)
 
-	cj := Execute(&ast)
+	cj := Transform(&ast)
 
 	rows := core.ReadAllRows(cj)
 	g.Expect(rows).To(HaveLen(4))
@@ -289,4 +289,30 @@ func TestAstExecutor_Match(t *testing.T) {
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(2)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(3)))
 	g.Expect(rows[2].Get("id").Value()).To(Equal(core.NewIntValue(4)))
+}
+
+func TestAstExecutor_In(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`select * from "../test-data/employees.csv" where 
+                                               first_name in ('James', 'John')`)
+
+	g.Expect(rows).To(HaveLen(3))
+	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
+	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(2)))
+	g.Expect(rows[2].Get("id").Value()).To(Equal(core.NewIntValue(4)))
+
+	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
+                                               dept_id in (11, 1+1)`)
+
+	g.Expect(rows).To(HaveLen(2))
+	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(3)))
+	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(4)))
+
+	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
+                                               dept_id not in (2, 3)`)
+
+	g.Expect(rows).To(HaveLen(2))
+	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
+	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(2)))
 }

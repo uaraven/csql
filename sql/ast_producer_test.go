@@ -280,7 +280,11 @@ func TestInListExpression(t *testing.T) {
 		What:  Term{Name: &CompoundName{Name: Identifier("col2")}},
 		NotIn: true,
 		List: ListLiteral{
-			Values: []Literal{{NumericValue: &v1}, {NumericValue: &v2}, {NumericValue: &v3}},
+			Values: []ListValue{
+				{Element: &Term{Value: &Literal{NumericValue: &v1}}},
+				{Element: &Term{Value: &Literal{NumericValue: &v2}}},
+				{Element: &Term{Value: &Literal{NumericValue: &v3}}},
+			},
 		},
 	}))
 }

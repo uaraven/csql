@@ -65,6 +65,12 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#distinct.
 	VisitDistinct(ctx *DistinctContext) interface{}
 
+	// Visit a parse tree produced by CsqlParser#listValueBinaryExpr.
+	VisitListValueBinaryExpr(ctx *ListValueBinaryExprContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#listValueTerm.
+	VisitListValueTerm(ctx *ListValueTermContext) interface{}
+
 	// Visit a parse tree produced by CsqlParser#likePatternBinaryExpr.
 	VisitLikePatternBinaryExpr(ctx *LikePatternBinaryExprContext) interface{}
 

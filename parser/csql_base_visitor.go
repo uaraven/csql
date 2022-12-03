@@ -84,6 +84,14 @@ func (v *BaseCsqlVisitor) VisitDistinct(ctx *DistinctContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseCsqlVisitor) VisitListValueBinaryExpr(ctx *ListValueBinaryExprContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitListValueTerm(ctx *ListValueTermContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseCsqlVisitor) VisitLikePatternBinaryExpr(ctx *LikePatternBinaryExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }

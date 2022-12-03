@@ -6,7 +6,7 @@ comparisonOperator: '<' | '<=' | '>' | '>=' | '=' | '!=' | '<>';
 
 binaryOperation: '+' | '-' | '*' | '/' | '%' | '||';
 
-list: '(' literalValue (',' literalValue)* ')';
+list: '(' listValue (',' listValue)* ')';
 
 term: compoundName | literalValue;
 
@@ -28,6 +28,11 @@ expr:
 where: K_WHERE expr;
 
 distinct: K_DISTINCT;
+
+listValue
+    : expr binaryOperation expr                 # listValueBinaryExpr
+    | term                                      # listValueTerm
+    ;
 
 likePatternExpression
     : expr binaryOperation expr                 # likePatternBinaryExpr

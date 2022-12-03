@@ -144,13 +144,26 @@ func (c CsqlVisitorImpl) VisitBinaryOperation(ctx *parser.BinaryOperationContext
 
 // VisitList visits a parse tree produced by CsqlParser#list.
 func (c CsqlVisitorImpl) VisitList(ctx *parser.ListContext) interface{} {
-	result := make([]Literal, 0)
-	for _, item := range ctx.AllLiteralValue() {
-		result = append(result, item.Accept(c).(Literal))
+	result := make([]ListValue, 0)
+	for _, item := range ctx.AllListValue() {
+		result = append(result, item.Accept(c).(ListValue))
 	}
 	return ListLiteral{
 		Values: result,
 	}
+}
+
+func (c CsqlVisitorImpl) VisitListValueBinaryExpr(ctx *parser.ListValueBinaryExprContext) interface{} {
+	return ListValue{ExpressionElement: BinaryExpression{
+		LHS:      ctx.Expr(0).Accept(c).(Expression),
+		RHS:      ctx.Expr(1).Accept(c).(Expression),
+		Operator: ctx.BinaryOperation().Accept(c).(string),
+	}}
+}
+
+func (c CsqlVisitorImpl) VisitListValueTerm(ctx *parser.ListValueTermContext) interface{} {
+	term := ctx.Term().Accept(c).(Term)
+	return ListValue{Element: &term}
 }
 
 // VisitTerm visits a parse tree produced by CsqlParser#term.

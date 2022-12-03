@@ -6,7 +6,7 @@ import (
 
 func ExecuteSql(query string) []core.Row {
 	ast := ParseSQL(query)
-	data := Execute(&ast)
+	data := Transform(&ast)
 
 	return core.ReadAllRows(data)
 }
