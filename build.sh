@@ -6,11 +6,8 @@ mkdir bin
 function build() {
   echo "Building for $1 ($2)"
   GOOS=$1 GOARCH=$2  go build -ldflags="-X 'main.Version=$(cat version.txt)'"
-  if [[ -f "csql.exe" ]] ; then
-    mv csql.exe bin/csql_$1_$2.exe
-  else
-    mv csql bin/csql_$1_$2
-  fi
+  mkdir bin/$1_$2
+  mv csql* bin/$1_$2
 }
 
 function increment_version() {
