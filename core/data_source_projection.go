@@ -66,12 +66,11 @@ func expandProjection(projection []ProjectionColumn, headers DataSourceHeader) [
 	for _, column := range projection {
 		if isAsterisk(column) {
 			fullAsterisk := column.source.(Identifiable).Identifier()
-			table, _ := qualified(fullAsterisk)
 			for _, cmd := range headers.ColumnsMetadata() {
 				if cmd.MatchesName(fullAsterisk) {
 					var newName string
-					if table != "" {
-						newName = table + "." + cmd.Name()
+					if cmd.ParentName() != "" {
+						newName = cmd.ParentName() + "." + cmd.Name()
 					} else {
 						newName = cmd.Name()
 					}
