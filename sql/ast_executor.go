@@ -1,4 +1,4 @@
-package ast
+package sql
 
 import (
 	"fmt"
@@ -87,6 +87,8 @@ func (ae AstExecutor) VisitExpression(condition Expression) core.Condition {
 		return ae.VisitLikeExpression(cond)
 	case MatchExpression:
 		return ae.VisitMatchExpression(cond)
+	case IsNullExpression:
+		return ae.VisitIsNull(cond)
 	}
 	panic(fmt.Errorf("unsupported expression: %v", condition))
 	return nil
@@ -226,4 +228,9 @@ func (ae AstExecutor) VisitBinaryExpression(cond BinaryExpression) core.Conditio
 	var op core.BinaryOperator = core.BinaryOperator(cond.Operator[0])
 
 	return core.NewExpression(op, left, right)
+}
+
+func (ae AstExecutor) VisitIsNull(cond IsNullExpression) core.Condition {
+	expr := ae.VisitExpression(cond.What)
+	return core.NewIsNull(expr, cond.Not)
 }

@@ -1,4 +1,4 @@
-package ast
+package sql
 
 import (
 	. "github.com/onsi/gomega"
@@ -141,7 +141,26 @@ func TestConditionalJoin(t *testing.T) {
 		}},
 		Operator: ">=",
 	}))
+}
 
+func TestInnerJoin(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT col FROM Table1 JOIN Table2 ON tcol1 >= tcol2")
+
+	g.Expect(s.From.Join.Type).To(Equal(InnerJoin))
+	g.Expect(s.From.Join.Source.TableName.Name).To(Equal(Identifier("Table1")))
+	g.Expect(s.From.Join.Target.TableName.Name).To(Equal(Identifier("Table2")))
+	g.Expect(s.From.Join.Condition).To(Equal(ComparisonExpression{
+		LHS: Term{Name: &CompoundName{
+			Qualifier: nil,
+			Name:      Identifier("tcol1"),
+		}},
+		RHS: Term{Name: &CompoundName{
+			Qualifier: nil,
+			Name:      Identifier("tcol2"),
+		}},
+		Operator: ">=",
+	}))
 }
 
 func TestSimpleWhereExpression(t *testing.T) {
@@ -254,14 +273,14 @@ func TestIsNullExpression(t *testing.T) {
 	g := NewGomegaWithT(t)
 	s := ParseSQL("SELECT col FROM Table1 WHERE col1 IS NULL")
 	g.Expect(s.Filter).ToNot(BeNil())
-	g.Expect(s.Filter).To(BeEquivalentTo(&IsNullExpression{
+	g.Expect(s.Filter).To(BeEquivalentTo(IsNullExpression{
 		What: Term{Name: &CompoundName{Name: "col1"}},
 		Not:  false,
 	}))
 
 	s = ParseSQL("SELECT col FROM Table1 WHERE col1 IS NOT NULL")
 	g.Expect(s.Filter).ToNot(BeNil())
-	g.Expect(s.Filter).To(BeEquivalentTo(&IsNullExpression{
+	g.Expect(s.Filter).To(BeEquivalentTo(IsNullExpression{
 		What: Term{Name: &CompoundName{Name: "col1"}},
 		Not:  true,
 	}))
@@ -269,7 +288,7 @@ func TestIsNullExpression(t *testing.T) {
 	s = ParseSQL("SELECT col FROM Table1 WHERE NOT col1 IS NULL")
 	g.Expect(s.Filter).ToNot(BeNil())
 	g.Expect(s.Filter).To(BeEquivalentTo(NotExpression{
-		Child: &IsNullExpression{
+		Child: IsNullExpression{
 			What: Term{Name: &CompoundName{Name: "col1"}},
 			Not:  false,
 		},

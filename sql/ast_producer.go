@@ -1,4 +1,4 @@
-package ast
+package sql
 
 import (
 	"fmt"
@@ -214,7 +214,7 @@ func (c CsqlVisitorImpl) VisitInExpr(ctx *parser.InExprContext) interface{} {
 }
 
 func (c CsqlVisitorImpl) VisitIsNullExpr(ctx *parser.IsNullExprContext) interface{} {
-	return &IsNullExpression{
+	return IsNullExpression{
 		What: ctx.Expr().Accept(c).(Expression),
 		Not:  ctx.K_NOT() != nil,
 	}
