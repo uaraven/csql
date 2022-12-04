@@ -144,26 +144,25 @@ func (c CsqlVisitorImpl) VisitBinaryOperation(ctx *parser.BinaryOperationContext
 
 // VisitList visits a parse tree produced by CsqlParser#list.
 func (c CsqlVisitorImpl) VisitList(ctx *parser.ListContext) interface{} {
-	result := make([]ListValue, 0)
-	for _, item := range ctx.AllListValue() {
-		result = append(result, item.Accept(c).(ListValue))
+	result := make([]Expression, 0)
+	for _, item := range ctx.AllValueExpr() {
+		result = append(result, item.Accept(c).(Expression))
 	}
 	return ListLiteral{
 		Values: result,
 	}
 }
 
-func (c CsqlVisitorImpl) VisitListValueBinaryExpr(ctx *parser.ListValueBinaryExprContext) interface{} {
-	return ListValue{ExpressionElement: BinaryExpression{
-		LHS:      ctx.Expr(0).Accept(c).(Expression),
-		RHS:      ctx.Expr(1).Accept(c).(Expression),
+func (c CsqlVisitorImpl) VisitValueBinaryExpr(ctx *parser.ValueBinaryExprContext) interface{} {
+	return BinaryExpression{
+		LHS:      ctx.ValueExpr(0).Accept(c).(Expression),
+		RHS:      ctx.ValueExpr(1).Accept(c).(Expression),
 		Operator: ctx.BinaryOperation().Accept(c).(string),
-	}}
+	}
 }
 
-func (c CsqlVisitorImpl) VisitListValueTerm(ctx *parser.ListValueTermContext) interface{} {
-	term := ctx.Term().Accept(c).(Term)
-	return ListValue{Element: &term}
+func (c CsqlVisitorImpl) VisitValueParensExpr(ctx *parser.ValueParensExprContext) interface{} {
+	return ctx.ValueExpr().Accept(c)
 }
 
 // VisitTerm visits a parse tree produced by CsqlParser#term.
@@ -180,29 +179,25 @@ func (c CsqlVisitorImpl) VisitTerm(ctx *parser.TermContext) interface{} {
 	}
 }
 
+func (c CsqlVisitorImpl) VisitValueExprItem(ctx *parser.ValueExprItemContext) interface{} {
+	return ctx.ValueExpr().Accept(c)
+}
+
 // VisitCondition visits a parse tree produced by CsqlParser#condition.
 func (c CsqlVisitorImpl) VisitCondition(ctx *parser.ConditionContext) interface{} {
 	return ComparisonExpression{
-		LHS:      ctx.Expr(0).Accept(c).(Expression),
-		RHS:      ctx.Expr(1).Accept(c).(Expression),
+		LHS:      ctx.WhereExpr(0).Accept(c).(Expression),
+		RHS:      ctx.WhereExpr(1).Accept(c).(Expression),
 		Operator: ctx.ComparisonOperator().Accept(c).(string),
-	}
-}
-
-func (c CsqlVisitorImpl) VisitEvaluation(ctx *parser.EvaluationContext) interface{} {
-	return BinaryExpression{
-		LHS:      ctx.Expr(0).Accept(c).(Expression),
-		RHS:      ctx.Expr(1).Accept(c).(Expression),
-		Operator: ctx.BinaryOperation().Accept(c).(string),
 	}
 }
 
 // VisitBetweenExpr visits a parse tree produced by CsqlParser#betweenExpr.
 func (c CsqlVisitorImpl) VisitBetweenExpr(ctx *parser.BetweenExprContext) interface{} {
 	return BetweenExpression{
-		What: ctx.Expr(0).Accept(c).(Expression),
-		Low:  ctx.Expr(1).Accept(c).(Expression),
-		High: ctx.Expr(2).Accept(c).(Expression),
+		What: ctx.ValueExpr(0).Accept(c).(Expression),
+		Low:  ctx.ValueExpr(1).Accept(c).(Expression),
+		High: ctx.ValueExpr(2).Accept(c).(Expression),
 	}
 }
 
@@ -213,14 +208,14 @@ func (c CsqlVisitorImpl) VisitTermItem(ctx *parser.TermItemContext) interface{} 
 // VisitNotExpr visits a parse tree produced by CsqlParser#notExpr.
 func (c CsqlVisitorImpl) VisitNotExpr(ctx *parser.NotExprContext) interface{} {
 	return NotExpression{
-		Child: ctx.Expr().Accept(c).(Expression),
+		Child: ctx.WhereExpr().Accept(c).(Expression),
 	}
 }
 
 // VisitInExpr visits a parse tree produced by CsqlParser#inExpr.
 func (c CsqlVisitorImpl) VisitInExpr(ctx *parser.InExprContext) interface{} {
 	return InListExpression{
-		What:  ctx.Expr().Accept(c).(Expression),
+		What:  ctx.ValueExpr().Accept(c).(Expression),
 		List:  ctx.List().Accept(c).(ListLiteral),
 		NotIn: ctx.K_NOT() != nil,
 	}
@@ -228,7 +223,7 @@ func (c CsqlVisitorImpl) VisitInExpr(ctx *parser.InExprContext) interface{} {
 
 func (c CsqlVisitorImpl) VisitIsNullExpr(ctx *parser.IsNullExprContext) interface{} {
 	return IsNullExpression{
-		What: ctx.Expr().Accept(c).(Expression),
+		What: ctx.ValueExpr().Accept(c).(Expression),
 		Not:  ctx.K_NOT() != nil,
 	}
 }
@@ -236,48 +231,36 @@ func (c CsqlVisitorImpl) VisitIsNullExpr(ctx *parser.IsNullExprContext) interfac
 // VisitOrExpr visits a parse tree produced by CsqlParser#orExpr.
 func (c CsqlVisitorImpl) VisitOrExpr(ctx *parser.OrExprContext) interface{} {
 	return OrExpression{
-		LHS: ctx.Expr(0).Accept(c).(Expression),
-		RHS: ctx.Expr(1).Accept(c).(Expression),
+		LHS: ctx.WhereExpr(0).Accept(c).(Expression),
+		RHS: ctx.WhereExpr(1).Accept(c).(Expression),
 	}
 }
 
 // VisitParensExpr visits a parse tree produced by CsqlParser#parensExpr.
 func (c CsqlVisitorImpl) VisitParensExpr(ctx *parser.ParensExprContext) interface{} {
-	return ctx.Expr().Accept(c).(Expression)
+	return ctx.WhereExpr().Accept(c).(Expression)
 }
 
 // VisitAndExpr visits a parse tree produced by CsqlParser#andExpr.
 func (c CsqlVisitorImpl) VisitAndExpr(ctx *parser.AndExprContext) interface{} {
 	return AndExpression{
-		LHS: ctx.Expr(0).Accept(c).(Expression),
-		RHS: ctx.Expr(1).Accept(c).(Expression),
+		LHS: ctx.WhereExpr(0).Accept(c).(Expression),
+		RHS: ctx.WhereExpr(1).Accept(c).(Expression),
 	}
-}
-
-func (c CsqlVisitorImpl) VisitLikePatternText(ctx *parser.LikePatternTextContext) interface{} {
-	return LikePattern{Text: removeStringQuotes(ctx.GetText())}
-}
-
-func (c CsqlVisitorImpl) VisitLikePatternBinaryExpr(ctx *parser.LikePatternBinaryExprContext) interface{} {
-	return LikePattern{Expr: BinaryExpression{
-		LHS:      ctx.Expr(0).Accept(c).(Expression),
-		RHS:      ctx.Expr(1).Accept(c).(Expression),
-		Operator: ctx.BinaryOperation().Accept(c).(string),
-	}}
 }
 
 // VisitLikeExpr visits a parse tree produced by CsqlParser#likeExpr.
 func (c CsqlVisitorImpl) VisitLikeExpr(ctx *parser.LikeExprContext) interface{} {
 	return LikeExpression{
-		What:    ctx.Expr().Accept(c).(Expression),
-		Pattern: ctx.LikePatternExpression().Accept(c).(LikePattern),
+		What:    ctx.ValueExpr(0).Accept(c).(Expression),
+		Pattern: ctx.ValueExpr(1).Accept(c).(Expression),
 		NotLike: ctx.K_NOT() != nil,
 	}
 }
 
 // VisitWhere visits a parse tree produced by CsqlParser#where.
 func (c CsqlVisitorImpl) VisitWhere(ctx *parser.WhereContext) interface{} {
-	return ctx.Expr().Accept(c).(Expression)
+	return ctx.WhereExpr().Accept(c).(Expression)
 }
 
 // VisitProjectionField visits a parse tree produced by CsqlParser#projectionField.
@@ -287,7 +270,7 @@ func (c CsqlVisitorImpl) VisitProjectionField(ctx *parser.ProjectionFieldContext
 		field := ctx.ProjectionFieldName().Accept(c).(NamedProjectionField)
 		projectionField.NamedField = &field
 	} else {
-		expr := ctx.EvaluatedExpression().Accept(c).(Expression)
+		expr := ctx.ValueExpr().Accept(c).(Expression)
 		projectionField.EvaluatedField = &EvaluatedProjectionField{
 			Expr: expr,
 		}
@@ -317,26 +300,14 @@ func (c CsqlVisitorImpl) VisitFieldName(ctx *parser.FieldNameContext) interface{
 	return parseIdentifier(ctx.GetText())
 }
 
-func (c CsqlVisitorImpl) VisitEvalTerm(ctx *parser.EvalTermContext) interface{} {
+func (c CsqlVisitorImpl) VisitValueTerm(ctx *parser.ValueTermContext) interface{} {
 	return ctx.Term().Accept(c).(Term)
-}
-
-func (c CsqlVisitorImpl) VisitEvalBinaryExpression(ctx *parser.EvalBinaryExpressionContext) interface{} {
-	return BinaryExpression{
-		LHS:      ctx.Expr(0).Accept(c).(Expression),
-		RHS:      ctx.Expr(1).Accept(c).(Expression),
-		Operator: ctx.BinaryOperation().GetText(),
-	}
-}
-
-func (c CsqlVisitorImpl) VisitEvalParens(ctx *parser.EvalParensContext) interface{} {
-	return ctx.EvaluatedExpression().Accept(c).(Expression)
 }
 
 func (c CsqlVisitorImpl) VisitMatchExpr(ctx *parser.MatchExprContext) interface{} {
 	return MatchExpression{
-		What:    ctx.Expr().Accept(c).(Expression),
-		Pattern: ctx.LikePatternExpression().Accept(c).(LikePattern),
+		What:    ctx.ValueExpr(0).Accept(c).(Expression),
+		Pattern: ctx.ValueExpr(1).Accept(c).(Expression),
 		Not:     ctx.K_NOT() != nil,
 	}
 }
@@ -351,8 +322,8 @@ func (c CsqlVisitorImpl) VisitConditionalJoinTarget(ctx *parser.ConditionalJoinT
 	result := joinTarget{}
 	result.dataSource = ctx.DataSource().Accept(c).(DataSource)
 
-	if ctx.Expr() != nil {
-		e := ctx.Expr().Accept(c).(Expression)
+	if ctx.WhereExpr() != nil {
+		e := ctx.WhereExpr().Accept(c).(Expression)
 		result.condition = e
 	}
 	return result

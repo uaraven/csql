@@ -224,7 +224,7 @@ func (lit Literal) String() string {
 }
 
 type ListLiteral struct {
-	Values []ListValue
+	Values []Expression
 }
 
 func (ll ListLiteral) String() string {
@@ -312,22 +312,9 @@ func (be BinaryExpression) String() string {
 	return fmt.Sprintf("%v %s %v", be.LHS, be.Operator, be.RHS)
 }
 
-type LikePattern struct {
-	Text string
-	Expr Expression
-}
-
-func (lp LikePattern) String() string {
-	if lp.Expr == nil {
-		return `"` + lp.Text + `""`
-	} else {
-		return lp.Expr.String()
-	}
-}
-
 type LikeExpression struct {
 	What    Expression
-	Pattern LikePattern
+	Pattern Expression
 	NotLike bool
 }
 
@@ -343,7 +330,7 @@ func (like LikeExpression) String() string {
 
 type MatchExpression struct {
 	What    Expression
-	Pattern LikePattern
+	Pattern Expression
 	Not     bool
 }
 
@@ -397,20 +384,5 @@ func (ine IsNullExpression) String() string {
 		sb.WriteString("NOT ")
 	}
 	sb.WriteString("NULL")
-	return sb.String()
-}
-
-type ListValue struct {
-	Element           *Term
-	ExpressionElement Expression
-}
-
-func (lv ListValue) String() string {
-	var sb strings.Builder
-	if lv.Element != nil {
-		sb.WriteString(lv.Element.String())
-	} else {
-		sb.WriteString(lv.ExpressionElement.String())
-	}
 	return sb.String()
 }

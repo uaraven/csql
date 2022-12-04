@@ -140,12 +140,7 @@ func (ae AstTransformer) TransformComparisionExpression(cond ComparisonExpressio
 func (ae AstTransformer) TransformLikeExpression(cond LikeExpression) core.Condition {
 	what := ae.TransformExpression(cond.What)
 
-	var like core.Condition
-	if cond.Pattern.Expr != nil {
-		like = core.NewLikeCondition(what, ae.TransformExpression(cond.Pattern.Expr))
-	} else {
-		like = core.NewLikeCondition(what, core.NewStringValue(cond.Pattern.Text))
-	}
+	like := core.NewLikeCondition(what, ae.TransformExpression(cond.Pattern))
 	if cond.NotLike {
 		return core.NewNot(like)
 	} else {
@@ -156,12 +151,7 @@ func (ae AstTransformer) TransformLikeExpression(cond LikeExpression) core.Condi
 func (ae AstTransformer) TransformMatchExpression(cond MatchExpression) core.Condition {
 	what := ae.TransformExpression(cond.What)
 
-	var match core.Condition
-	if cond.Pattern.Expr != nil {
-		match = core.NewMatchCondition(what, ae.TransformExpression(cond.Pattern.Expr))
-	} else {
-		match = core.NewMatchCondition(what, core.NewStringValue(cond.Pattern.Text))
-	}
+	match := core.NewMatchCondition(what, ae.TransformExpression(cond.Pattern))
 	if cond.Not {
 		return core.NewNot(match)
 	} else {
@@ -254,12 +244,8 @@ func (ae AstTransformer) TransformIsNull(cond IsNullExpression) core.Condition {
 
 func (ae AstTransformer) TransformInListExpression(cond InListExpression) core.Condition {
 	expr := ae.TransformExpression(cond.What)
-	values := funky.Map(cond.List.Values, func(li ListValue) core.Evaluator {
-		if li.Element != nil {
-			return ae.TransformTerm(*li.Element)
-		} else {
-			return ae.TransformExpression(li.ExpressionElement)
-		}
+	values := funky.Map(cond.List.Values, func(li Expression) core.Evaluator {
+		return ae.TransformExpression(li)
 	})
 	inExpr := core.NewInList(expr, values)
 	if cond.NotIn {

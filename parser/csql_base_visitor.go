@@ -28,7 +28,15 @@ func (v *BaseCsqlVisitor) VisitTerm(ctx *TermContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseCsqlVisitor) VisitEvaluation(ctx *EvaluationContext) interface{} {
+func (v *BaseCsqlVisitor) VisitValueTerm(ctx *ValueTermContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitValueBinaryExpr(ctx *ValueBinaryExprContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitValueParensExpr(ctx *ValueParensExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -68,6 +76,10 @@ func (v *BaseCsqlVisitor) VisitParensExpr(ctx *ParensExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseCsqlVisitor) VisitValueExprItem(ctx *ValueExprItemContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseCsqlVisitor) VisitBetweenExpr(ctx *BetweenExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -81,34 +93,6 @@ func (v *BaseCsqlVisitor) VisitWhere(ctx *WhereContext) interface{} {
 }
 
 func (v *BaseCsqlVisitor) VisitDistinct(ctx *DistinctContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseCsqlVisitor) VisitListValueBinaryExpr(ctx *ListValueBinaryExprContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseCsqlVisitor) VisitListValueTerm(ctx *ListValueTermContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseCsqlVisitor) VisitLikePatternBinaryExpr(ctx *LikePatternBinaryExprContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseCsqlVisitor) VisitLikePatternText(ctx *LikePatternTextContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseCsqlVisitor) VisitEvalTerm(ctx *EvalTermContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseCsqlVisitor) VisitEvalBinaryExpression(ctx *EvalBinaryExpressionContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseCsqlVisitor) VisitEvalParens(ctx *EvalParensContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

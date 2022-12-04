@@ -6,48 +6,38 @@ comparisonOperator: '<' | '<=' | '>' | '>=' | '=' | '!=' | '<>';
 
 binaryOperation: '+' | '-' | '*' | '/' | '%' | '||';
 
-list: '(' listValue (',' listValue)* ')';
+list: '(' valueExpr (',' valueExpr)* ')';
 
 term: compoundName | literalValue;
 
-expr:
-	term										# termItem
-	| expr K_BETWEEN expr K_AND expr			# betweenExpr
-	| expr K_NOT? K_LIKE likePatternExpression	# likeExpr
-	| expr K_NOT? K_MATCH likePatternExpression # matchExpr
-	| expr K_NOT? K_IN list						# inExpr
-	| expr comparisonOperator expr				# condition
-	| expr binaryOperation expr                 # evaluation
-	| expr K_IS K_NOT? K_NULL                   # isNullExpr
-	| expr K_AND expr							# andExpr
-	| expr K_OR expr							# orExpr
-	| K_NOT expr								# notExpr
-	| '(' expr ')'								# parensExpr
-	;
+valueExpr
+    : valueExpr binaryOperation valueExpr                 # valueBinaryExpr
+    | term                                                # valueTerm
+    | '(' valueExpr ')'                                   # valueParensExpr
+    ;
 
-where: K_WHERE expr;
+whereExpr
+    : term										     # termItem
+    | valueExpr                                      # valueExprItem
+    | whereExpr comparisonOperator whereExpr		 # condition
+    | whereExpr K_AND whereExpr						 # andExpr
+    | whereExpr K_OR whereExpr						 # orExpr
+    | K_NOT whereExpr								 # notExpr
+    | valueExpr K_BETWEEN valueExpr K_AND valueExpr	 # betweenExpr
+    | valueExpr K_NOT? K_LIKE valueExpr	             # likeExpr
+    | valueExpr K_NOT? K_MATCH valueExpr             # matchExpr
+    | valueExpr K_NOT? K_IN list					 # inExpr
+    | valueExpr K_IS K_NOT? K_NULL                   # isNullExpr
+    | '(' whereExpr ')'								 # parensExpr
+    ;
+
+where: K_WHERE whereExpr;
 
 distinct: K_DISTINCT;
 
-listValue
-    : expr binaryOperation expr                 # listValueBinaryExpr
-    | term                                      # listValueTerm
-    ;
-
-likePatternExpression
-    : expr binaryOperation expr                 # likePatternBinaryExpr
-    | stringValue                               # likePatternText
-    ;
-
-evaluatedExpression
-    : term                                      # evalTerm
-    | expr binaryOperation expr                 # evalBinaryExpression
-    | '(' evaluatedExpression ')'               # evalParens
-    ;
-
 projection: distinct? projectionField (',' projectionField)*;
 
-projectionField: (projectionFieldName | evaluatedExpression ) (K_AS? alias)?;
+projectionField: (projectionFieldName | valueExpr ) (K_AS? alias)?;
 
 projectionFieldName: (qualifier '.')? fieldName;
 
@@ -66,7 +56,7 @@ conditionalJoinType
 //		| fullJoin
 
 
-conditionalJoinTarget: dataSource K_ON expr;
+conditionalJoinTarget: dataSource K_ON whereExpr;
 
 unconditionalJoinTarget: dataSource;
 

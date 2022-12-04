@@ -203,9 +203,10 @@ func TestSimpleWhereLikeExpression(t *testing.T) {
 	g := NewGomegaWithT(t)
 	s := ParseSQL("SELECT col FROM Table1 WHERE col2 NOT LIKE 'abc%'")
 	g.Expect(s.Filter).ToNot(BeNil())
+	p := "abc%"
 	g.Expect(s.Filter).To(BeEquivalentTo(LikeExpression{
 		What:    Term{Name: &CompoundName{Name: Identifier("col2")}},
-		Pattern: LikePattern{Text: "abc%"},
+		Pattern: Term{Value: &Literal{StringValue: &p}},
 		NotLike: true,
 	}))
 }
@@ -218,10 +219,10 @@ func TestLikeWithExpression(t *testing.T) {
 	v2 := "bcd"
 	g.Expect(s.Filter).To(BeEquivalentTo(LikeExpression{
 		What: Term{Name: &CompoundName{Name: Identifier("col2")}},
-		Pattern: LikePattern{Expr: BinaryExpression{LHS: Term{Value: &Literal{StringValue: &v1}},
+		Pattern: BinaryExpression{LHS: Term{Value: &Literal{StringValue: &v1}},
 			RHS:      Term{Value: &Literal{StringValue: &v2}},
 			Operator: "+",
-		}},
+		},
 		NotLike: false,
 	}))
 }
@@ -230,9 +231,10 @@ func TestSimpleWhereMatchExpression(t *testing.T) {
 	g := NewGomegaWithT(t)
 	s := ParseSQL("SELECT col FROM Table1 WHERE col2 MATCH 'abc.*'")
 	g.Expect(s.Filter).ToNot(BeNil())
+	p := "abc.*"
 	g.Expect(s.Filter).To(BeEquivalentTo(MatchExpression{
 		What:    Term{Name: &CompoundName{Name: Identifier("col2")}},
-		Pattern: LikePattern{Text: "abc.*"},
+		Pattern: Term{Value: &Literal{StringValue: &p}},
 		Not:     false,
 	}))
 }
@@ -280,10 +282,10 @@ func TestInListExpression(t *testing.T) {
 		What:  Term{Name: &CompoundName{Name: Identifier("col2")}},
 		NotIn: true,
 		List: ListLiteral{
-			Values: []ListValue{
-				{Element: &Term{Value: &Literal{NumericValue: &v1}}},
-				{Element: &Term{Value: &Literal{NumericValue: &v2}}},
-				{Element: &Term{Value: &Literal{NumericValue: &v3}}},
+			Values: []Expression{
+				Term{Value: &Literal{NumericValue: &v1}},
+				Term{Value: &Literal{NumericValue: &v2}},
+				Term{Value: &Literal{NumericValue: &v3}},
 			},
 		},
 	}))

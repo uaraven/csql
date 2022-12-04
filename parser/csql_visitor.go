@@ -23,8 +23,14 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#term.
 	VisitTerm(ctx *TermContext) interface{}
 
-	// Visit a parse tree produced by CsqlParser#evaluation.
-	VisitEvaluation(ctx *EvaluationContext) interface{}
+	// Visit a parse tree produced by CsqlParser#valueTerm.
+	VisitValueTerm(ctx *ValueTermContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#valueBinaryExpr.
+	VisitValueBinaryExpr(ctx *ValueBinaryExprContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#valueParensExpr.
+	VisitValueParensExpr(ctx *ValueParensExprContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#condition.
 	VisitCondition(ctx *ConditionContext) interface{}
@@ -53,6 +59,9 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#parensExpr.
 	VisitParensExpr(ctx *ParensExprContext) interface{}
 
+	// Visit a parse tree produced by CsqlParser#valueExprItem.
+	VisitValueExprItem(ctx *ValueExprItemContext) interface{}
+
 	// Visit a parse tree produced by CsqlParser#betweenExpr.
 	VisitBetweenExpr(ctx *BetweenExprContext) interface{}
 
@@ -64,27 +73,6 @@ type CsqlVisitor interface {
 
 	// Visit a parse tree produced by CsqlParser#distinct.
 	VisitDistinct(ctx *DistinctContext) interface{}
-
-	// Visit a parse tree produced by CsqlParser#listValueBinaryExpr.
-	VisitListValueBinaryExpr(ctx *ListValueBinaryExprContext) interface{}
-
-	// Visit a parse tree produced by CsqlParser#listValueTerm.
-	VisitListValueTerm(ctx *ListValueTermContext) interface{}
-
-	// Visit a parse tree produced by CsqlParser#likePatternBinaryExpr.
-	VisitLikePatternBinaryExpr(ctx *LikePatternBinaryExprContext) interface{}
-
-	// Visit a parse tree produced by CsqlParser#likePatternText.
-	VisitLikePatternText(ctx *LikePatternTextContext) interface{}
-
-	// Visit a parse tree produced by CsqlParser#evalTerm.
-	VisitEvalTerm(ctx *EvalTermContext) interface{}
-
-	// Visit a parse tree produced by CsqlParser#evalBinaryExpression.
-	VisitEvalBinaryExpression(ctx *EvalBinaryExpressionContext) interface{}
-
-	// Visit a parse tree produced by CsqlParser#evalParens.
-	VisitEvalParens(ctx *EvalParensContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#projection.
 	VisitProjection(ctx *ProjectionContext) interface{}
