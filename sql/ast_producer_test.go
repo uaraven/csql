@@ -82,6 +82,24 @@ func TestSimpleQueryWithQualifiedProjection(t *testing.T) {
 	g.Expect(s.From.TableName.Alias).To(BeNil())
 }
 
+func TestSimpleQueryWithNegativeLiteral(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT col, -2 FROM Table")
+
+	g.Expect(s.Projection.Distinct).To(BeFalse())
+	g.Expect(s.Projection.ProjectionFields).To(HaveLen(2))
+	value := "-2"
+	g.Expect(s.Projection.ProjectionFields).To(BeEquivalentTo(
+		[]ProjectionField{
+			{NamedField: &NamedProjectionField{Name: Identifier("col")}},
+			{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{NumericValue: &value}}}},
+		}))
+
+	g.Expect(s.From.TableName).ToNot(BeNil())
+	g.Expect(s.From.TableName.Name).To(Equal(Identifier("Table")))
+	g.Expect(s.From.TableName.Alias).To(BeNil())
+}
+
 func TestSimpleErrorQuery(t *testing.T) {
 	g := NewGomegaWithT(t)
 	g.Expect(func() { ParseSQL("SELECT col FROM") }).To(Panic())
