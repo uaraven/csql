@@ -2,10 +2,19 @@
 
 csql is a small tool allowing to run SQL queries on CSV files.
 
-csql mostly adheres to ANSI SQL syntax<sup> * </sup> and supports all basic operations, including
-joins and aggregations<sup> ** </sup>
+csql supports basic<sup>**</sup> `SELECT` statement features, including:
+
+- Joins
+  - Left, Right, Cross and Inner
+- LIKE conditions
+- MATCH conditions (like LIKE, but using regular expressions)
+- BETWEEN conditions
+- IN (...list...) conditions
+- Logical operators `AND`, `OR` and `NOT`
+- LIMIT and ORDER BY
+- Table and column renaming (`SELECT t.column as col FROM "Table.csv" T`)
+
+csql automatically converts values to integer and float types and nulls. 
 
 ---
-<sup> * </sup> Only SELECT queries are supported, not every ANSI SQL expression and function is supported  
-
-<sup>**</sup> Full outer join and aggregations are not supported yet in version 0.1.x
+<sup>**</sup> Full outer join, union, IN (select) and aggregations are not supported yet in version 0.1.x
