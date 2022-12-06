@@ -47,6 +47,10 @@ func (ae AstTransformer) TransformSelect(ast *Select) core.DataSource {
 		ds = core.NewFilteredDataSource(ds, where)
 	}
 
+	if ast.Limit > 0 {
+		ds = core.NewOrderedDatasource(ds, []core.OrderByField{}, int(ast.Limit))
+	}
+
 	projection := ae.TransformProjection(ast.Projection.ProjectionFields)
 
 	return core.NewProjectionDataSource(ds, projection, ast.Projection.Distinct)

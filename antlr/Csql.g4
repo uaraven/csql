@@ -86,7 +86,7 @@ dataSource:
 
 sources: dataSource (',' dataSource)*;
 
-selectStatement: K_SELECT projection K_FROM sources where?;
+selectStatement: K_SELECT projection K_FROM sources where? limit?;
 
 signedNumber: ( '+' | '-')? NUMERIC_LITERAL;
 
@@ -105,6 +105,10 @@ compoundName: (qualifier '.')? name;
 name: IDENTIFIER;
 
 qualifier: IDENTIFIER;
+
+limit: K_LIMIT limitValue;
+
+limitValue: NUMERIC_LITERAL;
 
 K_AND: A N D;
 K_AS: A S;
@@ -131,6 +135,7 @@ K_ON: O N;
 K_DISTINCT: D I S T I N C T;
 K_LIKE: L I K E;
 K_FULL: F U L L;
+K_LIMIT: L I M I T;
 
 IDENTIFIER: SIMPLE_IDENTIFIER | QUOTED_IDENTIFIER;
 

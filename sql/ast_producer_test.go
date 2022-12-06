@@ -446,3 +446,18 @@ func TestSelectNull(t *testing.T) {
 		},
 	}))
 }
+
+func TestSelectLimit(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT NULL FROM Table1")
+	g.Expect(s.Limit).To(Equal(int32(0)))
+
+	s = ParseSQL("SELECT NULL FROM Table1 LIMIT 10")
+
+	g.Expect(s.Limit).To(Equal(int32(10)))
+
+	g.Expect(func() {
+		ParseSQL("SELECT NULL FROM Table1 LIMIT '10'")
+	}).To(Panic())
+
+}

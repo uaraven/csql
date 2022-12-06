@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 	"github.com/uaraven/csql/parser"
+	"strconv"
 	"strings"
 )
 
@@ -134,7 +135,26 @@ func (c CsqlVisitorImpl) VisitSelectStatement(ctx *parser.SelectStatementContext
 		e := ctx.Where().Accept(c).(Expression)
 		astSelect.Filter = e
 	}
+	if ctx.Limit() != nil {
+		astSelect.Limit = ctx.Limit().Accept(c).(int32)
+	}
 	return astSelect
+}
+
+func (c CsqlVisitorImpl) VisitLimit(ctx *parser.LimitContext) interface{} {
+	return ctx.LimitValue().Accept(c)
+}
+
+func (c CsqlVisitorImpl) VisitLimitValue(ctx *parser.LimitValueContext) interface{} {
+	limitValue, err := strconv.ParseInt(ctx.GetText(), 10, 32)
+	if err != nil {
+		panic(ParsingError{
+			line:    ctx.GetStart().GetLine(),
+			column:  ctx.GetStart().GetColumn(),
+			message: fmt.Sprintf("Unexpected: %v, expected unsigned integer", ctx.GetText()),
+		})
+	}
+	return int32(limitValue)
 }
 
 // VisitProjection visits a parse tree produced by CsqlParser#projection.

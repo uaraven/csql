@@ -151,4 +151,10 @@ type CsqlVisitor interface {
 
 	// Visit a parse tree produced by CsqlParser#qualifier.
 	VisitQualifier(ctx *QualifierContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#limit.
+	VisitLimit(ctx *LimitContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#limitValue.
+	VisitLimitValue(ctx *LimitValueContext) interface{}
 }

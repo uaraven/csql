@@ -45,11 +45,13 @@ func (cn CompoundName) String() string {
 }
 
 // Select represents a SELECT query. Select consists of
-// projection, Sources AKA "FROM" and Filter expressions
+// projection, Sources AKA "FROM" and Filter expressions,
+// Limit and OrderBy.
 type Select struct {
 	Projection SelectProjection
 	From       DataSource
 	Filter     Expression
+	Limit      int32 // 0 means no limit
 }
 
 func (sel Select) String() string {

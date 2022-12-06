@@ -199,3 +199,11 @@ func (v *BaseCsqlVisitor) VisitName(ctx *NameContext) interface{} {
 func (v *BaseCsqlVisitor) VisitQualifier(ctx *QualifierContext) interface{} {
 	return v.VisitChildren(ctx)
 }
+
+func (v *BaseCsqlVisitor) VisitLimit(ctx *LimitContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitLimitValue(ctx *LimitValueContext) interface{} {
+	return v.VisitChildren(ctx)
+}
