@@ -86,7 +86,7 @@ dataSource:
 
 sources: dataSource (',' dataSource)*;
 
-selectStatement: K_SELECT projection K_FROM sources where? limit? orderBy?;
+selectStatement: K_SELECT projection K_FROM sources where? orderBy? limit?;
 
 signedNumber: ( '+' | '-')? NUMERIC_LITERAL;
 

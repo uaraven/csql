@@ -178,9 +178,9 @@ func csqlParserInit() {
 		1, 0, 0, 0, 268, 269, 1, 0, 0, 0, 269, 43, 1, 0, 0, 0, 270, 268, 1, 0,
 		0, 0, 271, 272, 5, 29, 0, 0, 272, 273, 3, 18, 9, 0, 273, 274, 5, 22, 0,
 		0, 274, 276, 3, 42, 21, 0, 275, 277, 3, 14, 7, 0, 276, 275, 1, 0, 0, 0,
-		276, 277, 1, 0, 0, 0, 277, 279, 1, 0, 0, 0, 278, 280, 3, 64, 32, 0, 279,
+		276, 277, 1, 0, 0, 0, 277, 279, 1, 0, 0, 0, 278, 280, 3, 68, 34, 0, 279,
 		278, 1, 0, 0, 0, 279, 280, 1, 0, 0, 0, 280, 282, 1, 0, 0, 0, 281, 283,
-		3, 68, 34, 0, 282, 281, 1, 0, 0, 0, 282, 283, 1, 0, 0, 0, 283, 45, 1, 0,
+		3, 64, 32, 0, 282, 281, 1, 0, 0, 0, 282, 283, 1, 0, 0, 0, 283, 45, 1, 0,
 		0, 0, 284, 286, 7, 3, 0, 0, 285, 284, 1, 0, 0, 0, 285, 286, 1, 0, 0, 0,
 		286, 287, 1, 0, 0, 0, 287, 288, 5, 52, 0, 0, 288, 47, 1, 0, 0, 0, 289,
 		290, 5, 53, 0, 0, 290, 49, 1, 0, 0, 0, 291, 292, 5, 26, 0, 0, 292, 51,
@@ -4676,22 +4676,6 @@ func (s *SelectStatementContext) Where() IWhereContext {
 	return t.(IWhereContext)
 }
 
-func (s *SelectStatementContext) Limit() ILimitContext {
-	var t antlr.RuleContext
-	for _, ctx := range s.GetChildren() {
-		if _, ok := ctx.(ILimitContext); ok {
-			t = ctx.(antlr.RuleContext)
-			break
-		}
-	}
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(ILimitContext)
-}
-
 func (s *SelectStatementContext) OrderBy() IOrderByContext {
 	var t antlr.RuleContext
 	for _, ctx := range s.GetChildren() {
@@ -4706,6 +4690,22 @@ func (s *SelectStatementContext) OrderBy() IOrderByContext {
 	}
 
 	return t.(IOrderByContext)
+}
+
+func (s *SelectStatementContext) Limit() ILimitContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(ILimitContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(ILimitContext)
 }
 
 func (s *SelectStatementContext) GetRuleContext() antlr.RuleContext {
@@ -4782,10 +4782,10 @@ func (p *CsqlParser) SelectStatement() (localctx ISelectStatementContext) {
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
-	if _la == CsqlParserK_LIMIT {
+	if _la == CsqlParserK_ORDER {
 		{
 			p.SetState(278)
-			p.Limit()
+			p.OrderBy()
 		}
 
 	}
@@ -4793,10 +4793,10 @@ func (p *CsqlParser) SelectStatement() (localctx ISelectStatementContext) {
 	p.GetErrorHandler().Sync(p)
 	_la = p.GetTokenStream().LA(1)
 
-	if _la == CsqlParserK_ORDER {
+	if _la == CsqlParserK_LIMIT {
 		{
 			p.SetState(281)
-			p.OrderBy()
+			p.Limit()
 		}
 
 	}
