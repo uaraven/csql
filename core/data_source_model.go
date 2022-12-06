@@ -61,6 +61,7 @@ type Row interface {
 	Values() []Value
 	Get(string) funky.Option[Value]
 	Count() int
+	// GetByIndex returns the value of the column by its index. Indexes start with 1
 	GetByIndex(index int) Value
 	Satisfies(c Condition) bool
 	Key() string

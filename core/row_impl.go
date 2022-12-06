@@ -91,7 +91,7 @@ func (r rowImpl) Count() int {
 }
 
 func (r rowImpl) GetByIndex(index int) Value {
-	return r.values[index]
+	return r.values[index-1]
 }
 
 func (r rowImpl) Get(column string) funky.Option[Value] {

@@ -60,12 +60,12 @@ func TestAstExecutor_SelectProjection(t *testing.T) {
 	g.Expect(ds.Header().ColumnCount()).To(Equal(2))
 	rows := core.ReadAllRows(ds)
 	g.Expect(rows).To(HaveLen(4))
-	g.Expect(rows[0].GetByIndex(0)).To(Equal(core.NewStringValue("John")))
-	g.Expect(rows[0].GetByIndex(1)).To(Equal(core.NewFloatValue(2.0)))
-	g.Expect(rows[1].GetByIndex(0)).To(Equal(core.NewStringValue("James")))
-	g.Expect(rows[1].GetByIndex(1)).To(Equal(core.NewFloatValue(1.2 * 2)))
-	g.Expect(rows[3].GetByIndex(0)).To(Equal(core.NewStringValue("James")))
-	g.Expect(rows[3].GetByIndex(1)).To(Equal(core.NewFloatValue(1.6 * 2)))
+	g.Expect(rows[0].GetByIndex(1)).To(Equal(core.NewStringValue("John")))
+	g.Expect(rows[0].GetByIndex(2)).To(Equal(core.NewFloatValue(2.0)))
+	g.Expect(rows[1].GetByIndex(1)).To(Equal(core.NewStringValue("James")))
+	g.Expect(rows[1].GetByIndex(2)).To(Equal(core.NewFloatValue(1.2 * 2)))
+	g.Expect(rows[3].GetByIndex(1)).To(Equal(core.NewStringValue("James")))
+	g.Expect(rows[3].GetByIndex(2)).To(Equal(core.NewFloatValue(1.6 * 2)))
 
 	g.Expect(rows[0].Get("w2").IsPresent()).To(BeTrue())
 }
@@ -201,8 +201,8 @@ func TestAstExecutor_Nulls(t *testing.T) {
 
 	rows = ExecuteSql(`select id, null from "../test-data/nulls.csv" where name = 'Brbra'`)
 	g.Expect(rows).To(HaveLen(1))
-	g.Expect(rows[0].GetByIndex(0)).To(Equal(core.NewIntValue(1)))
-	g.Expect(rows[0].GetByIndex(1)).To(Equal(core.NewNullValue()))
+	g.Expect(rows[0].GetByIndex(1)).To(Equal(core.NewIntValue(1)))
+	g.Expect(rows[0].GetByIndex(2)).To(Equal(core.NewNullValue()))
 }
 
 func TestAstExecutor_Logical(t *testing.T) {
@@ -334,4 +334,32 @@ func TestAstExecutor_In(t *testing.T) {
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(2)))
+}
+
+func TestAstTransformer_Limit(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`select * from "../test-data/employees.csv" limit 2`)
+	g.Expect(rows).To(HaveLen(2))
+	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
+	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(2)))
+}
+
+func TestAstTransformer_OrderBy(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`select * from "../test-data/employees.csv" order by width`)
+	g.Expect(rows).To(HaveLen(4))
+	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
+	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(2)))
+	g.Expect(rows[2].Get("id").Value()).To(Equal(core.NewIntValue(4)))
+	g.Expect(rows[3].Get("id").Value()).To(Equal(core.NewIntValue(3)))
+
+	rows = ExecuteSql(`select * from "../test-data/employees.csv" order by last_name asc, 1 desc`)
+	g.Expect(rows).To(HaveLen(4))
+	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(3)))
+	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(4)))
+	g.Expect(rows[2].Get("id").Value()).To(Equal(core.NewIntValue(2)))
+	g.Expect(rows[3].Get("id").Value()).To(Equal(core.NewIntValue(1)))
+
 }

@@ -36,10 +36,10 @@ func TestOrderedDatasource_OrderBy(t *testing.T) {
 	rows := ReadAllRows(ods)
 
 	g.Expect(rows).To(HaveLen(4))
-	g.Expect(rows[0].GetByIndex(0).Value()).To(Equal(int64(3)))
-	g.Expect(rows[1].GetByIndex(0).Value()).To(Equal(int64(2)))
-	g.Expect(rows[2].GetByIndex(0).Value()).To(Equal(int64(1)))
-	g.Expect(rows[3].GetByIndex(0).Value()).To(Equal(int64(4)))
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(int64(3)))
+	g.Expect(rows[1].GetByIndex(1).Value()).To(Equal(int64(2)))
+	g.Expect(rows[2].GetByIndex(1).Value()).To(Equal(int64(1)))
+	g.Expect(rows[3].GetByIndex(1).Value()).To(Equal(int64(4)))
 }
 
 func TestOrderedDatasource_OrderByDesc(t *testing.T) {
@@ -54,10 +54,10 @@ func TestOrderedDatasource_OrderByDesc(t *testing.T) {
 	rows := ReadAllRows(ods)
 
 	g.Expect(rows).To(HaveLen(4))
-	g.Expect(rows[0].GetByIndex(0).Value()).To(Equal(int64(4)))
-	g.Expect(rows[1].GetByIndex(0).Value()).To(Equal(int64(1)))
-	g.Expect(rows[2].GetByIndex(0).Value()).To(Equal(int64(2)))
-	g.Expect(rows[3].GetByIndex(0).Value()).To(Equal(int64(3)))
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(int64(4)))
+	g.Expect(rows[1].GetByIndex(1).Value()).To(Equal(int64(1)))
+	g.Expect(rows[2].GetByIndex(1).Value()).To(Equal(int64(2)))
+	g.Expect(rows[3].GetByIndex(1).Value()).To(Equal(int64(3)))
 }
 
 func TestOrderedDatasource_OrderByTwoFields(t *testing.T) {
@@ -73,10 +73,10 @@ func TestOrderedDatasource_OrderByTwoFields(t *testing.T) {
 	rows := ReadAllRows(ods)
 
 	g.Expect(rows).To(HaveLen(4))
-	g.Expect(rows[0].GetByIndex(0).Value()).To(Equal(int64(3)))
-	g.Expect(rows[1].GetByIndex(0).Value()).To(Equal(int64(4)))
-	g.Expect(rows[2].GetByIndex(0).Value()).To(Equal(int64(1)))
-	g.Expect(rows[3].GetByIndex(0).Value()).To(Equal(int64(2)))
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(int64(3)))
+	g.Expect(rows[1].GetByIndex(1).Value()).To(Equal(int64(4)))
+	g.Expect(rows[2].GetByIndex(1).Value()).To(Equal(int64(1)))
+	g.Expect(rows[3].GetByIndex(1).Value()).To(Equal(int64(2)))
 }
 
 func TestOrderedDatasource_OrderByIndex(t *testing.T) {
@@ -85,17 +85,17 @@ func TestOrderedDatasource_OrderByIndex(t *testing.T) {
 	ds := loadTestMemDatasource("people")
 
 	ods := NewOrderedDatasource(ds, []OrderByField{
-		NewOrderByIndex(3, false),
-		NewOrderByIndex(2, true),
+		NewOrderByIndex(4, false), // last_name
+		NewOrderByIndex(3, true),  // first_name
 	}, 0)
 
 	rows := ReadAllRows(ods)
 
 	g.Expect(rows).To(HaveLen(4))
-	g.Expect(rows[0].GetByIndex(0).Value()).To(Equal(int64(3)))
-	g.Expect(rows[1].GetByIndex(0).Value()).To(Equal(int64(4)))
-	g.Expect(rows[2].GetByIndex(0).Value()).To(Equal(int64(1)))
-	g.Expect(rows[3].GetByIndex(0).Value()).To(Equal(int64(2)))
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(int64(3)))
+	g.Expect(rows[1].GetByIndex(1).Value()).To(Equal(int64(4)))
+	g.Expect(rows[2].GetByIndex(1).Value()).To(Equal(int64(1)))
+	g.Expect(rows[3].GetByIndex(1).Value()).To(Equal(int64(2)))
 }
 
 func TestOrderedDatasource_Limit(t *testing.T) {
@@ -108,8 +108,8 @@ func TestOrderedDatasource_Limit(t *testing.T) {
 	rows := ReadAllRows(ods)
 
 	g.Expect(rows).To(HaveLen(2))
-	g.Expect(rows[0].GetByIndex(0).Value()).To(Equal(int64(1)))
-	g.Expect(rows[1].GetByIndex(0).Value()).To(Equal(int64(2)))
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(int64(1)))
+	g.Expect(rows[1].GetByIndex(1).Value()).To(Equal(int64(2)))
 }
 
 func TestOrderedDatasource_OrderByIndexLimit(t *testing.T) {
@@ -118,14 +118,14 @@ func TestOrderedDatasource_OrderByIndexLimit(t *testing.T) {
 	ds := loadTestMemDatasource("people")
 
 	ods := NewOrderedDatasource(ds, []OrderByField{
-		NewOrderByIndex(3, false),
-		NewOrderByIndex(2, false),
+		NewOrderByIndex(4, false), // last_name
+		NewOrderByIndex(3, false), // first_name
 	}, 3)
 
 	rows := ReadAllRows(ods)
 
 	g.Expect(rows).To(HaveLen(3))
-	g.Expect(rows[0].GetByIndex(0).Value()).To(Equal(int64(3)))
-	g.Expect(rows[1].GetByIndex(0).Value()).To(Equal(int64(4)))
-	g.Expect(rows[2].GetByIndex(0).Value()).To(Equal(int64(2)))
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(int64(3)))
+	g.Expect(rows[1].GetByIndex(1).Value()).To(Equal(int64(4)))
+	g.Expect(rows[2].GetByIndex(1).Value()).To(Equal(int64(2)))
 }

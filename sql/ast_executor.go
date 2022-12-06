@@ -47,8 +47,12 @@ func (ae AstTransformer) TransformSelect(ast *Select) core.DataSource {
 		ds = core.NewFilteredDataSource(ds, where)
 	}
 
-	if ast.Limit > 0 {
-		ds = core.NewOrderedDatasource(ds, []core.OrderByField{}, int(ast.Limit))
+	var orderBy []core.OrderByField
+	if ast.OrderBy != nil {
+		orderBy = ae.TransformOrderByExpression(ast.OrderBy)
+	}
+	if ast.Limit > 0 || len(orderBy) > 0 {
+		ds = core.NewOrderedDatasource(ds, orderBy, int(ast.Limit))
 	}
 
 	projection := ae.TransformProjection(ast.Projection.ProjectionFields)
@@ -274,5 +278,22 @@ func (ae AstTransformer) TransformInListExpression(cond InListExpression) core.C
 		return core.NewNot(inExpr)
 	} else {
 		return inExpr
+	}
+}
+
+func (ae AstTransformer) TransformOrderByExpression(orderBy *OrderByExpression) []core.OrderByField {
+	var result []core.OrderByField
+	for _, obf := range orderBy.OrderFields {
+		result = append(result, ae.TransformOrderByField(obf))
+	}
+	return result
+}
+
+func (ae AstTransformer) TransformOrderByField(obf OrderByField) core.OrderByField {
+	if obf.FieldIndex > 0 {
+		return core.NewOrderByIndex(int(obf.FieldIndex), obf.Descending)
+	} else {
+		fn := ae.TransformCompoundName(obf.FieldName).(core.Identifiable)
+		return core.NewOrderBy(fn.Identifier(), obf.Descending)
 	}
 }

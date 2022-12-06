@@ -207,3 +207,15 @@ func (v *BaseCsqlVisitor) VisitLimit(ctx *LimitContext) interface{} {
 func (v *BaseCsqlVisitor) VisitLimitValue(ctx *LimitValueContext) interface{} {
 	return v.VisitChildren(ctx)
 }
+
+func (v *BaseCsqlVisitor) VisitOrderBy(ctx *OrderByContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitOrderByField(ctx *OrderByFieldContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitFieldIndex(ctx *FieldIndexContext) interface{} {
+	return v.VisitChildren(ctx)
+}

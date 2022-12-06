@@ -157,4 +157,13 @@ type CsqlVisitor interface {
 
 	// Visit a parse tree produced by CsqlParser#limitValue.
 	VisitLimitValue(ctx *LimitValueContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#orderBy.
+	VisitOrderBy(ctx *OrderByContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#orderByField.
+	VisitOrderByField(ctx *OrderByFieldContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#fieldIndex.
+	VisitFieldIndex(ctx *FieldIndexContext) interface{}
 }

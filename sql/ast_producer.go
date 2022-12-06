@@ -103,6 +103,18 @@ func parseIdentifier(identifier string) Identifier {
 	return Identifier(identifier)
 }
 
+func parseUnsignedIntValue(token antlr.Token, text string) interface{} {
+	limitValue, err := strconv.ParseInt(text, 10, 32)
+	if err != nil {
+		panic(ParsingError{
+			line:    token.GetLine(),
+			column:  token.GetColumn(),
+			message: fmt.Sprintf("Unexpected: %v, expected unsigned integer", text),
+		})
+	}
+	return int32(limitValue)
+}
+
 // NewCsqlVisitor creates new instance of the visitor
 func NewCsqlVisitor() parser.CsqlVisitor {
 	baseVisitor := parser.BaseCsqlVisitor{}
@@ -138,6 +150,10 @@ func (c CsqlVisitorImpl) VisitSelectStatement(ctx *parser.SelectStatementContext
 	if ctx.Limit() != nil {
 		astSelect.Limit = ctx.Limit().Accept(c).(int32)
 	}
+	if ctx.OrderBy() != nil {
+		obe := ctx.OrderBy().Accept(c).(OrderByExpression)
+		astSelect.OrderBy = &obe
+	}
 	return astSelect
 }
 
@@ -146,15 +162,33 @@ func (c CsqlVisitorImpl) VisitLimit(ctx *parser.LimitContext) interface{} {
 }
 
 func (c CsqlVisitorImpl) VisitLimitValue(ctx *parser.LimitValueContext) interface{} {
-	limitValue, err := strconv.ParseInt(ctx.GetText(), 10, 32)
-	if err != nil {
-		panic(ParsingError{
-			line:    ctx.GetStart().GetLine(),
-			column:  ctx.GetStart().GetColumn(),
-			message: fmt.Sprintf("Unexpected: %v, expected unsigned integer", ctx.GetText()),
-		})
+	return parseUnsignedIntValue(ctx.GetStart(), ctx.GetText())
+}
+
+func (c CsqlVisitorImpl) VisitOrderBy(ctx *parser.OrderByContext) interface{} {
+	obe := OrderByExpression{OrderFields: []OrderByField{}}
+	for idx, _ := range ctx.AllOrderByField() {
+		obe.OrderFields = append(obe.OrderFields, ctx.OrderByField(idx).Accept(c).(OrderByField))
 	}
-	return int32(limitValue)
+	return obe
+}
+
+func (c CsqlVisitorImpl) VisitOrderByField(ctx *parser.OrderByFieldContext) interface{} {
+	obf := OrderByField{}
+	if ctx.CompoundName() != nil {
+		fieldName := ctx.CompoundName().Accept(c).(CompoundName)
+		obf.FieldName = &fieldName
+	} else {
+		obf.FieldIndex = ctx.FieldIndex().Accept(c).(int32)
+	}
+	if ctx.K_DESC() != nil {
+		obf.Descending = true
+	}
+	return obf
+}
+
+func (c CsqlVisitorImpl) VisitFieldIndex(ctx *parser.FieldIndexContext) interface{} {
+	return parseUnsignedIntValue(ctx.GetStart(), ctx.GetText())
 }
 
 // VisitProjection visits a parse tree produced by CsqlParser#projection.

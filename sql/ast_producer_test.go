@@ -459,5 +459,15 @@ func TestSelectLimit(t *testing.T) {
 	g.Expect(func() {
 		ParseSQL("SELECT NULL FROM Table1 LIMIT '10'")
 	}).To(Panic())
+}
 
+func TestSelectOrderBy(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT a, b, c FROM Table1 ORDER BY a desc, 2, Table1.c")
+	q := Identifier("Table1")
+	g.Expect(s.OrderBy).To(BeEquivalentTo(&OrderByExpression{OrderFields: []OrderByField{
+		{FieldName: &CompoundName{Name: Identifier("a")}, FieldIndex: 0, Descending: true},
+		{FieldName: nil, FieldIndex: 2, Descending: false},
+		{FieldName: &CompoundName{Qualifier: &q, Name: Identifier("c")}, FieldIndex: 0, Descending: false},
+	}}))
 }

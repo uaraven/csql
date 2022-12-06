@@ -21,6 +21,8 @@ package sql
 
 import (
 	"fmt"
+	"github.com/uaraven/csql/funky"
+	"strconv"
 	"strings"
 )
 
@@ -52,6 +54,7 @@ type Select struct {
 	From       DataSource
 	Filter     Expression
 	Limit      int32 // 0 means no limit
+	OrderBy    *OrderByExpression
 }
 
 func (sel Select) String() string {
@@ -110,6 +113,36 @@ func (pf ProjectionField) String() string {
 		sb.WriteString(string(*pf.Alias))
 	}
 	return sb.String()
+}
+
+type OrderByField struct {
+	FieldName  *CompoundName
+	FieldIndex int32 // 0 means no index
+	Descending bool
+}
+
+func (obf OrderByField) String() string {
+	var sb strings.Builder
+	if obf.FieldName != nil {
+		sb.WriteString(obf.FieldName.String())
+	} else {
+		sb.WriteString(strconv.FormatInt(int64(obf.FieldIndex), 10))
+	}
+	if obf.Descending {
+		sb.WriteString(" DESC")
+	}
+	return sb.String()
+}
+
+type OrderByExpression struct {
+	OrderFields []OrderByField
+}
+
+func (obe OrderByExpression) String() string {
+	fieldNames := funky.Map(obe.OrderFields, func(o OrderByField) string {
+		return o.String()
+	})
+	return "ORDER BY " + strings.Join(fieldNames, ", ")
 }
 
 // SourceName is a name of a Table/Data file with optional Alias

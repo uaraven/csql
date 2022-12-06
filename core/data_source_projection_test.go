@@ -61,7 +61,7 @@ func TestProjectionDataSource_NextRowDistinct(t *testing.T) {
 
 	g.Expect(rows).To(HaveLen(3))
 	firstNames := funky.Map(rows, func(r Row) string {
-		return r.GetByIndex(0).Value().(string)
+		return r.GetByIndex(1).Value().(string)
 	})
 	g.Expect(firstNames).To(ContainElements("James", "John", "Jeremy"))
 }
@@ -111,13 +111,13 @@ func TestProjectionDataSource_WithUnnamedExpressions(t *testing.T) {
 	g.Expect(rows[0].Get("first_name").IsPresent()).To(BeTrue())
 	g.Expect(rows[0].Get("first_name").Value()).To(Equal(NewStringValue("John")))
 	g.Expect(rows[0].Get("sum").IsPresent()).To(BeFalse())
-	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(int64(11)))
+	g.Expect(rows[0].GetByIndex(2).Value()).To(Equal(int64(11)))
 
 	g.Expect(rows[3].Values()).To(HaveLen(2))
 	g.Expect(rows[3].Get("first_name").IsPresent()).To(BeTrue())
 	g.Expect(rows[3].Get("first_name").Value()).To(Equal(NewStringValue("James")))
 	g.Expect(rows[3].Get("sum").IsPresent()).To(BeFalse())
-	g.Expect(rows[3].GetByIndex(1).Value()).To(Equal(int64(14)))
+	g.Expect(rows[3].GetByIndex(2).Value()).To(Equal(int64(14)))
 }
 
 func TestProjectionDataSource_WithStar(t *testing.T) {
@@ -142,12 +142,12 @@ func TestProjectionDataSource_WithStar(t *testing.T) {
 	g.Expect(rows[0].Get("last_name").IsPresent()).To(BeTrue())
 	g.Expect(rows[0].Get("width").IsPresent()).To(BeTrue())
 	g.Expect(rows[0].Get("sum").IsPresent()).To(BeFalse())
-	g.Expect(rows[0].GetByIndex(5).Value()).To(Equal(int64(11)))
+	g.Expect(rows[0].GetByIndex(6).Value()).To(Equal(int64(11)))
 
 	g.Expect(rows[3].Get("first_name").IsPresent()).To(BeTrue())
 	g.Expect(rows[3].Get("first_name").Value()).To(Equal(NewStringValue("James")))
 	g.Expect(rows[3].Get("sum").IsPresent()).To(BeFalse())
-	g.Expect(rows[3].GetByIndex(5).Value()).To(Equal(int64(14)))
+	g.Expect(rows[3].GetByIndex(6).Value()).To(Equal(int64(14)))
 }
 
 func TestProjectionDataSource_WithTableStar(t *testing.T) {

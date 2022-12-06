@@ -64,7 +64,7 @@ fieldName: IDENTIFIER | '*';
 innerJoin: K_INNER? K_JOIN;
 leftJoin: K_LEFT K_OUTER? K_JOIN;
 rightJoin: K_RIGHT K_OUTER? K_JOIN;
-//fullJoin: K_FULL K_OUTER?;
+//fullJoin: K_FULL K_OUTER? K_JOIN;
 crossJoin: K_CROSS K_JOIN;
 
 conditionalJoinType
@@ -86,7 +86,7 @@ dataSource:
 
 sources: dataSource (',' dataSource)*;
 
-selectStatement: K_SELECT projection K_FROM sources where? limit?;
+selectStatement: K_SELECT projection K_FROM sources where? limit? orderBy?;
 
 signedNumber: ( '+' | '-')? NUMERIC_LITERAL;
 
@@ -109,6 +109,14 @@ qualifier: IDENTIFIER;
 limit: K_LIMIT limitValue;
 
 limitValue: NUMERIC_LITERAL;
+
+orderBy: K_ORDER K_BY orderByField (',' orderByField)*;
+
+orderByField
+    : (compoundName | fieldIndex) ( K_ASC | K_DESC )?
+    ;
+
+fieldIndex: NUMERIC_LITERAL;
 
 K_AND: A N D;
 K_AS: A S;
@@ -136,6 +144,10 @@ K_DISTINCT: D I S T I N C T;
 K_LIKE: L I K E;
 K_FULL: F U L L;
 K_LIMIT: L I M I T;
+K_ORDER: O R D E R;
+K_BY: B Y;
+K_ASC: A S C;
+K_DESC: D E S C;
 
 IDENTIFIER: SIMPLE_IDENTIFIER | QUOTED_IDENTIFIER;
 
