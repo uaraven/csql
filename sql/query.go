@@ -82,22 +82,6 @@ func (sp SelectProjection) String() string {
 	return sb.String()
 }
 
-// NamedProjectionField is one field in projection. ProjectionField consist of optional TableName
-// Field Name and optional Alias
-type NamedProjectionField struct {
-	TableName *Identifier
-	Name      Identifier
-}
-
-func (npf NamedProjectionField) String() string {
-	var sb strings.Builder
-	if npf.TableName != nil {
-		sb.WriteString(fmt.Sprintf("%v.", npf.TableName))
-	}
-	sb.WriteString(string(npf.Name))
-	return sb.String()
-}
-
 type EvaluatedProjectionField struct {
 	Expr Expression
 }
@@ -107,7 +91,7 @@ func (epf EvaluatedProjectionField) String() string {
 }
 
 type ProjectionField struct {
-	NamedField     *NamedProjectionField
+	NamedField     *CompoundName
 	EvaluatedField *EvaluatedProjectionField
 	Alias          *Identifier
 }

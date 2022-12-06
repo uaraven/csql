@@ -192,10 +192,10 @@ func (ae AstTransformer) TransformProjectionField(p ProjectionField) core.Projec
 	}
 }
 
-func (ae AstTransformer) TransformNamedProjectionField(field *NamedProjectionField, alias *Identifier) core.ProjectionColumn {
+func (ae AstTransformer) TransformNamedProjectionField(field *CompoundName, alias *Identifier) core.ProjectionColumn {
 	var sb strings.Builder
-	if field.TableName != nil {
-		sb.WriteString(string(*field.TableName))
+	if field.Qualifier != nil {
+		sb.WriteString(string(*field.Qualifier))
 		sb.WriteRune('.')
 	}
 	sb.WriteString(string(field.Name))
@@ -250,8 +250,7 @@ func (ae AstTransformer) TransformBinaryExpression(cond BinaryExpression) core.C
 	if cond.Operator == "||" {
 		return core.NewConcat(left, right)
 	} else {
-		var op core.BinaryOperator = core.BinaryOperator(cond.Operator[0])
-
+		var op = core.BinaryOperator(cond.Operator[0])
 		return core.NewExpression(op, left, right)
 	}
 }

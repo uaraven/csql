@@ -57,7 +57,7 @@ func TestSimpleQueryQuotedQualifiedIdentifier(t *testing.T) {
 	g.Expect(s.Projection.Distinct).To(BeFalse())
 	g.Expect(s.Projection.ProjectionFields).To(HaveLen(1))
 	identifier := Identifier("t")
-	g.Expect(s.Projection.ProjectionFields[0].NamedField.TableName).To(Equal(&identifier))
+	g.Expect(s.Projection.ProjectionFields[0].NamedField.Qualifier).To(Equal(&identifier))
 	g.Expect(s.Projection.ProjectionFields[0].NamedField.Name).To(Equal(Identifier("col")))
 
 	g.Expect(s.From.TableName).ToNot(BeNil())
@@ -72,8 +72,8 @@ func TestSimpleQueryWithQualifiedProjection(t *testing.T) {
 	g.Expect(s.Projection.Distinct).To(BeFalse())
 	g.Expect(s.Projection.ProjectionFields).To(HaveLen(1))
 	tName := Identifier("Table")
-	g.Expect(s.Projection.ProjectionFields[0].NamedField).To(BeEquivalentTo(&NamedProjectionField{
-		TableName: &tName,
+	g.Expect(s.Projection.ProjectionFields[0].NamedField).To(BeEquivalentTo(&CompoundName{
+		Qualifier: &tName,
 		Name:      Identifier("col"),
 	}))
 
@@ -91,7 +91,7 @@ func TestSimpleQueryWithNegativeLiteral(t *testing.T) {
 	vf := "-1e-10"
 	g.Expect(s.Projection.ProjectionFields).To(BeEquivalentTo(
 		[]ProjectionField{
-			{NamedField: &NamedProjectionField{Name: Identifier("col")}},
+			{NamedField: &CompoundName{Name: Identifier("col")}},
 			{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{NumericValue: &value}}}},
 			{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{NumericValue: &vf}}}},
 		}))
@@ -432,7 +432,7 @@ func TestSelectTableAlias(t *testing.T) {
 
 	renamedCol := Identifier("tcol")
 	g.Expect(s.Projection.ProjectionFields).To(BeEquivalentTo([]ProjectionField{
-		{NamedField: &NamedProjectionField{TableName: &tableAlias, Name: Identifier("col")}, Alias: &renamedCol},
+		{NamedField: &CompoundName{Qualifier: &tableAlias, Name: Identifier("col")}, Alias: &renamedCol},
 	}))
 }
 

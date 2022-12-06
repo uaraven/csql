@@ -43,7 +43,7 @@ func newErrors() *Errors {
 	}
 }
 
-func (e *Errors) SyntaxError(recognizer antlr.Recognizer, offendingSymbol interface{}, line, column int, msg string, ee antlr.RecognitionException) {
+func (e *Errors) SyntaxError(_ antlr.Recognizer, _ interface{}, line, column int, msg string, _ antlr.RecognitionException) {
 	e.errors = append(e.errors, ParsingError{
 		line:    line,
 		column:  column,
@@ -51,11 +51,11 @@ func (e *Errors) SyntaxError(recognizer antlr.Recognizer, offendingSymbol interf
 	})
 }
 
-func (e *Errors) ReportAmbiguity(recognizer antlr.Parser, dfa *antlr.DFA, startIndex, stopIndex int, exact bool, ambigAlts *antlr.BitSet, configs antlr.ATNConfigSet) {
+func (e *Errors) ReportAmbiguity(_ antlr.Parser, _ *antlr.DFA, _, _ int, _ bool, _ *antlr.BitSet, _ antlr.ATNConfigSet) {
 }
-func (e *Errors) ReportAttemptingFullContext(recognizer antlr.Parser, dfa *antlr.DFA, startIndex, stopIndex int, conflictingAlts *antlr.BitSet, configs antlr.ATNConfigSet) {
+func (e *Errors) ReportAttemptingFullContext(_ antlr.Parser, _ *antlr.DFA, _, _ int, _ *antlr.BitSet, _ antlr.ATNConfigSet) {
 }
-func (e *Errors) ReportContextSensitivity(recognizer antlr.Parser, dfa *antlr.DFA, startIndex, stopIndex, prediction int, configs antlr.ATNConfigSet) {
+func (e *Errors) ReportContextSensitivity(_ antlr.Parser, _ *antlr.DFA, _, _, _ int, _ antlr.ATNConfigSet) {
 }
 
 // ParseSQL reads the sql statement and converts it into an AST
@@ -286,7 +286,7 @@ func (c CsqlVisitorImpl) VisitWhere(ctx *parser.WhereContext) interface{} {
 func (c CsqlVisitorImpl) VisitProjectionField(ctx *parser.ProjectionFieldContext) interface{} {
 	var projectionField ProjectionField
 	if ctx.ProjectionFieldName() != nil {
-		field := ctx.ProjectionFieldName().Accept(c).(NamedProjectionField)
+		field := ctx.ProjectionFieldName().Accept(c).(CompoundName)
 		projectionField.NamedField = &field
 	} else {
 		expr := ctx.ValueExpr().Accept(c).(Expression)
@@ -303,14 +303,13 @@ func (c CsqlVisitorImpl) VisitProjectionField(ctx *parser.ProjectionFieldContext
 
 // VisitProjectionFieldName visits a parse tree produced by CsqlParser#projectionFieldName.
 func (c CsqlVisitorImpl) VisitProjectionFieldName(ctx *parser.ProjectionFieldNameContext) interface{} {
-	field := NamedProjectionField{}
+	field := CompoundName{
+		Name: ctx.FieldName().Accept(c).(Identifier),
+	}
 	if ctx.Qualifier() != nil {
 		tableName := ctx.Qualifier().Accept(c).(Identifier)
-		field.TableName = &tableName
-	} else {
-		field.TableName = nil
+		field.Qualifier = &tableName
 	}
-	field.Name = ctx.FieldName().Accept(c).(Identifier)
 	return field
 }
 
@@ -508,21 +507,21 @@ func (c CsqlVisitorImpl) VisitQualifier(ctx *parser.QualifierContext) interface{
 }
 
 // VisitInnerJoin visits a parse tree produced by CsqlParser#innerJoin.
-func (c CsqlVisitorImpl) VisitInnerJoin(ctx *parser.InnerJoinContext) interface{} {
+func (c CsqlVisitorImpl) VisitInnerJoin(_ *parser.InnerJoinContext) interface{} {
 	return InnerJoin
 }
 
 // VisitLeftJoin visits a parse tree produced by CsqlParser#leftJoin.
-func (c CsqlVisitorImpl) VisitLeftJoin(ctx *parser.LeftJoinContext) interface{} {
+func (c CsqlVisitorImpl) VisitLeftJoin(_ *parser.LeftJoinContext) interface{} {
 	return LeftOuterJoin
 }
 
 // VisitRightJoin visits a parse tree produced by CsqlParser#rightJoin.
-func (c CsqlVisitorImpl) VisitRightJoin(ctx *parser.RightJoinContext) interface{} {
+func (c CsqlVisitorImpl) VisitRightJoin(_ *parser.RightJoinContext) interface{} {
 	return RightOuterJoin
 }
 
 // VisitCrossJoin visits a parse tree produced by CsqlParser#crossJoin.
-func (c CsqlVisitorImpl) VisitCrossJoin(ctx *parser.CrossJoinContext) interface{} {
+func (c CsqlVisitorImpl) VisitCrossJoin(_ *parser.CrossJoinContext) interface{} {
 	return CrossJoin
 }
