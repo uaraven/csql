@@ -95,6 +95,9 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#rightJoin.
 	VisitRightJoin(ctx *RightJoinContext) interface{}
 
+	// Visit a parse tree produced by CsqlParser#fullJoin.
+	VisitFullJoin(ctx *FullJoinContext) interface{}
+
 	// Visit a parse tree produced by CsqlParser#crossJoin.
 	VisitCrossJoin(ctx *CrossJoinContext) interface{}
 

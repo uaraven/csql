@@ -412,6 +412,8 @@ func (c CsqlVisitorImpl) VisitConditionalJoinType(ctx *parser.ConditionalJoinTyp
 		return RightOuterJoin
 	} else if ctx.LeftJoin() != nil {
 		return LeftOuterJoin
+	} else if ctx.FullJoin() != nil {
+		return FullJoin
 	}
 	return InvalidJoin
 }
@@ -558,24 +560,4 @@ func (c CsqlVisitorImpl) VisitQualifier(ctx *parser.QualifierContext) interface{
 		return nil
 	}
 	return parseIdentifier(ctx.GetText())
-}
-
-// VisitInnerJoin visits a parse tree produced by CsqlParser#innerJoin.
-func (c CsqlVisitorImpl) VisitInnerJoin(_ *parser.InnerJoinContext) interface{} {
-	return InnerJoin
-}
-
-// VisitLeftJoin visits a parse tree produced by CsqlParser#leftJoin.
-func (c CsqlVisitorImpl) VisitLeftJoin(_ *parser.LeftJoinContext) interface{} {
-	return LeftOuterJoin
-}
-
-// VisitRightJoin visits a parse tree produced by CsqlParser#rightJoin.
-func (c CsqlVisitorImpl) VisitRightJoin(_ *parser.RightJoinContext) interface{} {
-	return RightOuterJoin
-}
-
-// VisitCrossJoin visits a parse tree produced by CsqlParser#crossJoin.
-func (c CsqlVisitorImpl) VisitCrossJoin(_ *parser.CrossJoinContext) interface{} {
-	return CrossJoin
 }

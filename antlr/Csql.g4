@@ -64,14 +64,14 @@ fieldName: IDENTIFIER | '*';
 innerJoin: K_INNER? K_JOIN;
 leftJoin: K_LEFT K_OUTER? K_JOIN;
 rightJoin: K_RIGHT K_OUTER? K_JOIN;
-//fullJoin: K_FULL K_OUTER? K_JOIN;
+fullJoin: K_FULL K_OUTER? K_JOIN;
 crossJoin: K_CROSS K_JOIN;
 
 conditionalJoinType
         : innerJoin
 		| leftJoin
-		| rightJoin;
-//		| fullJoin
+		| rightJoin
+		| fullJoin;
 
 
 conditionalJoinTarget: dataSource K_ON whereExpr;

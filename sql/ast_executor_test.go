@@ -184,6 +184,50 @@ func TestAstExecutor_InnerJoin(t *testing.T) {
 	g.Expect(rows[3].Get("dept.name").Value()).To(Equal(core.NewStringValue("The Grand Tour")))
 }
 
+func TestAstExecutor_FullOuterJoin(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	sql := ParseSQL(`select * from "../test-data/authors.csv" 
+    full join "../test-data/books.csv"
+	on authors.id = books.author_id`)
+
+	jds := Transform(&sql)
+
+	rows := core.ReadAllRows(jds)
+	g.Expect(rows).To(HaveLen(6))
+	g.Expect(rows[0].Values()).To(Equal([]core.Value{
+		core.NewIntValue(1),
+		core.NewStringValue("J.R.R. Tolkien"),
+		core.NewIntValue(1),
+		core.NewIntValue(1),
+		core.NewStringValue("Lord Of The Rings"),
+	}))
+
+	g.Expect(rows[1].Values()).To(Equal([]core.Value{
+		core.NewIntValue(2),
+		core.NewStringValue("Stephen King"),
+		core.NewIntValue(2),
+		core.NewIntValue(2),
+		core.NewStringValue("Carrie"),
+	}))
+
+	g.Expect(rows[4].Values()).To(Equal([]core.Value{
+		core.NewNullValue(),
+		core.NewNullValue(),
+		core.NewIntValue(4),
+		core.NewIntValue(6),
+		core.NewStringValue("Unwritten Book"),
+	}))
+
+	g.Expect(rows[5].Values()).To(Equal([]core.Value{
+		core.NewNullValue(),
+		core.NewNullValue(),
+		core.NewIntValue(5),
+		core.NewIntValue(6),
+		core.NewStringValue("Unwritten Book 2"),
+	}))
+}
+
 func TestAstExecutor_Nulls(t *testing.T) {
 	g := NewGomegaWithT(t)
 

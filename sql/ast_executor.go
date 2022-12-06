@@ -79,9 +79,11 @@ func (ae AstTransformer) TransformJoinedSource(ctx *JoinedSource) core.DataSourc
 	case InnerJoin:
 		return core.NewInnerJoin(left, right, ae.TransformExpression(ctx.Condition))
 	case LeftOuterJoin:
-		return core.NewLeftOuterJoinDatasource(left, right, ae.TransformExpression(ctx.Condition))
+		return core.NewLeftOuterJoin(left, right, ae.TransformExpression(ctx.Condition))
 	case RightOuterJoin:
-		return core.NewRightOuterJoinDatasource(left, right, ae.TransformExpression(ctx.Condition))
+		return core.NewRightOuterJoin(left, right, ae.TransformExpression(ctx.Condition))
+	case FullJoin:
+		return core.NewFullJoin(left, right, ae.TransformExpression(ctx.Condition))
 	}
 	// todo: Implement a proper panic
 	panic("Unsupported join type")

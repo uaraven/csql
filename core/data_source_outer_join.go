@@ -24,7 +24,7 @@ import (
 	"github.com/uaraven/csql/collection"
 )
 
-func NewLeftOuterJoinDatasource(left DataSource, right DataSource, joinOn Condition) DataSource {
+func NewLeftOuterJoin(left DataSource, right DataSource, joinOn Condition) DataSource {
 	mds := &memDataSource{
 		name:  fmt.Sprintf("(%s LEFT JOIN %s)", left.GetName(), right.GetName()),
 		index: -1,
@@ -34,7 +34,7 @@ func NewLeftOuterJoinDatasource(left DataSource, right DataSource, joinOn Condit
 	return mds
 }
 
-func NewRightOuterJoinDatasource(left DataSource, right DataSource, joinOn Condition) DataSource {
+func NewRightOuterJoin(left DataSource, right DataSource, joinOn Condition) DataSource {
 	mds := &memDataSource{
 		name:  fmt.Sprintf("(%s RIGHT JOIN %s)", left.GetName(), right.GetName()),
 		index: -1,

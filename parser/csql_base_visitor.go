@@ -124,6 +124,10 @@ func (v *BaseCsqlVisitor) VisitRightJoin(ctx *RightJoinContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseCsqlVisitor) VisitFullJoin(ctx *FullJoinContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseCsqlVisitor) VisitCrossJoin(ctx *CrossJoinContext) interface{} {
 	return v.VisitChildren(ctx)
 }
