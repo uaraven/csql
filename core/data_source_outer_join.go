@@ -52,7 +52,7 @@ func leftOuterJoin(left DataSource, right DataSource, header DataSourceHeader, j
 		if leftRow == nil {
 			return result
 		}
-		joined := selectRight(counter, header, leftRow, right, joinOn)
+		joined, counter := selectRight(counter, header, leftRow, right, joinOn)
 		if joined.Empty() {
 			joinedRow := joinRows(counter, header, leftRow, nullRow(right.Header()))
 			counter++
@@ -68,17 +68,18 @@ func leftOuterJoin(left DataSource, right DataSource, header DataSourceHeader, j
 
 }
 
-func selectRight(counter int, header DataSourceHeader, leftRow Row, right DataSource, joinOn Condition) collection.LinkedList[Row] {
+func selectRight(counter int, header DataSourceHeader, leftRow Row, right DataSource, joinOn Condition) (collection.LinkedList[Row], int) {
 	var rightSelected collection.LinkedList[Row] = collection.NewLinkedList[Row]()
 	right.Rewind()
 	for {
 		rightRow := right.NextRow()
 		if rightRow == nil {
-			return rightSelected
+			return rightSelected, counter
 		}
 		joined := joinRows(counter, header, leftRow, rightRow)
 		if joined.Satisfies(joinOn) {
-			rightSelected.Append(joined)
+			rightSelected.Append(newRowWithId(counter, joined.Header(), joined.Values()))
+			counter++
 		}
 	}
 }
@@ -91,7 +92,7 @@ func rightOuterJoin(left DataSource, right DataSource, header DataSourceHeader, 
 		if rightRow == nil {
 			return result
 		}
-		joined := selectLeft(counter, header, rightRow, left, joinOn)
+		joined, counter := selectLeft(counter, header, rightRow, left, joinOn)
 		if joined.Empty() {
 			joinedRow := joinRows(counter, header, nullRow(left.Header()), rightRow)
 			counter++
@@ -107,17 +108,18 @@ func rightOuterJoin(left DataSource, right DataSource, header DataSourceHeader, 
 
 }
 
-func selectLeft(counter int, header DataSourceHeader, rightRow Row, left DataSource, joinOn Condition) collection.LinkedList[Row] {
+func selectLeft(counter int, header DataSourceHeader, rightRow Row, left DataSource, joinOn Condition) (collection.LinkedList[Row], int) {
 	var leftSelected collection.LinkedList[Row] = collection.NewLinkedList[Row]()
 	left.Rewind()
 	for {
 		leftRow := left.NextRow()
 		if leftRow == nil {
-			return leftSelected
+			return leftSelected, counter
 		}
 		joined := joinRows(counter, header, leftRow, rightRow)
 		if joined.Satisfies(joinOn) {
-			leftSelected.Append(joined)
+			leftSelected.Append(newRowWithId(counter, header, joined.Values()))
+			counter++
 		}
 	}
 }
