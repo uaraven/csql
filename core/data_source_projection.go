@@ -135,7 +135,6 @@ func newHeaderWithProjection(src DataSource, projection []ProjectionColumn) Data
 	}
 
 	return &dataSourceHeader{
-		parent:  src,
 		columns: columns,
 	}
 }

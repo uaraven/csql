@@ -175,6 +175,12 @@ func (ds DataSource) String() string {
 	return ds.Join.String()
 }
 
+type UnionSource struct {
+	Select   Select
+	Union    *UnionSource
+	unionAll bool
+}
+
 // JoinType is just that
 type JoinType int
 
@@ -182,13 +188,15 @@ const (
 	// InvalidJoin represents any unsupported or erroneous JOIN type
 	InvalidJoin JoinType = iota
 	// InnerJoin represents inner join
-	InnerJoin JoinType = iota
+	InnerJoin
 	// LeftOuterJoin represents LEFT JOIN or LEFT OUTER JOIN
-	LeftOuterJoin JoinType = iota
+	LeftOuterJoin
 	// RightOuterJoin represents RIGHT JOIN or RIGHT OUTER JOIN
-	RightOuterJoin JoinType = iota
+	RightOuterJoin
 	// CrossJoin represents CROSS JOIN, including implicit CROSS JOIN
-	CrossJoin JoinType = iota
+	CrossJoin
+	// FullJoin represents FULL OUTER JOIN
+	FullJoin
 
 	// InOperator is just that
 	InOperator = "IN"

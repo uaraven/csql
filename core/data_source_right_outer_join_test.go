@@ -32,7 +32,7 @@ func TestRightOuterJoinDatasource_NextRow(t *testing.T) {
 
 	joinCondition := NewEq(NewRowValue("authors.id"),
 		NewRowValue("books.author_id"))
-	jds := NewRightOuterJoinDatasource(left, right, joinCondition)
+	jds := NewRightOuterJoin(left, right, joinCondition)
 
 	g.Expect(jds.Header().ColumnCount()).To(Equal(5))
 	rows := ReadAllRows(jds)
@@ -63,7 +63,7 @@ func TestRightOuterJoinDatasource_CurrentRow(t *testing.T) {
 
 	joinCondition := NewEq(NewRowValue("authors.id"),
 		NewRowValue("books.author_id"))
-	jds := NewLeftOuterJoinDatasource(left, right, joinCondition)
+	jds := NewLeftOuterJoin(left, right, joinCondition)
 
 	g.Expect(jds.CurrentRow()).To(BeNil())
 
@@ -79,7 +79,7 @@ func TestRightOuterJoinDatasource_Rewind(t *testing.T) {
 
 	joinCondition := NewEq(NewRowValue("authors.id"),
 		NewRowValue("books.author_id"))
-	jds := NewLeftOuterJoinDatasource(left, right, joinCondition)
+	jds := NewLeftOuterJoin(left, right, joinCondition)
 
 	row := jds.NextRow()
 	g.Expect(row.Values()).To(Equal([]Value{NewIntValue(1), NewStringValue("J.R.R. Tolkien"), NewIntValue(1), NewIntValue(1), NewStringValue("Lord Of The Rings")}))
@@ -98,7 +98,7 @@ func TestRightOuterJoinDatasource_GetName(t *testing.T) {
 
 	joinCondition := NewEq(NewRowValue("authors.id"),
 		NewRowValue("books.author_id"))
-	jds := NewRightOuterJoinDatasource(left, right, joinCondition)
+	jds := NewRightOuterJoin(left, right, joinCondition)
 
 	g.Expect(jds.GetName()).To(Equal("(authors RIGHT JOIN books)"))
 }

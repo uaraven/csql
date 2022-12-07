@@ -60,7 +60,7 @@ func (e *Errors) ReportContextSensitivity(_ antlr.Parser, _ *antlr.DFA, _, _, _ 
 }
 
 // ParseSQL reads the sql statement and converts it into an AST
-func ParseSQL(sql string) Select {
+func ParseSQL(sql string) UnionSource {
 	fs := antlr.NewInputStream(sql)
 	lex := parser.NewCsqlLexer(fs)
 	tokens := antlr.NewCommonTokenStream(lex, antlr.TokenDefaultChannel)
@@ -76,7 +76,7 @@ func ParseSQL(sql string) Select {
 		}
 		panic(sb.String())
 	}
-	return visitor.Visit(tree).(Select)
+	return *visitor.Visit(tree).(*UnionSource)
 }
 
 // CsqlVisitorImpl is a visitor for the antlr CST
@@ -135,7 +135,7 @@ func (c CsqlVisitorImpl) Visit(tree antlr.ParseTree) interface{} {
 
 // VisitQuery visits a parse tree produced by CsqlParser#query.
 func (c CsqlVisitorImpl) VisitQuery(ctx *parser.QueryContext) interface{} {
-	return ctx.SelectStatement().Accept(c).(Select)
+	return ctx.UnionSelects().Accept(c).(*UnionSource)
 }
 
 // VisitSelectStatement visits a parse tree produced by CsqlParser#selectStatement.
@@ -155,6 +155,17 @@ func (c CsqlVisitorImpl) VisitSelectStatement(ctx *parser.SelectStatementContext
 		astSelect.OrderBy = &obe
 	}
 	return astSelect
+}
+
+func (c CsqlVisitorImpl) VisitUnionSelects(ctx *parser.UnionSelectsContext) interface{} {
+	astUnion := UnionSource{
+		Select:   ctx.SelectStatement().Accept(c).(Select),
+		unionAll: ctx.K_ALL(0) != nil,
+	}
+	if len(ctx.AllUnionSelects()) > 0 {
+		astUnion.Union = ctx.UnionSelects(0).Accept(c).(*UnionSource)
+	}
+	return &astUnion
 }
 
 func (c CsqlVisitorImpl) VisitLimit(ctx *parser.LimitContext) interface{} {
@@ -412,6 +423,8 @@ func (c CsqlVisitorImpl) VisitConditionalJoinType(ctx *parser.ConditionalJoinTyp
 		return RightOuterJoin
 	} else if ctx.LeftJoin() != nil {
 		return LeftOuterJoin
+	} else if ctx.FullJoin() != nil {
+		return FullJoin
 	}
 	return InvalidJoin
 }
@@ -558,24 +571,4 @@ func (c CsqlVisitorImpl) VisitQualifier(ctx *parser.QualifierContext) interface{
 		return nil
 	}
 	return parseIdentifier(ctx.GetText())
-}
-
-// VisitInnerJoin visits a parse tree produced by CsqlParser#innerJoin.
-func (c CsqlVisitorImpl) VisitInnerJoin(_ *parser.InnerJoinContext) interface{} {
-	return InnerJoin
-}
-
-// VisitLeftJoin visits a parse tree produced by CsqlParser#leftJoin.
-func (c CsqlVisitorImpl) VisitLeftJoin(_ *parser.LeftJoinContext) interface{} {
-	return LeftOuterJoin
-}
-
-// VisitRightJoin visits a parse tree produced by CsqlParser#rightJoin.
-func (c CsqlVisitorImpl) VisitRightJoin(_ *parser.RightJoinContext) interface{} {
-	return RightOuterJoin
-}
-
-// VisitCrossJoin visits a parse tree produced by CsqlParser#crossJoin.
-func (c CsqlVisitorImpl) VisitCrossJoin(_ *parser.CrossJoinContext) interface{} {
-	return CrossJoin
 }

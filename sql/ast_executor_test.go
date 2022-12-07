@@ -22,6 +22,7 @@ package sql
 import (
 	. "github.com/onsi/gomega"
 	"github.com/uaraven/csql/core"
+	"github.com/uaraven/csql/funky"
 	"testing"
 )
 
@@ -182,6 +183,50 @@ func TestAstExecutor_InnerJoin(t *testing.T) {
 	g.Expect(rows[3].Get("dept.id").Value()).To(Equal(core.NewIntValue(2)))
 	g.Expect(rows[3].Get("employees.first_name").Value()).To(Equal(core.NewStringValue("James")))
 	g.Expect(rows[3].Get("dept.name").Value()).To(Equal(core.NewStringValue("The Grand Tour")))
+}
+
+func TestAstExecutor_FullOuterJoin(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	sql := ParseSQL(`select * from "../test-data/authors.csv" 
+    full join "../test-data/books.csv"
+	on authors.id = books.author_id`)
+
+	jds := Transform(&sql)
+
+	rows := core.ReadAllRows(jds)
+	g.Expect(rows).To(HaveLen(6))
+	g.Expect(rows[0].Values()).To(Equal([]core.Value{
+		core.NewIntValue(1),
+		core.NewStringValue("J.R.R. Tolkien"),
+		core.NewIntValue(1),
+		core.NewIntValue(1),
+		core.NewStringValue("Lord Of The Rings"),
+	}))
+
+	g.Expect(rows[1].Values()).To(Equal([]core.Value{
+		core.NewIntValue(2),
+		core.NewStringValue("Stephen King"),
+		core.NewIntValue(2),
+		core.NewIntValue(2),
+		core.NewStringValue("Carrie"),
+	}))
+
+	g.Expect(rows[4].Values()).To(Equal([]core.Value{
+		core.NewNullValue(),
+		core.NewNullValue(),
+		core.NewIntValue(4),
+		core.NewIntValue(6),
+		core.NewStringValue("Unwritten Book"),
+	}))
+
+	g.Expect(rows[5].Values()).To(Equal([]core.Value{
+		core.NewNullValue(),
+		core.NewNullValue(),
+		core.NewIntValue(5),
+		core.NewIntValue(6),
+		core.NewStringValue("Unwritten Book 2"),
+	}))
 }
 
 func TestAstExecutor_Nulls(t *testing.T) {
@@ -361,5 +406,61 @@ func TestAstTransformer_OrderBy(t *testing.T) {
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(4)))
 	g.Expect(rows[2].Get("id").Value()).To(Equal(core.NewIntValue(2)))
 	g.Expect(rows[3].Get("id").Value()).To(Equal(core.NewIntValue(1)))
+}
+
+func TestAstTransformer_UnionAll(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select first_name, last_name from "../test-data/employees.csv" 
+		union all 
+		select first_name, last_name from "../test-data/people.csv"`)
+
+	g.Expect(rows).To(HaveLen(8))
+
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal("John"))
+	g.Expect(rows[0].GetByIndex(2).Value()).To(Equal("Snow"))
+
+	g.Expect(rows[4].GetByIndex(1).Value()).To(Equal("John"))
+	g.Expect(rows[4].GetByIndex(2).Value()).To(Equal("Snow"))
+}
+
+func TestAstTransformer_Union(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select first_name, last_name from "../test-data/employees.csv" 
+		union 
+		select first_name, last_name from "../test-data/people.csv"`)
+
+	g.Expect(rows).To(HaveLen(4))
+}
+
+func TestAstTransformer_UnionRenaming(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select first_name from "../test-data/employees.csv" 
+		union 
+		select first_name from "../test-data/people.csv"
+		union 
+		select name as first_name from "../test-data/dept.csv"`)
+
+	g.Expect(rows).To(HaveLen(5))
+	names := funky.Map(rows, func(row core.Row) string {
+		return row.GetByIndex(1).Value().(string)
+	})
+	g.Expect(names).To(Equal([]string{"John", "James", "Jeremy", "The Wall", "The Grand Tour"}))
+}
+
+func TestAstTransformer_UnionDifferentProjections(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	g.Expect(func() {
+		ExecuteSql(`
+		select first_name, last_name from "../test-data/employees.csv" 
+		union 
+		select first_name, first_name from "../test-data/people.csv"`)
+	}).To(Panic())
 
 }

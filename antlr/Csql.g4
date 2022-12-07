@@ -18,7 +18,7 @@
  */
 grammar Csql;
 
-query: selectStatement ';'? EOF;
+query: unionSelects ';'? EOF;
 
 comparisonOperator: '<' | '<=' | '>' | '>=' | '=' | '!=' | '<>';
 
@@ -64,14 +64,14 @@ fieldName: IDENTIFIER | '*';
 innerJoin: K_INNER? K_JOIN;
 leftJoin: K_LEFT K_OUTER? K_JOIN;
 rightJoin: K_RIGHT K_OUTER? K_JOIN;
-//fullJoin: K_FULL K_OUTER? K_JOIN;
+fullJoin: K_FULL K_OUTER? K_JOIN;
 crossJoin: K_CROSS K_JOIN;
 
 conditionalJoinType
         : innerJoin
 		| leftJoin
-		| rightJoin;
-//		| fullJoin
+		| rightJoin
+		| fullJoin;
 
 
 conditionalJoinTarget: dataSource K_ON whereExpr;
@@ -85,6 +85,9 @@ dataSource:
 	| '(' dataSource ')'									# dataSourceItem;
 
 sources: dataSource (',' dataSource)*;
+
+unionSelects:
+    selectStatement (K_UNION K_ALL? unionSelects)*;
 
 selectStatement: K_SELECT projection K_FROM sources where? orderBy? limit?;
 
@@ -148,6 +151,8 @@ K_ORDER: O R D E R;
 K_BY: B Y;
 K_ASC: A S C;
 K_DESC: D E S C;
+K_UNION: U N I O N;
+K_ALL: A L L;
 
 IDENTIFIER: SIMPLE_IDENTIFIER | QUOTED_IDENTIFIER;
 

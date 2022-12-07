@@ -44,8 +44,6 @@ type ColumnMetadata interface {
 
 // DataSourceHeader describes all the columns in the datasource
 type DataSourceHeader interface {
-	// Parent returns the DataSource containing this header
-	Parent() DataSource
 	// ColumnCount returns the number of the columns in the DataSource
 	ColumnCount() int
 	// ColumnsMetadata is a slice of all the columns' metadata

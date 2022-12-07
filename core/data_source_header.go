@@ -53,12 +53,7 @@ func (cm columnMetadata) Name() string {
 }
 
 type dataSourceHeader struct {
-	parent  DataSource
 	columns []ColumnMetadata
-}
-
-func (d dataSourceHeader) Parent() DataSource {
-	return d.parent
 }
 
 func (d dataSourceHeader) ColumnCount() int {
@@ -95,7 +90,7 @@ func NewHeadersFromSlice(parent DataSource, headers []string) DataSourceHeader {
 			index:      idx,
 		})
 	}
-	return &dataSourceHeader{parent: parent, columns: columns}
+	return &dataSourceHeader{ /*parent: parent,*/ columns: columns}
 }
 
 func NewHeadersFromOtherHeaders(parent DataSource, headers ...[]ColumnMetadata) DataSourceHeader {
@@ -104,7 +99,7 @@ func NewHeadersFromOtherHeaders(parent DataSource, headers ...[]ColumnMetadata) 
 		columns = append(columns, otherHeaders...)
 	}
 	return &dataSourceHeader{
-		parent:  parent,
+		//parent:  parent,
 		columns: columns,
 	}
 }

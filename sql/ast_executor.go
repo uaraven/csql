@@ -31,16 +31,29 @@ type AstTransformer struct {
 
 // Transform processes the abstract syntax tree and creates executable Datasource that will
 // produce results when queried
-func Transform(ast *Select) core.DataSource {
+func Transform(ast *UnionSource) core.DataSource {
 	ae := NewAstTransformer()
-	return ae.TransformSelect(ast)
+	return ae.TransformUnion(*ast)
 }
 
 func NewAstTransformer() AstTransformer {
 	return AstTransformer{}
 }
 
-func (ae AstTransformer) TransformSelect(ast *Select) core.DataSource {
+func (ae AstTransformer) TransformUnion(u UnionSource) core.DataSource {
+	ds1 := ae.TransformSelect(u.Select)
+	if u.Union == nil {
+		return ds1
+	}
+	ds2 := ae.TransformUnion(*u.Union)
+	if u.unionAll {
+		return core.NewUnionAll(ds1, ds2)
+	} else {
+		return core.NewUnion(ds1, ds2)
+	}
+}
+
+func (ae AstTransformer) TransformSelect(ast Select) core.DataSource {
 	ds := ae.TransformDataSource(&ast.From)
 	if ast.Filter != nil {
 		where := ae.TransformExpression(ast.Filter)
@@ -79,9 +92,11 @@ func (ae AstTransformer) TransformJoinedSource(ctx *JoinedSource) core.DataSourc
 	case InnerJoin:
 		return core.NewInnerJoin(left, right, ae.TransformExpression(ctx.Condition))
 	case LeftOuterJoin:
-		return core.NewLeftOuterJoinDatasource(left, right, ae.TransformExpression(ctx.Condition))
+		return core.NewLeftOuterJoin(left, right, ae.TransformExpression(ctx.Condition))
 	case RightOuterJoin:
-		return core.NewRightOuterJoinDatasource(left, right, ae.TransformExpression(ctx.Condition))
+		return core.NewRightOuterJoin(left, right, ae.TransformExpression(ctx.Condition))
+	case FullJoin:
+		return core.NewFullJoin(left, right, ae.TransformExpression(ctx.Condition))
 	}
 	// todo: Implement a proper panic
 	panic("Unsupported join type")
