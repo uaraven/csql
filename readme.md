@@ -6,6 +6,7 @@ csql supports basic<sup>*</sup> `SELECT` statement features, including:
 
 - Joins
   - Left, Right, Full, Cross and Inner
+- UNION and UNION ALL
 - LIKE conditions
 - MATCH conditions (like LIKE, but using regular expressions)
 - BETWEEN conditions
@@ -17,4 +18,4 @@ csql supports basic<sup>*</sup> `SELECT` statement features, including:
 csql automatically converts values to integer and float types and nulls. 
 
 ---
-<sup>*</sup> union, IN (select) and aggregations are not supported yet in version 0.1.x
+<sup>*</sup> IN (select) and aggregations are not supported yet in version 0.1.x
