@@ -22,6 +22,7 @@ package sql
 import (
 	. "github.com/onsi/gomega"
 	"github.com/uaraven/csql/core"
+	"github.com/uaraven/csql/funky"
 	"testing"
 )
 
@@ -405,5 +406,61 @@ func TestAstTransformer_OrderBy(t *testing.T) {
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(4)))
 	g.Expect(rows[2].Get("id").Value()).To(Equal(core.NewIntValue(2)))
 	g.Expect(rows[3].Get("id").Value()).To(Equal(core.NewIntValue(1)))
+}
+
+func TestAstTransformer_UnionAll(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select first_name, last_name from "../test-data/employees.csv" 
+		union all 
+		select first_name, last_name from "../test-data/people.csv"`)
+
+	g.Expect(rows).To(HaveLen(8))
+
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal("John"))
+	g.Expect(rows[0].GetByIndex(2).Value()).To(Equal("Snow"))
+
+	g.Expect(rows[4].GetByIndex(1).Value()).To(Equal("John"))
+	g.Expect(rows[4].GetByIndex(2).Value()).To(Equal("Snow"))
+}
+
+func TestAstTransformer_Union(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select first_name, last_name from "../test-data/employees.csv" 
+		union 
+		select first_name, last_name from "../test-data/people.csv"`)
+
+	g.Expect(rows).To(HaveLen(4))
+}
+
+func TestAstTransformer_UnionRenaming(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select first_name from "../test-data/employees.csv" 
+		union 
+		select first_name from "../test-data/people.csv"
+		union 
+		select name as first_name from "../test-data/dept.csv"`)
+
+	g.Expect(rows).To(HaveLen(5))
+	names := funky.Map(rows, func(row core.Row) string {
+		return row.GetByIndex(1).Value().(string)
+	})
+	g.Expect(names).To(Equal([]string{"John", "James", "Jeremy", "The Wall", "The Grand Tour"}))
+}
+
+func TestAstTransformer_UnionDifferentProjections(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	g.Expect(func() {
+		ExecuteSql(`
+		select first_name, last_name from "../test-data/employees.csv" 
+		union 
+		select first_name, first_name from "../test-data/people.csv"`)
+	}).To(Panic())
 
 }

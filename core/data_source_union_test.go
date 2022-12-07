@@ -30,7 +30,7 @@ func TestNewUnionAll(t *testing.T) {
 	ds1 := loadTestMemDatasource("employees")
 	ds2 := loadTestMemDatasource("people")
 
-	unionAll := NewUnionAll([]DataSource{ds1, ds2})
+	unionAll := NewUnionAll(ds1, ds2)
 
 	rows := ReadAllRows(unionAll)
 	g.Expect(rows).To(HaveLen(8))
@@ -44,7 +44,7 @@ func TestNewUnion(t *testing.T) {
 	ds2 := NewProjectionDataSource(loadTestMemDatasource("people"),
 		NewSimpleProjection([]string{"first_name", "last_name"}, []string{"", ""}), false)
 
-	union := NewUnion([]DataSource{ds1, ds2})
+	union := NewUnion(ds1, ds2)
 
 	rows := ReadAllRows(union)
 	g.Expect(rows).To(HaveLen(4))
@@ -58,5 +58,5 @@ func TestNewUnionDifferentProjections(t *testing.T) {
 	ds2 := NewProjectionDataSource(loadTestMemDatasource("people"),
 		NewSimpleProjection([]string{"first_name", "last_name", "width"}, []string{"", "", ""}), false)
 
-	g.Expect(func() { NewUnion([]DataSource{ds1, ds2}) }).To(Panic())
+	g.Expect(func() { NewUnion(ds1, ds2) }).To(Panic())
 }

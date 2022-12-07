@@ -125,6 +125,9 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#sources.
 	VisitSources(ctx *SourcesContext) interface{}
 
+	// Visit a parse tree produced by CsqlParser#unionSelects.
+	VisitUnionSelects(ctx *UnionSelectsContext) interface{}
+
 	// Visit a parse tree produced by CsqlParser#selectStatement.
 	VisitSelectStatement(ctx *SelectStatementContext) interface{}
 

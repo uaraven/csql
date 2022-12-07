@@ -164,6 +164,10 @@ func (v *BaseCsqlVisitor) VisitSources(ctx *SourcesContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseCsqlVisitor) VisitUnionSelects(ctx *UnionSelectsContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseCsqlVisitor) VisitSelectStatement(ctx *SelectStatementContext) interface{} {
 	return v.VisitChildren(ctx)
 }

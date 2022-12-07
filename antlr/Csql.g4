@@ -18,7 +18,7 @@
  */
 grammar Csql;
 
-query: selectStatement ';'? EOF;
+query: unionSelects ';'? EOF;
 
 comparisonOperator: '<' | '<=' | '>' | '>=' | '=' | '!=' | '<>';
 
@@ -86,6 +86,9 @@ dataSource:
 
 sources: dataSource (',' dataSource)*;
 
+unionSelects:
+    selectStatement (K_UNION K_ALL? unionSelects)*;
+
 selectStatement: K_SELECT projection K_FROM sources where? orderBy? limit?;
 
 signedNumber: ( '+' | '-')? NUMERIC_LITERAL;
@@ -148,6 +151,8 @@ K_ORDER: O R D E R;
 K_BY: B Y;
 K_ASC: A S C;
 K_DESC: D E S C;
+K_UNION: U N I O N;
+K_ALL: A L L;
 
 IDENTIFIER: SIMPLE_IDENTIFIER | QUOTED_IDENTIFIER;
 

@@ -175,6 +175,12 @@ func (ds DataSource) String() string {
 	return ds.Join.String()
 }
 
+type UnionSource struct {
+	Select   Select
+	Union    *UnionSource
+	unionAll bool
+}
+
 // JoinType is just that
 type JoinType int
 

@@ -27,16 +27,16 @@ import (
 	"strings"
 )
 
-func NewUnion(dataSources []DataSource) DataSource {
-	unionDs := NewUnionAll(dataSources)
+func NewUnion(ds1, ds2 DataSource) DataSource {
+	unionDs := NewUnionAll(ds1, ds2)
 	return NewMemDataSource(unionDs.GetName(), unionDs.Header().ColumnsMetadata(), performDistinct(unionDs))
 }
 
-func NewUnionAll(dataSources []DataSource) DataSource {
-	first := dataSources[0]
-	ensureSameProjection(first, dataSources[1:])
+func NewUnionAll(ds1, ds2 DataSource) DataSource {
+	first := ds1
+	ensureSameProjection(first, ds2)
 
-	return combineRows(dataSources)
+	return combineRows([]DataSource{ds1, ds2})
 }
 
 func performDistinct(ds DataSource) []Row {
@@ -73,14 +73,13 @@ func combineRows(datasources []DataSource) DataSource {
 	return NewMemDataSource(unionName, datasources[0].Header().ColumnsMetadata(), result)
 }
 
-func ensureSameProjection(first DataSource, others []DataSource) {
+func ensureSameProjection(first DataSource, other DataSource) {
 	projectionFirst := getProjection(first.Header().ColumnsMetadata())
-	for _, prj := range others {
-		projectionOther := getProjection(prj.Header().ColumnsMetadata())
-		if !reflect.DeepEqual(projectionFirst, projectionOther) {
-			panic(fmt.Errorf("different columns in UNION: %v", projectionOther))
-		}
+	projectionOther := getProjection(other.Header().ColumnsMetadata())
+	if !reflect.DeepEqual(projectionFirst, projectionOther) {
+		panic(fmt.Errorf("different columns in UNION: %v", projectionOther))
 	}
+
 }
 
 func getProjection(columns []ColumnMetadata) []string {
