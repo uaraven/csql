@@ -50,7 +50,6 @@ func NewMemDataSource(name string, headers []ColumnMetadata, rows []Row) DataSou
 	}
 
 	ds.headers = dataSourceHeader{
-		parent:  ds,
 		columns: headers,
 	}
 
