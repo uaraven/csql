@@ -21,6 +21,7 @@ package sql
 
 import (
 	"fmt"
+	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
 	"github.com/uaraven/csql/funky"
 	"strconv"
 	"strings"
@@ -34,7 +35,8 @@ type CompoundName struct {
 	// Qualifier is a table name or alias
 	Qualifier *Identifier
 	// Name is a field name
-	Name Identifier
+	Name     Identifier
+	Location *SourceLocation
 }
 
 func (cn CompoundName) String() string {
@@ -222,6 +224,8 @@ func (jt JoinType) String() string {
 		return "RIGHT OUTER JOIN"
 	case CrossJoin:
 		return "CROSS JOIN"
+	case FullJoin:
+		return "FULL OUTER JOIN"
 	default:
 		return "*Unsupported Join*"
 	}
@@ -250,6 +254,7 @@ func (js JoinedSource) String() string {
 // - String
 // - List
 type Literal struct {
+	Location     *SourceLocation
 	IsNull       bool
 	NumericValue *string
 	StringValue  *string
@@ -304,17 +309,10 @@ type Expression interface {
 	String() string
 }
 
-type ParensExpression struct {
-	Child Expression
-}
-
-func (pe ParensExpression) String() string {
-	return fmt.Sprintf("(%v)", pe.Child)
-}
-
 type AndExpression struct {
-	LHS Expression
-	RHS Expression
+	LHS      Expression
+	RHS      Expression
+	Location *SourceLocation
 }
 
 func (ae AndExpression) String() string {
@@ -322,8 +320,9 @@ func (ae AndExpression) String() string {
 }
 
 type OrExpression struct {
-	LHS Expression
-	RHS Expression
+	LHS      Expression
+	RHS      Expression
+	Location *SourceLocation
 }
 
 func (oe OrExpression) String() string {
@@ -331,7 +330,8 @@ func (oe OrExpression) String() string {
 }
 
 type NotExpression struct {
-	Child Expression
+	Location *SourceLocation
+	Child    Expression
 }
 
 func (ne NotExpression) String() string {
@@ -342,6 +342,7 @@ type ComparisonExpression struct {
 	LHS      Expression
 	RHS      Expression
 	Operator string
+	Location *SourceLocation
 }
 
 func (ce ComparisonExpression) String() string {
@@ -352,6 +353,7 @@ type BinaryExpression struct {
 	LHS      Expression
 	RHS      Expression
 	Operator string
+	Location *SourceLocation
 }
 
 func (be BinaryExpression) String() string {
@@ -391,9 +393,10 @@ func (match MatchExpression) String() string {
 }
 
 type BetweenExpression struct {
-	What Expression
-	Low  Expression
-	High Expression
+	What     Expression
+	Low      Expression
+	High     Expression
+	Location *SourceLocation
 }
 
 func (be BetweenExpression) String() string {
@@ -401,9 +404,10 @@ func (be BetweenExpression) String() string {
 }
 
 type InListExpression struct {
-	What  Expression
-	List  ListLiteral
-	NotIn bool
+	What     Expression
+	List     ListLiteral
+	NotIn    bool
+	Location *SourceLocation
 }
 
 func (ile InListExpression) String() string {
@@ -431,4 +435,16 @@ func (ine IsNullExpression) String() string {
 	}
 	sb.WriteString("NULL")
 	return sb.String()
+}
+
+type SourceLocation struct {
+	Line   int
+	Column int
+}
+
+func SLFromToken(t antlr.Token) *SourceLocation {
+	return &SourceLocation{
+		Line:   t.GetLine(),
+		Column: t.GetColumn(),
+	}
 }

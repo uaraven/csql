@@ -31,15 +31,16 @@ func NewSourceLocation(line, pos int) SourceLocation {
 }
 
 type CsqlError struct {
-	message string
+	location SourceLocation
+	message  string
 }
 
 func (ce CsqlError) Error() string {
 	return ce.message
 }
 
-func NewError(message string) error {
-	return &CsqlError{message: message}
+func NewError(where SourceLocation, message string) error {
+	return &CsqlError{location: where, message: message}
 }
 
 func UnknownColumnError(columnName string) error {
