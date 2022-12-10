@@ -51,13 +51,13 @@ func NewMatchConditionL(left Evaluator, right Evaluator, l *errors.SourceLocatio
 }
 
 func (mc matchCondition) Evaluate(context EvaluationContext) Value {
-	expression, err := EnsureString(mc.left.Evaluate(context))
-	if err != nil {
-		panic(errors.NewTypeMismatch(mc.loc, mc.left, "string", mc))
-	}
-	value, err := EnsureString(mc.right.Evaluate(context))
+	expression, err := EnsureString(mc.right.Evaluate(context))
 	if err != nil {
 		panic(errors.NewTypeMismatch(mc.loc, mc.right, "string", mc))
+	}
+	value, err := EnsureString(mc.left.Evaluate(context))
+	if err != nil {
+		panic(errors.NewTypeMismatch(mc.loc, mc.left, "string", mc))
 	}
 
 	matched, err := regexp.MatchString(expression, value)
@@ -97,13 +97,13 @@ func NewLikeConditionL(left Evaluator, right Evaluator, location *errors.SourceL
 }
 
 func (lc likeCondition) Evaluate(context EvaluationContext) Value {
-	expression, err := EnsureString(lc.left.Evaluate(context))
-	if err != nil {
-		panic(errors.NewTypeMismatch(lc.loc, lc.left, "string", lc))
-	}
-	value, err := EnsureString(lc.right.Evaluate(context))
+	expression, err := EnsureString(lc.right.Evaluate(context))
 	if err != nil {
 		panic(errors.NewTypeMismatch(lc.loc, lc.right, "string", lc))
+	}
+	value, err := EnsureString(lc.left.Evaluate(context))
+	if err != nil {
+		panic(errors.NewTypeMismatch(lc.loc, lc.left, "string", lc))
 	}
 
 	likeExpr := translateLike(expression)
