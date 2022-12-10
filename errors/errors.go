@@ -22,6 +22,7 @@ package errors
 import (
 	"fmt"
 	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
+	"strings"
 )
 
 type CsqlError struct {
@@ -39,6 +40,23 @@ func NewError(where *SourceLocation, message string) error {
 
 func UnknownColumnError(location *SourceLocation, columnName string) error {
 	return &CsqlError{Location: location, Message: fmt.Sprintf("Unknown column name: %s", columnName)}
+}
+
+func NewTypeMismatch(location *SourceLocation, value interface{}, expectedType string, expression interface{}) error {
+	return &CsqlError{Location: location, Message: TypeMismatchMsg(value, expectedType, expression)}
+}
+
+func TypeMismatchMsg(value interface{}, expectedType string, expression interface{}) string {
+	var sb strings.Builder
+	sb.WriteString("Type mismatch. Expected ")
+	sb.WriteString(fmt.Sprint(value))
+	sb.WriteString(" to be ")
+	sb.WriteString(expectedType)
+	if expression != nil {
+		sb.WriteString(" in ")
+		sb.WriteString(fmt.Sprint(expression))
+	}
+	return sb.String()
 }
 
 type SourceLocation struct {

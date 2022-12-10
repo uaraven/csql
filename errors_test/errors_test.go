@@ -44,6 +44,46 @@ func TestInvalidSource(t *testing.T) {
 		To(PanicWith(SourceLocation(errors.Loc(1, 14))))
 }
 
+func TestInvalidInList(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	g.Expect(func() {
+		sql.ExecuteSql(`
+			SELECT * FROM "../test-data/employees.csv" 
+			         WHERE width between 1 and "3"`)
+	}).To(PanicWith(SourceLocation(errors.Loc(3, 18))))
+}
+
+func TestInvalidTypeMatch(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	g.Expect(func() {
+		sql.ExecuteSql(`
+			SELECT * FROM "../test-data/employees.csv" 
+			         WHERE last_name match 11`)
+	}).To(PanicWith(SourceLocation(errors.Loc(3, 18))))
+}
+
+func TestInvalidTypeLike(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	g.Expect(func() {
+		sql.ExecuteSql(`
+			SELECT * FROM "../test-data/employees.csv" 
+			         WHERE last_name like 2*11`)
+	}).To(PanicWith(SourceLocation(errors.Loc(3, 18))))
+}
+
+func TestInvalidTypeConcat(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	g.Expect(func() {
+		sql.ExecuteSql(`
+			SELECT * FROM "../test-data/employees.csv" 
+			         WHERE last_name = '12' || width`)
+	}).To(PanicWith(SourceLocation(errors.Loc(3, 18))))
+}
+
 type WithLocationMatcher struct {
 	Expected *errors.SourceLocation
 }

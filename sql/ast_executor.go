@@ -135,6 +135,8 @@ func (ae AstTransformer) TransformExpression(condition Expression) core.Conditio
 		return ae.TransformIsNull(cond)
 	case InListExpression:
 		return ae.TransformInListExpression(cond)
+	case BetweenExpression:
+		return ae.TransformBetweenExpression(cond)
 	}
 	panic(fmt.Errorf("unsupported expression: %v", condition))
 	return nil
@@ -315,4 +317,15 @@ func (ae AstTransformer) TransformOrderByField(obf OrderByField) core.OrderByFie
 		fn := ae.TransformCompoundName(obf.FieldName).(core.Identifiable)
 		return core.NewOrderByL(fn.Identifier(), obf.Descending, obf.Location)
 	}
+}
+
+func (ae AstTransformer) TransformBetweenExpression(cond BetweenExpression) core.Condition {
+	what := ae.TransformExpression(cond.What)
+	lower := ae.TransformExpression(cond.Low)
+	upper := ae.TransformExpression(cond.High)
+
+	return core.NewAnd(
+		core.WithLoc(core.NewGte(what, lower), cond.Location),
+		core.WithLoc(core.NewLte(what, upper), cond.Location),
+	)
 }

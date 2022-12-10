@@ -85,7 +85,7 @@ type ComparisonCondition struct {
 func (cc ComparisonCondition) Evaluate(ctx EvaluationContext) Value {
 	defer func() {
 		if err := recover(); err != nil {
-			panic(errors.NewError(cc.loc, fmt.Sprintf("Incompatible operand types %v and %v", cc.left, cc.right)))
+			panic(errors.NewError(cc.loc, fmt.Sprintf("Incompatible operand types %v and %v in %s", cc.left, cc.right, cc)))
 		}
 	}()
 	lv := cc.left.Evaluate(ctx)

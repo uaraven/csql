@@ -51,15 +51,25 @@ func NewMatchConditionL(left Evaluator, right Evaluator, l *errors.SourceLocatio
 }
 
 func (mc matchCondition) Evaluate(context EvaluationContext) Value {
-	expression := mc.right.Evaluate(context).AsString()
-	value := mc.left.Evaluate(context).AsString()
+	expression, err := EnsureString(mc.left.Evaluate(context))
+	if err != nil {
+		panic(errors.NewTypeMismatch(mc.loc, mc.left, "string", mc))
+	}
+	value, err := EnsureString(mc.right.Evaluate(context))
+	if err != nil {
+		panic(errors.NewTypeMismatch(mc.loc, mc.right, "string", mc))
+	}
 
-	matched, err := regexp.MatchString(expression.Value().(string), value.Value().(string))
+	matched, err := regexp.MatchString(expression, value)
 	if err != nil {
 		panic(errors.NewError(mc.loc, fmt.Sprintf("failure while evaluating %v MATCH %v: %v", mc.left, mc.right, err)))
 	}
 
 	return NewBoolValue(matched)
+}
+
+func (mc matchCondition) String() string {
+	return fmt.Sprintf("%v MATCH %v", mc.left, mc.right)
 }
 
 // likeCondition matches left expression against the right expression, which
@@ -87,12 +97,18 @@ func NewLikeConditionL(left Evaluator, right Evaluator, location *errors.SourceL
 }
 
 func (lc likeCondition) Evaluate(context EvaluationContext) Value {
-	expression := lc.right.Evaluate(context).AsString()
-	value := lc.left.Evaluate(context).AsString()
+	expression, err := EnsureString(lc.left.Evaluate(context))
+	if err != nil {
+		panic(errors.NewTypeMismatch(lc.loc, lc.left, "string", lc))
+	}
+	value, err := EnsureString(lc.right.Evaluate(context))
+	if err != nil {
+		panic(errors.NewTypeMismatch(lc.loc, lc.right, "string", lc))
+	}
 
 	likeExpr := translateLike(expression)
 
-	matched, err := regexp.MatchString(likeExpr, value.Value().(string))
+	matched, err := regexp.MatchString(likeExpr, value)
 	if err != nil {
 		panic(errors.NewError(lc.loc, fmt.Sprintf("Failure while evaluating %v LIKE %v: %v", lc.left, lc.right, err)))
 	}
@@ -100,7 +116,11 @@ func (lc likeCondition) Evaluate(context EvaluationContext) Value {
 	return NewBoolValue(matched)
 }
 
-func translateLike(value Value) string {
-	val := "^" + regexp.QuoteMeta(value.Value().(string)) + "$"
+func (lc likeCondition) String() string {
+	return fmt.Sprintf("%v LIKE %v", lc.left, lc.right)
+}
+
+func translateLike(value string) string {
+	val := "^" + regexp.QuoteMeta(value) + "$"
 	return strings.ReplaceAll(strings.ReplaceAll(val, "%", ".*?"), "_", ".")
 }

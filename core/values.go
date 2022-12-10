@@ -131,7 +131,7 @@ func (sv stringValue) AsBool() Value {
 }
 
 func (sv stringValue) String() string {
-	return fmt.Sprintf("\"%s\"", sv.value)
+	return fmt.Sprintf("'%s'", sv.value)
 }
 
 func (sv stringValue) Equals(other Value) bool {
@@ -323,6 +323,10 @@ type rowValue struct {
 	location   *errors.SourceLocation
 }
 
+func (rv rowValue) String() string {
+	return rv.identifier
+}
+
 func NewRowValue(identifier string) Evaluator {
 	return &rowValue{
 		identifier: identifier,
@@ -351,7 +355,7 @@ func (rv rowValue) Identifier() string {
 
 func EnsureString(v Value) (string, error) {
 	if v.Type() != TypeString {
-		return "", fmt.Errorf("expected %v to have type 'string'", v)
+		return "", fmt.Errorf(errors.TypeMismatchMsg(v, "string", nil))
 	}
 	return v.Value().(string), nil
 }
@@ -361,7 +365,7 @@ func DecodeNumericL(value string, l *errors.SourceLocation) Value {
 	if err != nil {
 		f64, err := strconv.ParseFloat(value, 64)
 		if err != nil {
-			panic(errors.NewError(l, fmt.Sprintf("%v is not numeric", value)))
+			panic(errors.NewTypeMismatch(l, value, "number", ""))
 		}
 		return NewFloatValueL(f64, l)
 	}

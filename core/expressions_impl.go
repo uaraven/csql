@@ -86,6 +86,10 @@ func (ae binaryExpression) Evaluate(context EvaluationContext) Value {
 	}
 }
 
+func (ae binaryExpression) String() string {
+	return fmt.Sprintf("%v %s %v", ae.left, string(rune(ae.operation)), ae.right)
+}
+
 func NewExpression(operation BinaryOperator, left Evaluator, right Evaluator) Evaluator {
 	return &binaryExpression{
 		operation: operation,
@@ -132,11 +136,15 @@ func (c concatExpression) Evaluate(context EvaluationContext) Value {
 	}()
 	ls, err := EnsureString(c.left.Evaluate(context))
 	if err != nil {
-		panic(errors.NewError(c.loc, fmt.Sprintf("Expected '%s' to have type string", c.left)))
+		panic(errors.NewTypeMismatch(c.loc, c.left, "string", c))
 	}
 	rs, err := EnsureString(c.right.Evaluate(context))
 	if err != nil {
-		panic(errors.NewError(c.loc, fmt.Sprintf("Expected '%s' to have type string", c.right)))
+		panic(errors.NewTypeMismatch(c.loc, c.right, "string", c))
 	}
 	return NewStringValue(ls + rs)
+}
+
+func (c concatExpression) String() string {
+	return fmt.Sprintf("%v || %v", c.left, c.right)
 }
