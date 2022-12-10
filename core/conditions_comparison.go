@@ -21,6 +21,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/uaraven/csql/errors"
 	"golang.org/x/exp/constraints"
 )
 
@@ -78,9 +79,15 @@ type ComparisonCondition struct {
 	operator compareOperator
 	left     Evaluator
 	right    Evaluator
+	loc      *errors.SourceLocation
 }
 
 func (cc ComparisonCondition) Evaluate(ctx EvaluationContext) Value {
+	defer func() {
+		if err := recover(); err != nil {
+			panic(errors.NewError(cc.loc, fmt.Sprintf("Incompatible operand types %v and %v in %s", cc.left, cc.right, cc)))
+		}
+	}()
 	lv := cc.left.Evaluate(ctx)
 	rv := cc.right.Evaluate(ctx)
 	switch lv.Type() {
@@ -99,6 +106,19 @@ func (cc ComparisonCondition) Evaluate(ctx EvaluationContext) Value {
 
 func (cc ComparisonCondition) String() string {
 	return fmt.Sprintf("%s %s %s", cc.left, operatorStr[cc.operator], cc.right)
+}
+
+func WithLoc(condition Condition, loc *errors.SourceLocation) Condition {
+	if compCond, ok := condition.(ComparisonCondition); ok {
+		return ComparisonCondition{
+			operator: compCond.operator,
+			left:     compCond.left,
+			right:    compCond.right,
+			loc:      loc,
+		}
+	} else {
+		return condition
+	}
 }
 
 func NewEq(left Evaluator, right Evaluator) Condition {

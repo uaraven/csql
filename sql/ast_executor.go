@@ -135,6 +135,8 @@ func (ae AstTransformer) TransformExpression(condition Expression) core.Conditio
 		return ae.TransformIsNull(cond)
 	case InListExpression:
 		return ae.TransformInListExpression(cond)
+	case BetweenExpression:
+		return ae.TransformBetweenExpression(cond)
 	}
 	panic(fmt.Errorf("unsupported expression: %v", condition))
 	return nil
@@ -160,21 +162,25 @@ func (ae AstTransformer) TransformNotExpression(cond NotExpression) core.Conditi
 func (ae AstTransformer) TransformComparisionExpression(cond ComparisonExpression) core.Condition {
 	left := ae.TransformExpression(cond.LHS)
 	right := ae.TransformExpression(cond.RHS)
+	var cc core.Condition
 	switch cond.Operator {
 	case "=":
-		return core.NewEq(left, right)
+		cc = core.NewEq(left, right)
 	case "<>":
-		return core.NewNeq(left, right)
+		cc = core.NewNeq(left, right)
 	case "!=":
-		return core.NewNeq(left, right)
+		cc = core.NewNeq(left, right)
 	case ">":
-		return core.NewGt(left, right)
+		cc = core.NewGt(left, right)
 	case "<":
-		return core.NewLt(left, right)
+		cc = core.NewLt(left, right)
 	case ">=":
-		return core.NewGte(left, right)
+		cc = core.NewGte(left, right)
 	case "<=":
-		return core.NewLte(left, right)
+		cc = core.NewLte(left, right)
+	}
+	if cc != nil {
+		return core.WithLoc(cc, cond.Location)
 	}
 	panic(fmt.Errorf("unsupported expression: %v", cond))
 }
@@ -182,7 +188,7 @@ func (ae AstTransformer) TransformComparisionExpression(cond ComparisonExpressio
 func (ae AstTransformer) TransformLikeExpression(cond LikeExpression) core.Condition {
 	what := ae.TransformExpression(cond.What)
 
-	like := core.NewLikeCondition(what, ae.TransformExpression(cond.Pattern))
+	like := core.NewLikeConditionL(what, ae.TransformExpression(cond.Pattern), cond.Location)
 	if cond.NotLike {
 		return core.NewNot(like)
 	} else {
@@ -193,7 +199,7 @@ func (ae AstTransformer) TransformLikeExpression(cond LikeExpression) core.Condi
 func (ae AstTransformer) TransformMatchExpression(cond MatchExpression) core.Condition {
 	what := ae.TransformExpression(cond.What)
 
-	match := core.NewMatchCondition(what, ae.TransformExpression(cond.Pattern))
+	match := core.NewMatchConditionL(what, ae.TransformExpression(cond.Pattern), cond.Location)
 	if cond.Not {
 		return core.NewNot(match)
 	} else {
@@ -253,16 +259,16 @@ func (ae AstTransformer) TransformCompoundName(name *CompoundName) core.Conditio
 		sb.WriteRune('.')
 	}
 	sb.WriteString(string(name.Name))
-	return core.NewRowValue(sb.String())
+	return core.NewRowValueL(sb.String(), name.Location)
 }
 
 func (ae AstTransformer) TransformLiteral(value Literal) core.Condition {
 	if value.IsNull {
-		return core.NewNullValue()
+		return core.NewNullValueL(value.Location)
 	} else if value.StringValue != nil {
-		return core.NewStringValue(*value.StringValue)
+		return core.NewStringValueL(*value.StringValue, value.Location)
 	} else {
-		return core.DecodeNumeric(*value.NumericValue)
+		return core.DecodeNumericL(*value.NumericValue, value.Location)
 	}
 }
 
@@ -271,10 +277,10 @@ func (ae AstTransformer) TransformBinaryExpression(cond BinaryExpression) core.C
 	right := ae.TransformExpression(cond.RHS)
 
 	if cond.Operator == "||" {
-		return core.NewConcat(left, right)
+		return core.NewConcatL(left, right, cond.Location)
 	} else {
 		var op = core.BinaryOperator(cond.Operator[0])
-		return core.NewExpression(op, left, right)
+		return core.NewExpressionL(op, left, right, cond.Location)
 	}
 }
 
@@ -306,9 +312,20 @@ func (ae AstTransformer) TransformOrderByExpression(orderBy *OrderByExpression) 
 
 func (ae AstTransformer) TransformOrderByField(obf OrderByField) core.OrderByField {
 	if obf.FieldIndex > 0 {
-		return core.NewOrderByIndex(int(obf.FieldIndex), obf.Descending)
+		return core.NewOrderByIndexL(int(obf.FieldIndex), obf.Descending, obf.Location)
 	} else {
 		fn := ae.TransformCompoundName(obf.FieldName).(core.Identifiable)
-		return core.NewOrderBy(fn.Identifier(), obf.Descending)
+		return core.NewOrderByL(fn.Identifier(), obf.Descending, obf.Location)
 	}
+}
+
+func (ae AstTransformer) TransformBetweenExpression(cond BetweenExpression) core.Condition {
+	what := ae.TransformExpression(cond.What)
+	lower := ae.TransformExpression(cond.Low)
+	upper := ae.TransformExpression(cond.High)
+
+	return core.NewAnd(
+		core.WithLoc(core.NewGte(what, lower), cond.Location),
+		core.WithLoc(core.NewLte(what, upper), cond.Location),
+	)
 }

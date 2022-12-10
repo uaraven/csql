@@ -21,6 +21,7 @@ package sql
 
 import (
 	"fmt"
+	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/funky"
 	"strconv"
 	"strings"
@@ -34,7 +35,8 @@ type CompoundName struct {
 	// Qualifier is a table name or alias
 	Qualifier *Identifier
 	// Name is a field name
-	Name Identifier
+	Name     Identifier
+	Location *errors.SourceLocation
 }
 
 func (cn CompoundName) String() string {
@@ -119,6 +121,7 @@ type OrderByField struct {
 	FieldName  *CompoundName
 	FieldIndex int32 // 0 means no index
 	Descending bool
+	Location   *errors.SourceLocation
 }
 
 func (obf OrderByField) String() string {
@@ -135,6 +138,7 @@ func (obf OrderByField) String() string {
 }
 
 type OrderByExpression struct {
+	Location    *errors.SourceLocation
 	OrderFields []OrderByField
 }
 
@@ -222,6 +226,8 @@ func (jt JoinType) String() string {
 		return "RIGHT OUTER JOIN"
 	case CrossJoin:
 		return "CROSS JOIN"
+	case FullJoin:
+		return "FULL OUTER JOIN"
 	default:
 		return "*Unsupported Join*"
 	}
@@ -250,6 +256,7 @@ func (js JoinedSource) String() string {
 // - String
 // - List
 type Literal struct {
+	Location     *errors.SourceLocation
 	IsNull       bool
 	NumericValue *string
 	StringValue  *string
@@ -304,17 +311,10 @@ type Expression interface {
 	String() string
 }
 
-type ParensExpression struct {
-	Child Expression
-}
-
-func (pe ParensExpression) String() string {
-	return fmt.Sprintf("(%v)", pe.Child)
-}
-
 type AndExpression struct {
-	LHS Expression
-	RHS Expression
+	LHS      Expression
+	RHS      Expression
+	Location *errors.SourceLocation
 }
 
 func (ae AndExpression) String() string {
@@ -322,8 +322,9 @@ func (ae AndExpression) String() string {
 }
 
 type OrExpression struct {
-	LHS Expression
-	RHS Expression
+	LHS      Expression
+	RHS      Expression
+	Location *errors.SourceLocation
 }
 
 func (oe OrExpression) String() string {
@@ -331,7 +332,8 @@ func (oe OrExpression) String() string {
 }
 
 type NotExpression struct {
-	Child Expression
+	Location *errors.SourceLocation
+	Child    Expression
 }
 
 func (ne NotExpression) String() string {
@@ -342,6 +344,7 @@ type ComparisonExpression struct {
 	LHS      Expression
 	RHS      Expression
 	Operator string
+	Location *errors.SourceLocation
 }
 
 func (ce ComparisonExpression) String() string {
@@ -352,6 +355,7 @@ type BinaryExpression struct {
 	LHS      Expression
 	RHS      Expression
 	Operator string
+	Location *errors.SourceLocation
 }
 
 func (be BinaryExpression) String() string {
@@ -359,9 +363,10 @@ func (be BinaryExpression) String() string {
 }
 
 type LikeExpression struct {
-	What    Expression
-	Pattern Expression
-	NotLike bool
+	What     Expression
+	Pattern  Expression
+	NotLike  bool
+	Location *errors.SourceLocation
 }
 
 func (like LikeExpression) String() string {
@@ -375,9 +380,10 @@ func (like LikeExpression) String() string {
 }
 
 type MatchExpression struct {
-	What    Expression
-	Pattern Expression
-	Not     bool
+	Location *errors.SourceLocation
+	What     Expression
+	Pattern  Expression
+	Not      bool
 }
 
 func (match MatchExpression) String() string {
@@ -391,9 +397,10 @@ func (match MatchExpression) String() string {
 }
 
 type BetweenExpression struct {
-	What Expression
-	Low  Expression
-	High Expression
+	What     Expression
+	Low      Expression
+	High     Expression
+	Location *errors.SourceLocation
 }
 
 func (be BetweenExpression) String() string {
@@ -401,9 +408,10 @@ func (be BetweenExpression) String() string {
 }
 
 type InListExpression struct {
-	What  Expression
-	List  ListLiteral
-	NotIn bool
+	What     Expression
+	List     ListLiteral
+	NotIn    bool
+	Location *errors.SourceLocation
 }
 
 func (ile InListExpression) String() string {

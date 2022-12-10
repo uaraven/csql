@@ -22,6 +22,7 @@ package sql
 import (
 	"fmt"
 	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
+	. "github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/parser"
 	"strconv"
 	"strings"
@@ -70,11 +71,9 @@ func ParseSQL(sql string) UnionSource {
 	visitor := NewCsqlVisitor()
 	tree := p.Query()
 	if len(errors.errors) != 0 {
-		var sb strings.Builder
-		for _, err := range errors.errors {
-			sb.WriteString(fmt.Sprintf("[%d, %d] %s\n", err.line, err.column, err.message))
-		}
-		panic(sb.String())
+		err1 := errors.errors[0]
+		srcLoc := Loc(err1.line, err1.column)
+		panic(NewError(srcLoc, err1.message))
 	}
 	return *visitor.Visit(tree).(*UnionSource)
 }
@@ -177,7 +176,7 @@ func (c CsqlVisitorImpl) VisitLimitValue(ctx *parser.LimitValueContext) interfac
 }
 
 func (c CsqlVisitorImpl) VisitOrderBy(ctx *parser.OrderByContext) interface{} {
-	obe := OrderByExpression{OrderFields: []OrderByField{}}
+	obe := OrderByExpression{OrderFields: []OrderByField{}, Location: SLFromToken(ctx.GetStart())}
 	for idx, _ := range ctx.AllOrderByField() {
 		obe.OrderFields = append(obe.OrderFields, ctx.OrderByField(idx).Accept(c).(OrderByField))
 	}
@@ -185,7 +184,9 @@ func (c CsqlVisitorImpl) VisitOrderBy(ctx *parser.OrderByContext) interface{} {
 }
 
 func (c CsqlVisitorImpl) VisitOrderByField(ctx *parser.OrderByFieldContext) interface{} {
-	obf := OrderByField{}
+	obf := OrderByField{
+		Location: SLFromToken(ctx.GetStart()),
+	}
 	if ctx.CompoundName() != nil {
 		fieldName := ctx.CompoundName().Accept(c).(CompoundName)
 		obf.FieldName = &fieldName
@@ -239,6 +240,7 @@ func (c CsqlVisitorImpl) VisitList(ctx *parser.ListContext) interface{} {
 
 func (c CsqlVisitorImpl) VisitValueBinaryExpr(ctx *parser.ValueBinaryExprContext) interface{} {
 	return BinaryExpression{
+		Location: SLFromToken(ctx.GetStart()),
 		LHS:      ctx.ValueExpr(0).Accept(c).(Expression),
 		RHS:      ctx.ValueExpr(1).Accept(c).(Expression),
 		Operator: ctx.BinaryOperation().Accept(c).(string),
@@ -270,6 +272,7 @@ func (c CsqlVisitorImpl) VisitValueExprItem(ctx *parser.ValueExprItemContext) in
 // VisitCondition visits a parse tree produced by CsqlParser#condition.
 func (c CsqlVisitorImpl) VisitCondition(ctx *parser.ConditionContext) interface{} {
 	return ComparisonExpression{
+		Location: SLFromToken(ctx.GetStart()),
 		LHS:      ctx.WhereExpr(0).Accept(c).(Expression),
 		RHS:      ctx.WhereExpr(1).Accept(c).(Expression),
 		Operator: ctx.ComparisonOperator().Accept(c).(string),
@@ -279,9 +282,10 @@ func (c CsqlVisitorImpl) VisitCondition(ctx *parser.ConditionContext) interface{
 // VisitBetweenExpr visits a parse tree produced by CsqlParser#betweenExpr.
 func (c CsqlVisitorImpl) VisitBetweenExpr(ctx *parser.BetweenExprContext) interface{} {
 	return BetweenExpression{
-		What: ctx.ValueExpr(0).Accept(c).(Expression),
-		Low:  ctx.ValueExpr(1).Accept(c).(Expression),
-		High: ctx.ValueExpr(2).Accept(c).(Expression),
+		Location: SLFromToken(ctx.GetStart()),
+		What:     ctx.ValueExpr(0).Accept(c).(Expression),
+		Low:      ctx.ValueExpr(1).Accept(c).(Expression),
+		High:     ctx.ValueExpr(2).Accept(c).(Expression),
 	}
 }
 
@@ -292,16 +296,18 @@ func (c CsqlVisitorImpl) VisitTermItem(ctx *parser.TermItemContext) interface{} 
 // VisitNotExpr visits a parse tree produced by CsqlParser#notExpr.
 func (c CsqlVisitorImpl) VisitNotExpr(ctx *parser.NotExprContext) interface{} {
 	return NotExpression{
-		Child: ctx.WhereExpr().Accept(c).(Expression),
+		Location: SLFromToken(ctx.GetStart()),
+		Child:    ctx.WhereExpr().Accept(c).(Expression),
 	}
 }
 
 // VisitInExpr visits a parse tree produced by CsqlParser#inExpr.
 func (c CsqlVisitorImpl) VisitInExpr(ctx *parser.InExprContext) interface{} {
 	return InListExpression{
-		What:  ctx.ValueExpr().Accept(c).(Expression),
-		List:  ctx.List().Accept(c).(ListLiteral),
-		NotIn: ctx.K_NOT() != nil,
+		Location: SLFromToken(ctx.GetStart()),
+		What:     ctx.ValueExpr().Accept(c).(Expression),
+		List:     ctx.List().Accept(c).(ListLiteral),
+		NotIn:    ctx.K_NOT() != nil,
 	}
 }
 
@@ -315,8 +321,9 @@ func (c CsqlVisitorImpl) VisitIsNullExpr(ctx *parser.IsNullExprContext) interfac
 // VisitOrExpr visits a parse tree produced by CsqlParser#orExpr.
 func (c CsqlVisitorImpl) VisitOrExpr(ctx *parser.OrExprContext) interface{} {
 	return OrExpression{
-		LHS: ctx.WhereExpr(0).Accept(c).(Expression),
-		RHS: ctx.WhereExpr(1).Accept(c).(Expression),
+		Location: SLFromToken(ctx.GetStart()),
+		LHS:      ctx.WhereExpr(0).Accept(c).(Expression),
+		RHS:      ctx.WhereExpr(1).Accept(c).(Expression),
 	}
 }
 
@@ -328,17 +335,19 @@ func (c CsqlVisitorImpl) VisitParensExpr(ctx *parser.ParensExprContext) interfac
 // VisitAndExpr visits a parse tree produced by CsqlParser#andExpr.
 func (c CsqlVisitorImpl) VisitAndExpr(ctx *parser.AndExprContext) interface{} {
 	return AndExpression{
-		LHS: ctx.WhereExpr(0).Accept(c).(Expression),
-		RHS: ctx.WhereExpr(1).Accept(c).(Expression),
+		Location: SLFromToken(ctx.GetStart()),
+		LHS:      ctx.WhereExpr(0).Accept(c).(Expression),
+		RHS:      ctx.WhereExpr(1).Accept(c).(Expression),
 	}
 }
 
 // VisitLikeExpr visits a parse tree produced by CsqlParser#likeExpr.
 func (c CsqlVisitorImpl) VisitLikeExpr(ctx *parser.LikeExprContext) interface{} {
 	return LikeExpression{
-		What:    ctx.ValueExpr(0).Accept(c).(Expression),
-		Pattern: ctx.ValueExpr(1).Accept(c).(Expression),
-		NotLike: ctx.K_NOT() != nil,
+		What:     ctx.ValueExpr(0).Accept(c).(Expression),
+		Pattern:  ctx.ValueExpr(1).Accept(c).(Expression),
+		NotLike:  ctx.K_NOT() != nil,
+		Location: SLFromToken(ctx.GetStart()),
 	}
 }
 
@@ -369,7 +378,8 @@ func (c CsqlVisitorImpl) VisitProjectionField(ctx *parser.ProjectionFieldContext
 // VisitProjectionFieldName visits a parse tree produced by CsqlParser#projectionFieldName.
 func (c CsqlVisitorImpl) VisitProjectionFieldName(ctx *parser.ProjectionFieldNameContext) interface{} {
 	field := CompoundName{
-		Name: ctx.FieldName().Accept(c).(Identifier),
+		Location: SLFromToken(ctx.GetStart()),
+		Name:     ctx.FieldName().Accept(c).(Identifier),
 	}
 	if ctx.Qualifier() != nil {
 		tableName := ctx.Qualifier().Accept(c).(Identifier)
@@ -389,9 +399,10 @@ func (c CsqlVisitorImpl) VisitValueTerm(ctx *parser.ValueTermContext) interface{
 
 func (c CsqlVisitorImpl) VisitMatchExpr(ctx *parser.MatchExprContext) interface{} {
 	return MatchExpression{
-		What:    ctx.ValueExpr(0).Accept(c).(Expression),
-		Pattern: ctx.ValueExpr(1).Accept(c).(Expression),
-		Not:     ctx.K_NOT() != nil,
+		Location: SLFromToken(ctx.GetStart()),
+		What:     ctx.ValueExpr(0).Accept(c).(Expression),
+		Pattern:  ctx.ValueExpr(1).Accept(c).(Expression),
+		Not:      ctx.K_NOT() != nil,
 	}
 }
 
@@ -514,7 +525,9 @@ func (c CsqlVisitorImpl) VisitNullValue(ctx *parser.NullValueContext) interface{
 
 // VisitLiteralValue visits a parse tree produced by CsqlParser#literalValue.
 func (c CsqlVisitorImpl) VisitLiteralValue(ctx *parser.LiteralValueContext) interface{} {
-	l := Literal{}
+	l := Literal{
+		Location: SLFromToken(ctx.GetStart()),
+	}
 	if ctx.SignedNumber() != nil {
 		v := ctx.SignedNumber().Accept(c).(string)
 		l.NumericValue = &v
@@ -549,7 +562,9 @@ func (c CsqlVisitorImpl) VisitSourceName(ctx *parser.SourceNameContext) interfac
 
 // VisitCompoundName visits a parse tree produced by CsqlParser#compoundName.
 func (c CsqlVisitorImpl) VisitCompoundName(ctx *parser.CompoundNameContext) interface{} {
-	result := CompoundName{}
+	result := CompoundName{
+		Location: SLFromToken(ctx.GetStart()),
+	}
 	if ctx.Qualifier() == nil {
 		result.Qualifier = nil
 	} else {

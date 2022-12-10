@@ -22,6 +22,7 @@ package core
 import (
 	"fmt"
 	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/funky"
 )
 
@@ -29,6 +30,7 @@ const AllColumns = "*"
 
 type ProjectionColumn struct {
 	source Evaluator
+	loc    *errors.SourceLocation
 	alias  string
 }
 
@@ -36,12 +38,24 @@ func NewColumn(name string) ProjectionColumn {
 	return ProjectionColumn{source: NewRowValue(name)}
 }
 
+func NewColumnL(name string, location *errors.SourceLocation) ProjectionColumn {
+	return ProjectionColumn{source: NewRowValue(name), loc: location}
+}
+
 func NewColumnWithAlias(name string, alias string) ProjectionColumn {
 	return ProjectionColumn{source: NewRowValue(name), alias: alias}
 }
 
+func NewColumnWithAliasL(name string, alias string, location *errors.SourceLocation) ProjectionColumn {
+	return ProjectionColumn{source: NewRowValue(name), alias: alias, loc: location}
+}
+
 func NewExpressionColumn(src Evaluator, alias string) ProjectionColumn {
 	return ProjectionColumn{source: src, alias: alias}
+}
+
+func NewExpressionColumnL(src Evaluator, alias string, location *errors.SourceLocation) ProjectionColumn {
+	return ProjectionColumn{source: src, alias: alias, loc: location}
 }
 
 func NewSimpleProjection(sourceNames []string, aliases []string) []ProjectionColumn {
@@ -112,7 +126,7 @@ func newHeaderWithProjection(src DataSource, projection []ProjectionColumn) Data
 			sourceColumn := rowId.Identifier()
 			columnIdx := src.Header().IndexByName(sourceColumn)
 			if columnIdx == InvalidFieldIndex {
-				panic(UnknownColumnError(sourceColumn))
+				panic(errors.UnknownColumnError(prjColumn.loc, sourceColumn))
 			}
 			sourceColumnMetadata := src.Header().ColumnsMetadata()[columnIdx]
 			columnMeta = columnMetadata{

@@ -21,6 +21,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/uaraven/csql/errors"
 	"sort"
 )
 
@@ -28,6 +29,7 @@ type OrderByField struct {
 	name  string
 	index int
 	desc  bool
+	loc   *errors.SourceLocation
 }
 
 func NewOrderBy(column string, desc bool) OrderByField {
@@ -38,11 +40,29 @@ func NewOrderBy(column string, desc bool) OrderByField {
 	}
 }
 
+func NewOrderByL(column string, desc bool, l *errors.SourceLocation) OrderByField {
+	return OrderByField{
+		name:  column,
+		index: -1,
+		desc:  desc,
+		loc:   l,
+	}
+}
+
 func NewOrderByIndex(index int, desc bool) OrderByField {
 	return OrderByField{
 		name:  "",
 		index: index,
 		desc:  desc,
+	}
+}
+
+func NewOrderByIndexL(index int, desc bool, l *errors.SourceLocation) OrderByField {
+	return OrderByField{
+		name:  "",
+		index: index,
+		desc:  desc,
+		loc:   l,
 	}
 }
 
@@ -76,8 +96,8 @@ func rowSorter(i, j int, rows []Row, orderBy []OrderByField) bool {
 			r1v = r1.GetByIndex(order.index)
 			r2v = r2.GetByIndex(order.index)
 		} else {
-			r1v = r1.Get(order.name).OrPanic(fmt.Errorf("unknown column: %v", order.name))
-			r2v = r2.Get(order.name).OrPanic(fmt.Errorf("unknown column: %v", order.name))
+			r1v = r1.Get(order.name).OrPanic(errors.NewError(order.loc, fmt.Sprintf("unknown column: %v", order.name)))
+			r2v = r2.Get(order.name).OrPanic(errors.NewError(order.loc, fmt.Sprintf("unknown column: %v", order.name)))
 		}
 		if !r1v.Equals(r2v) {
 			less := r1v.Less(r2v)

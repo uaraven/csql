@@ -21,6 +21,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/util"
 )
 
@@ -46,6 +47,7 @@ type binaryExpression struct {
 	operation BinaryOperator
 	left      Evaluator
 	right     Evaluator
+	loc       *errors.SourceLocation
 }
 
 func operationExecutor[T int64 | float64](oper BinaryOperator, a T, b T) (T, error) {
@@ -71,7 +73,7 @@ func (ae binaryExpression) Evaluate(context EvaluationContext) Value {
 	right := ae.right.Evaluate(context)
 
 	if !IsNumeric(left) || !IsNumeric(right) {
-		panic(fmt.Errorf("both operands must be numeric: %v and %v", left, right))
+		panic(errors.NewError(ae.loc, fmt.Sprintf("both operands must be numeric: %v and %v", left, right)))
 	}
 	if left.Type() == TypeFloat || right.Type() == TypeFloat {
 		a := left.AsFloat().Value().(float64)
@@ -84,6 +86,10 @@ func (ae binaryExpression) Evaluate(context EvaluationContext) Value {
 	}
 }
 
+func (ae binaryExpression) String() string {
+	return fmt.Sprintf("%v %s %v", ae.left, string(rune(ae.operation)), ae.right)
+}
+
 func NewExpression(operation BinaryOperator, left Evaluator, right Evaluator) Evaluator {
 	return &binaryExpression{
 		operation: operation,
@@ -92,9 +98,19 @@ func NewExpression(operation BinaryOperator, left Evaluator, right Evaluator) Ev
 	}
 }
 
+func NewExpressionL(operation BinaryOperator, left Evaluator, right Evaluator, loc *errors.SourceLocation) Evaluator {
+	return &binaryExpression{
+		operation: operation,
+		left:      left,
+		right:     right,
+		loc:       loc,
+	}
+}
+
 type concatExpression struct {
 	left  Evaluator
 	right Evaluator
+	loc   *errors.SourceLocation
 }
 
 func NewConcat(left Evaluator, right Evaluator) Evaluator {
@@ -104,8 +120,31 @@ func NewConcat(left Evaluator, right Evaluator) Evaluator {
 	}
 }
 
+func NewConcatL(left Evaluator, right Evaluator, loc *errors.SourceLocation) Evaluator {
+	return &concatExpression{
+		left:  left,
+		right: right,
+		loc:   loc,
+	}
+}
+
 func (c concatExpression) Evaluate(context EvaluationContext) Value {
-	ls := EnsureString(c.left.Evaluate(context)).AsString().Value().(string)
-	rs := EnsureString(c.right.Evaluate(context)).AsString().Value().(string)
+	defer func() {
+		if err := recover(); err != nil {
+			panic(errors.NewError(c.loc, fmt.Sprintf("%v", err)))
+		}
+	}()
+	ls, err := EnsureString(c.left.Evaluate(context))
+	if err != nil {
+		panic(errors.NewTypeMismatch(c.loc, c.left, "string", c))
+	}
+	rs, err := EnsureString(c.right.Evaluate(context))
+	if err != nil {
+		panic(errors.NewTypeMismatch(c.loc, c.right, "string", c))
+	}
 	return NewStringValue(ls + rs)
+}
+
+func (c concatExpression) String() string {
+	return fmt.Sprintf("%v || %v", c.left, c.right)
 }
