@@ -247,7 +247,7 @@ func TestAstExecutor_Nulls(t *testing.T) {
 	rows = ExecuteSql(`select id, null from "../test-data/nulls.csv" where name = 'Brbra'`)
 	g.Expect(rows).To(HaveLen(1))
 	g.Expect(rows[0].GetByIndex(1)).To(Equal(core.NewIntValue(1)))
-	g.Expect(rows[0].GetByIndex(2)).To(Equal(core.NewNullValue()))
+	g.Expect(rows[0].GetByIndex(2).Value()).To(BeNil())
 }
 
 func TestAstExecutor_Logical(t *testing.T) {

@@ -21,6 +21,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/uaraven/csql/errors"
 	"strconv"
 )
 
@@ -33,14 +34,17 @@ var (
 
 type stringValue struct {
 	value string
+	loc   *errors.SourceLocation
 }
 
 type intValue struct {
 	value int64
+	loc   *errors.SourceLocation
 }
 
 type floatValue struct {
 	value float64
+	loc   *errors.SourceLocation
 }
 
 type boolValue struct {
@@ -48,18 +52,31 @@ type boolValue struct {
 }
 
 type nullValue struct {
+	loc *errors.SourceLocation
 }
 
 func NewStringValue(v string) Value {
 	return &stringValue{value: v}
 }
 
+func NewStringValueL(v string, l *errors.SourceLocation) Value {
+	return &stringValue{value: v, loc: l}
+}
+
 func NewIntValue(iv int64) Value {
 	return &intValue{value: iv}
 }
 
+func NewIntValueL(iv int64, l *errors.SourceLocation) Value {
+	return &intValue{value: iv, loc: l}
+}
+
 func NewFloatValue(fv float64) Value {
 	return &floatValue{value: fv}
+}
+
+func NewFloatValueL(fv float64, l *errors.SourceLocation) Value {
+	return &floatValue{value: fv, loc: l}
 }
 
 func NewBoolValue(b bool) Value {
@@ -68,6 +85,10 @@ func NewBoolValue(b bool) Value {
 
 func NewNullValue() Value {
 	return nullV
+}
+
+func NewNullValueL(loc *errors.SourceLocation) Value {
+	return &nullValue{loc: loc}
 }
 
 func (sv stringValue) Type() DataType {
@@ -270,15 +291,15 @@ func (n nullValue) AsString() Value {
 }
 
 func (n nullValue) AsInt() Value {
-	panic(fmt.Sprintf("cannot cast null to int"))
+	panic(errors.NewError(n.loc, fmt.Sprintf("cannot cast null to int")))
 }
 
 func (n nullValue) AsFloat() Value {
-	panic(fmt.Sprintf("cannot cast null to float"))
+	panic(errors.NewError(n.loc, fmt.Sprintf("cannot cast null to float")))
 }
 
 func (n nullValue) AsBool() Value {
-	panic(fmt.Sprintf("cannot cast null to bool"))
+	panic(errors.NewError(n.loc, fmt.Sprintf("cannot cast null to bool")))
 }
 
 func (n nullValue) String() string {
@@ -299,6 +320,7 @@ type Identifiable interface {
 
 type rowValue struct {
 	identifier string
+	location   *errors.SourceLocation
 }
 
 func NewRowValue(identifier string) Evaluator {
@@ -307,12 +329,19 @@ func NewRowValue(identifier string) Evaluator {
 	}
 }
 
+func NewRowValueL(identifier string, loc *errors.SourceLocation) Evaluator {
+	return &rowValue{
+		identifier: identifier,
+		location:   loc,
+	}
+}
+
 func (rv rowValue) Evaluate(ctx EvaluationContext) Value {
 	val := ctx.Get(rv.identifier)
 	if val.IsPresent() {
 		return val.Value()
 	} else {
-		panic(fmt.Errorf("unknown column %s", rv.identifier))
+		panic(errors.NewError(rv.location, fmt.Sprintf("unknown column %s", rv.identifier)))
 	}
 }
 
@@ -320,21 +349,21 @@ func (rv rowValue) Identifier() string {
 	return rv.identifier
 }
 
-func EnsureString(v Value) Value {
+func EnsureString(v Value) (string, error) {
 	if v.Type() != TypeString {
-		panic(fmt.Sprintf("expected %v to have type 'string'", v))
+		return "", fmt.Errorf("expected %v to have type 'string'", v)
 	}
-	return v
+	return v.Value().(string), nil
 }
 
-func DecodeNumeric(value string) Value {
+func DecodeNumericL(value string, l *errors.SourceLocation) Value {
 	i64, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
 		f64, err := strconv.ParseFloat(value, 64)
 		if err != nil {
-			panic(fmt.Errorf("%v is not numeric", value))
+			panic(errors.NewError(l, fmt.Sprintf("%v is not numeric", value)))
 		}
-		return NewFloatValue(f64)
+		return NewFloatValueL(f64, l)
 	}
-	return NewIntValue(i64)
+	return NewIntValueL(i64, l)
 }

@@ -71,11 +71,9 @@ func ParseSQL(sql string) UnionSource {
 	visitor := NewCsqlVisitor()
 	tree := p.Query()
 	if len(errors.errors) != 0 {
-		var sb strings.Builder
-		for _, err := range errors.errors {
-			sb.WriteString(fmt.Sprintf("[%d, %d] %s\n", err.line, err.column, err.message))
-		}
-		panic(sb.String())
+		err1 := errors.errors[0]
+		srcLoc := Loc(err1.line, err1.column)
+		panic(NewError(srcLoc, err1.message))
 	}
 	return *visitor.Visit(tree).(*UnionSource)
 }
@@ -186,7 +184,9 @@ func (c CsqlVisitorImpl) VisitOrderBy(ctx *parser.OrderByContext) interface{} {
 }
 
 func (c CsqlVisitorImpl) VisitOrderByField(ctx *parser.OrderByFieldContext) interface{} {
-	obf := OrderByField{}
+	obf := OrderByField{
+		Location: SLFromToken(ctx.GetStart()),
+	}
 	if ctx.CompoundName() != nil {
 		fieldName := ctx.CompoundName().Accept(c).(CompoundName)
 		obf.FieldName = &fieldName
@@ -344,9 +344,10 @@ func (c CsqlVisitorImpl) VisitAndExpr(ctx *parser.AndExprContext) interface{} {
 // VisitLikeExpr visits a parse tree produced by CsqlParser#likeExpr.
 func (c CsqlVisitorImpl) VisitLikeExpr(ctx *parser.LikeExprContext) interface{} {
 	return LikeExpression{
-		What:    ctx.ValueExpr(0).Accept(c).(Expression),
-		Pattern: ctx.ValueExpr(1).Accept(c).(Expression),
-		NotLike: ctx.K_NOT() != nil,
+		What:     ctx.ValueExpr(0).Accept(c).(Expression),
+		Pattern:  ctx.ValueExpr(1).Accept(c).(Expression),
+		NotLike:  ctx.K_NOT() != nil,
+		Location: SLFromToken(ctx.GetStart()),
 	}
 }
 
@@ -398,9 +399,10 @@ func (c CsqlVisitorImpl) VisitValueTerm(ctx *parser.ValueTermContext) interface{
 
 func (c CsqlVisitorImpl) VisitMatchExpr(ctx *parser.MatchExprContext) interface{} {
 	return MatchExpression{
-		What:    ctx.ValueExpr(0).Accept(c).(Expression),
-		Pattern: ctx.ValueExpr(1).Accept(c).(Expression),
-		Not:     ctx.K_NOT() != nil,
+		Location: SLFromToken(ctx.GetStart()),
+		What:     ctx.ValueExpr(0).Accept(c).(Expression),
+		Pattern:  ctx.ValueExpr(1).Accept(c).(Expression),
+		Not:      ctx.K_NOT() != nil,
 	}
 }
 

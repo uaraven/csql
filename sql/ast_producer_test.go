@@ -261,9 +261,10 @@ func TestSimpleWhereLikeExpression(t *testing.T) {
 	g.Expect(s.Select.Filter).ToNot(BeNil())
 	p := "abc%"
 	g.Expect(s.Select.Filter).To(BeEquivalentTo(LikeExpression{
-		What:    Term{Name: &CompoundName{Location: Loc(1, 29), Name: Identifier("col2")}},
-		Pattern: Term{Value: &Literal{Location: Loc(1, 43), StringValue: &p}},
-		NotLike: true,
+		What:     Term{Name: &CompoundName{Location: Loc(1, 29), Name: Identifier("col2")}},
+		Pattern:  Term{Value: &Literal{Location: Loc(1, 43), StringValue: &p}},
+		NotLike:  true,
+		Location: Loc(1, 29),
 	}))
 }
 
@@ -280,7 +281,8 @@ func TestLikeWithExpression(t *testing.T) {
 			Operator: "+",
 			Location: Loc(1, 39),
 		},
-		NotLike: false,
+		NotLike:  false,
+		Location: Loc(1, 29),
 	}))
 }
 
@@ -290,9 +292,10 @@ func TestSimpleWhereMatchExpression(t *testing.T) {
 	g.Expect(s.Select.Filter).ToNot(BeNil())
 	p := "abc.*"
 	g.Expect(s.Select.Filter).To(BeEquivalentTo(MatchExpression{
-		What:    Term{Name: &CompoundName{Location: Loc(1, 29), Name: Identifier("col2")}},
-		Pattern: Term{Value: &Literal{Location: Loc(1, 40), StringValue: &p}},
-		Not:     false,
+		Location: Loc(1, 29),
+		What:     Term{Name: &CompoundName{Location: Loc(1, 29), Name: Identifier("col2")}},
+		Pattern:  Term{Value: &Literal{Location: Loc(1, 40), StringValue: &p}},
+		Not:      false,
 	}))
 }
 
@@ -507,8 +510,8 @@ func TestSelectOrderBy(t *testing.T) {
 	g.Expect(s.Select.OrderBy).To(BeEquivalentTo(&OrderByExpression{
 		Location: Loc(1, 27),
 		OrderFields: []OrderByField{
-			{FieldName: &CompoundName{Name: Identifier("a"), Location: Loc(1, 36)}, FieldIndex: 0, Descending: true},
-			{FieldName: nil, FieldIndex: 2, Descending: false},
-			{FieldName: &CompoundName{Qualifier: &q, Name: Identifier("c"), Location: Loc(1, 47)}, FieldIndex: 0, Descending: false},
+			{Location: Loc(1, 36), FieldName: &CompoundName{Name: Identifier("a"), Location: Loc(1, 36)}, FieldIndex: 0, Descending: true},
+			{Location: Loc(1, 44), FieldName: nil, FieldIndex: 2, Descending: false},
+			{Location: Loc(1, 47), FieldName: &CompoundName{Qualifier: &q, Name: Identifier("c"), Location: Loc(1, 47)}, FieldIndex: 0, Descending: false},
 		}}))
 }

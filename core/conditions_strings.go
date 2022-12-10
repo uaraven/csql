@@ -21,6 +21,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/uaraven/csql/errors"
 	"regexp"
 	"strings"
 )
@@ -29,6 +30,7 @@ import (
 // must resolve to a string value and is treated as regular expression
 type matchCondition struct {
 	Condition
+	loc   *errors.SourceLocation
 	left  Evaluator
 	right Evaluator
 }
@@ -40,13 +42,21 @@ func NewMatchCondition(left Evaluator, right Evaluator) Condition {
 	}
 }
 
+func NewMatchConditionL(left Evaluator, right Evaluator, l *errors.SourceLocation) Condition {
+	return &matchCondition{
+		left:  left,
+		right: right,
+		loc:   l,
+	}
+}
+
 func (mc matchCondition) Evaluate(context EvaluationContext) Value {
 	expression := mc.right.Evaluate(context).AsString()
 	value := mc.left.Evaluate(context).AsString()
 
 	matched, err := regexp.MatchString(expression.Value().(string), value.Value().(string))
 	if err != nil {
-		panic(fmt.Sprintf("failure while evaluating %v MATCH %v: %v", mc.left, mc.right, err))
+		panic(errors.NewError(mc.loc, fmt.Sprintf("failure while evaluating %v MATCH %v: %v", mc.left, mc.right, err)))
 	}
 
 	return NewBoolValue(matched)
@@ -58,12 +68,21 @@ type likeCondition struct {
 	Condition
 	left  Evaluator
 	right Evaluator
+	loc   *errors.SourceLocation
 }
 
 func NewLikeCondition(left Evaluator, right Evaluator) Condition {
 	return &likeCondition{
 		left:  left,
 		right: right,
+	}
+}
+
+func NewLikeConditionL(left Evaluator, right Evaluator, location *errors.SourceLocation) Condition {
+	return &likeCondition{
+		left:  left,
+		right: right,
+		loc:   location,
 	}
 }
 
@@ -75,7 +94,7 @@ func (lc likeCondition) Evaluate(context EvaluationContext) Value {
 
 	matched, err := regexp.MatchString(likeExpr, value.Value().(string))
 	if err != nil {
-		panic(fmt.Sprintf("failure while evaluating %v LIKE %v: %v", lc.left, lc.right, err))
+		panic(errors.NewError(lc.loc, fmt.Sprintf("Failure while evaluating %v LIKE %v: %v", lc.left, lc.right, err)))
 	}
 
 	return NewBoolValue(matched)

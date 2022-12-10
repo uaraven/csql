@@ -121,6 +121,7 @@ type OrderByField struct {
 	FieldName  *CompoundName
 	FieldIndex int32 // 0 means no index
 	Descending bool
+	Location   *errors.SourceLocation
 }
 
 func (obf OrderByField) String() string {
@@ -362,9 +363,10 @@ func (be BinaryExpression) String() string {
 }
 
 type LikeExpression struct {
-	What    Expression
-	Pattern Expression
-	NotLike bool
+	What     Expression
+	Pattern  Expression
+	NotLike  bool
+	Location *errors.SourceLocation
 }
 
 func (like LikeExpression) String() string {
@@ -378,9 +380,10 @@ func (like LikeExpression) String() string {
 }
 
 type MatchExpression struct {
-	What    Expression
-	Pattern Expression
-	Not     bool
+	Location *errors.SourceLocation
+	What     Expression
+	Pattern  Expression
+	Not      bool
 }
 
 func (match MatchExpression) String() string {
