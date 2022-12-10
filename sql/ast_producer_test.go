@@ -21,6 +21,7 @@ package sql
 
 import (
 	. "github.com/onsi/gomega"
+	. "github.com/uaraven/csql/errors"
 	"testing"
 )
 
@@ -78,6 +79,7 @@ func TestSimpleQueryWithQualifiedProjection(t *testing.T) {
 	g.Expect(s.Select.Projection.ProjectionFields).To(HaveLen(1))
 	tName := Identifier("Table")
 	g.Expect(s.Select.Projection.ProjectionFields[0].NamedField).To(BeEquivalentTo(&CompoundName{
+		Location:  Loc(1, 7),
 		Qualifier: &tName,
 		Name:      Identifier("col"),
 	}))
@@ -96,9 +98,9 @@ func TestSimpleQueryWithNegativeLiteral(t *testing.T) {
 	vf := "-1e-10"
 	g.Expect(s.Select.Projection.ProjectionFields).To(BeEquivalentTo(
 		[]ProjectionField{
-			{NamedField: &CompoundName{Name: Identifier("col")}},
-			{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{NumericValue: &value}}}},
-			{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{NumericValue: &vf}}}},
+			{NamedField: &CompoundName{Location: Loc(1, 7), Name: Identifier("col")}},
+			{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{Location: Loc(1, 12), NumericValue: &value}}}},
+			{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{Location: Loc(1, 16), NumericValue: &vf}}}},
 		}))
 
 	g.Expect(s.Select.From.TableName).ToNot(BeNil())
@@ -176,13 +178,16 @@ func TestConditionalJoin(t *testing.T) {
 	g.Expect(s.Select.From.Join.Condition).To(Equal(ComparisonExpression{
 		LHS: Term{Name: &CompoundName{
 			Qualifier: nil,
+			Location:  Loc(1, 44),
 			Name:      Identifier("tcol1"),
 		}},
 		RHS: Term{Name: &CompoundName{
+			Location:  Loc(1, 53),
 			Qualifier: nil,
 			Name:      Identifier("tcol2"),
 		}},
 		Operator: ">=",
+		Location: Loc(1, 44),
 	}))
 }
 
@@ -195,14 +200,17 @@ func TestInnerJoin(t *testing.T) {
 	g.Expect(s.Select.From.Join.Target.TableName.Name).To(Equal(Identifier("Table2")))
 	g.Expect(s.Select.From.Join.Condition).To(Equal(ComparisonExpression{
 		LHS: Term{Name: &CompoundName{
+			Location:  Loc(1, 38),
 			Qualifier: nil,
 			Name:      Identifier("tcol1"),
 		}},
 		RHS: Term{Name: &CompoundName{
+			Location:  Loc(1, 47),
 			Qualifier: nil,
 			Name:      Identifier("tcol2"),
 		}},
 		Operator: ">=",
+		Location: Loc(1, 38),
 	}))
 }
 
@@ -214,11 +222,13 @@ func TestSimpleWhereExpression(t *testing.T) {
 	g.Expect(s.Select.Filter).To(BeEquivalentTo(ComparisonExpression{
 		LHS: Term{
 			Name: &CompoundName{
-				Name: Identifier("col2"),
+				Name:     Identifier("col2"),
+				Location: Loc(1, 29),
 			},
 		},
-		RHS:      Term{Value: &Literal{NumericValue: &val}},
+		RHS:      Term{Value: &Literal{Location: Loc(1, 36), NumericValue: &val}},
 		Operator: ">",
+		Location: Loc(1, 29),
 	}))
 }
 
@@ -230,14 +240,17 @@ func TestParensWhereExpression(t *testing.T) {
 	g.Expect(s.Select.Filter).To(BeEquivalentTo(ComparisonExpression{
 		LHS: Term{
 			Name: &CompoundName{
-				Name: Identifier("col2"),
+				Location: Loc(1, 29),
+				Name:     Identifier("col2"),
 			},
 		},
 		RHS: BinaryExpression{
-			LHS:      Term{Name: &CompoundName{Name: Identifier("col1")}},
-			RHS:      Term{Value: &Literal{NumericValue: &val}},
+			LHS:      Term{Name: &CompoundName{Location: Loc(1, 37), Name: Identifier("col1")}},
+			RHS:      Term{Value: &Literal{Location: Loc(1, 44), NumericValue: &val}},
+			Location: Loc(1, 37),
 			Operator: "-",
 		},
+		Location: Loc(1, 29),
 		Operator: ">",
 	}))
 }
@@ -248,8 +261,8 @@ func TestSimpleWhereLikeExpression(t *testing.T) {
 	g.Expect(s.Select.Filter).ToNot(BeNil())
 	p := "abc%"
 	g.Expect(s.Select.Filter).To(BeEquivalentTo(LikeExpression{
-		What:    Term{Name: &CompoundName{Name: Identifier("col2")}},
-		Pattern: Term{Value: &Literal{StringValue: &p}},
+		What:    Term{Name: &CompoundName{Location: Loc(1, 29), Name: Identifier("col2")}},
+		Pattern: Term{Value: &Literal{Location: Loc(1, 43), StringValue: &p}},
 		NotLike: true,
 	}))
 }
@@ -261,10 +274,11 @@ func TestLikeWithExpression(t *testing.T) {
 	v1 := "abc%"
 	v2 := "bcd"
 	g.Expect(s.Select.Filter).To(BeEquivalentTo(LikeExpression{
-		What: Term{Name: &CompoundName{Name: Identifier("col2")}},
-		Pattern: BinaryExpression{LHS: Term{Value: &Literal{StringValue: &v1}},
-			RHS:      Term{Value: &Literal{StringValue: &v2}},
+		What: Term{Name: &CompoundName{Location: Loc(1, 29), Name: Identifier("col2")}},
+		Pattern: BinaryExpression{LHS: Term{Value: &Literal{Location: Loc(1, 39), StringValue: &v1}},
+			RHS:      Term{Value: &Literal{Location: Loc(1, 48), StringValue: &v2}},
 			Operator: "+",
+			Location: Loc(1, 39),
 		},
 		NotLike: false,
 	}))
@@ -276,15 +290,16 @@ func TestSimpleWhereMatchExpression(t *testing.T) {
 	g.Expect(s.Select.Filter).ToNot(BeNil())
 	p := "abc.*"
 	g.Expect(s.Select.Filter).To(BeEquivalentTo(MatchExpression{
-		What:    Term{Name: &CompoundName{Name: Identifier("col2")}},
-		Pattern: Term{Value: &Literal{StringValue: &p}},
+		What:    Term{Name: &CompoundName{Location: Loc(1, 29), Name: Identifier("col2")}},
+		Pattern: Term{Value: &Literal{Location: Loc(1, 40), StringValue: &p}},
 		Not:     false,
 	}))
 }
 
 func TestSimpleAndOrWhereExpression(t *testing.T) {
 	g := NewGomegaWithT(t)
-	s := ParseSQL("SELECT col FROM Table1 WHERE col2 > 10 and col2 < 20 OR col3 >= 0")
+	s := ParseSQL("SELECT col FROM Table1 WHERE col2 > 10 and col2 < 20\n" +
+		"OR col3 >= 0")
 	g.Expect(s.Select.Filter).ToNot(BeNil())
 	v1 := "10"
 	v2 := "20"
@@ -293,24 +308,38 @@ func TestSimpleAndOrWhereExpression(t *testing.T) {
 		LHS: AndExpression{
 			LHS: ComparisonExpression{
 				LHS: Term{Name: &CompoundName{
-					Name: "col2",
+					Name:     "col2",
+					Location: Loc(1, 29),
 				}},
 				RHS: Term{Value: &Literal{
+					Location:     Loc(1, 36),
 					NumericValue: &v1,
 				}},
+				Location: Loc(1, 29),
 				Operator: ">",
 			},
 			RHS: ComparisonExpression{
-				LHS:      Term{Name: &CompoundName{Name: Identifier("col2")}},
-				RHS:      Term{Value: &Literal{NumericValue: &v2}},
+				LHS: Term{Name: &CompoundName{
+					Location: Loc(1, 43),
+					Name:     Identifier("col2")}},
+				RHS: Term{Value: &Literal{
+					Location:     Loc(1, 50),
+					NumericValue: &v2}},
 				Operator: "<",
+				Location: Loc(1, 43),
 			},
+			Location: Loc(1, 29),
 		},
 		RHS: ComparisonExpression{
-			LHS:      Term{Name: &CompoundName{Name: Identifier("col3")}},
-			RHS:      Term{Value: &Literal{NumericValue: &v3}},
+			LHS: Term{Name: &CompoundName{
+				Location: Loc(2, 3), Name: Identifier("col3")}},
+			RHS: Term{Value: &Literal{
+				Location:     Loc(2, 11),
+				NumericValue: &v3}},
 			Operator: ">=",
+			Location: Loc(2, 3),
 		},
+		Location: Loc(1, 29),
 	}))
 }
 
@@ -322,13 +351,14 @@ func TestInListExpression(t *testing.T) {
 	v2 := "2"
 	v3 := "3"
 	g.Expect(s.Select.Filter).To(BeEquivalentTo(InListExpression{
-		What:  Term{Name: &CompoundName{Name: Identifier("col2")}},
-		NotIn: true,
+		What:     Term{Name: &CompoundName{Location: Loc(1, 29), Name: Identifier("col2")}},
+		NotIn:    true,
+		Location: Loc(1, 29),
 		List: ListLiteral{
 			Values: []Expression{
-				Term{Value: &Literal{NumericValue: &v1}},
-				Term{Value: &Literal{NumericValue: &v2}},
-				Term{Value: &Literal{NumericValue: &v3}},
+				Term{Value: &Literal{Location: Loc(1, 42), NumericValue: &v1}},
+				Term{Value: &Literal{Location: Loc(1, 45), NumericValue: &v2}},
+				Term{Value: &Literal{Location: Loc(1, 48), NumericValue: &v3}},
 			},
 		},
 	}))
@@ -339,22 +369,23 @@ func TestIsNullExpression(t *testing.T) {
 	s := ParseSQL("SELECT col FROM Table1 WHERE col1 IS NULL")
 	g.Expect(s.Select.Filter).ToNot(BeNil())
 	g.Expect(s.Select.Filter).To(BeEquivalentTo(IsNullExpression{
-		What: Term{Name: &CompoundName{Name: "col1"}},
+		What: Term{Name: &CompoundName{Name: "col1", Location: Loc(1, 29)}},
 		Not:  false,
 	}))
 
 	s = ParseSQL("SELECT col FROM Table1 WHERE col1 IS NOT NULL")
 	g.Expect(s.Select.Filter).ToNot(BeNil())
 	g.Expect(s.Select.Filter).To(BeEquivalentTo(IsNullExpression{
-		What: Term{Name: &CompoundName{Name: "col1"}},
+		What: Term{Name: &CompoundName{Location: Loc(1, 29), Name: "col1"}},
 		Not:  true,
 	}))
 
 	s = ParseSQL("SELECT col FROM Table1 WHERE NOT col1 IS NULL")
 	g.Expect(s.Select.Filter).ToNot(BeNil())
 	g.Expect(s.Select.Filter).To(BeEquivalentTo(NotExpression{
+		Location: Loc(1, 29),
 		Child: IsNullExpression{
-			What: Term{Name: &CompoundName{Name: "col1"}},
+			What: Term{Name: &CompoundName{Location: Loc(1, 33), Name: "col1"}},
 			Not:  false,
 		},
 	}))
@@ -367,9 +398,10 @@ func TestBetweenExpression(t *testing.T) {
 	v1 := "10"
 
 	g.Expect(s.Select.Filter).To(BeEquivalentTo(BetweenExpression{
-		What: Term{Name: &CompoundName{Name: "col2"}},
-		Low:  Term{Value: &Literal{NumericValue: &v1}},
-		High: Term{Name: &CompoundName{Name: "col1"}},
+		What:     Term{Name: &CompoundName{Name: "col2", Location: Loc(1, 29)}},
+		Low:      Term{Value: &Literal{NumericValue: &v1, Location: Loc(1, 42)}},
+		High:     Term{Name: &CompoundName{Name: "col1", Location: Loc(1, 49)}},
+		Location: Loc(1, 29),
 	}))
 
 }
@@ -386,9 +418,10 @@ func TestSelectEvaluation(t *testing.T) {
 			{
 				EvaluatedField: &EvaluatedProjectionField{
 					Expr: BinaryExpression{
-						LHS:      Term{Value: &Literal{NumericValue: &v1}},
-						RHS:      Term{Value: &Literal{NumericValue: &v2}},
+						LHS:      Term{Value: &Literal{NumericValue: &v1, Location: Loc(1, 7)}},
+						RHS:      Term{Value: &Literal{NumericValue: &v2, Location: Loc(1, 9)}},
 						Operator: "+",
+						Location: Loc(1, 7),
 					},
 				},
 			},
@@ -404,9 +437,9 @@ func TestSelectLiteralValue(t *testing.T) {
 	v3 := "3"
 
 	g.Expect(s.Select.Projection.ProjectionFields).To(BeEquivalentTo([]ProjectionField{
-		{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{NumericValue: &v1}}}},
-		{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{NumericValue: &v2}}}},
-		{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{StringValue: &v3}}}},
+		{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{NumericValue: &v1, Location: Loc(1, 7)}}}},
+		{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{NumericValue: &v2, Location: Loc(1, 9)}}}},
+		{EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{StringValue: &v3, Location: Loc(1, 14)}}}},
 	}))
 }
 
@@ -419,8 +452,9 @@ func TestSelectParenExpr(t *testing.T) {
 	g.Expect(s.Select.Projection.ProjectionFields).To(BeEquivalentTo([]ProjectionField{
 		{
 			EvaluatedField: &EvaluatedProjectionField{Expr: BinaryExpression{
-				LHS:      Term{Value: &Literal{NumericValue: &v1}},
-				RHS:      Term{Value: &Literal{NumericValue: &v2}},
+				Location: Loc(1, 8),
+				LHS:      Term{Value: &Literal{NumericValue: &v1, Location: Loc(1, 8)}},
+				RHS:      Term{Value: &Literal{NumericValue: &v2, Location: Loc(1, 12)}},
 				Operator: "/",
 			},
 			},
@@ -437,7 +471,7 @@ func TestSelectTableAlias(t *testing.T) {
 
 	renamedCol := Identifier("tcol")
 	g.Expect(s.Select.Projection.ProjectionFields).To(BeEquivalentTo([]ProjectionField{
-		{NamedField: &CompoundName{Qualifier: &tableAlias, Name: Identifier("col")}, Alias: &renamedCol},
+		{NamedField: &CompoundName{Qualifier: &tableAlias, Name: Identifier("col"), Location: Loc(1, 7)}, Alias: &renamedCol},
 	}))
 }
 
@@ -447,7 +481,7 @@ func TestSelectNull(t *testing.T) {
 
 	g.Expect(s.Select.Projection.ProjectionFields).To(BeEquivalentTo([]ProjectionField{
 		{
-			EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{IsNull: true}}},
+			EvaluatedField: &EvaluatedProjectionField{Expr: Term{Value: &Literal{IsNull: true, Location: Loc(1, 7)}}},
 		},
 	}))
 }
@@ -470,9 +504,11 @@ func TestSelectOrderBy(t *testing.T) {
 	g := NewGomegaWithT(t)
 	s := ParseSQL("SELECT a, b, c FROM Table1 ORDER BY a desc, 2, Table1.c")
 	q := Identifier("Table1")
-	g.Expect(s.Select.OrderBy).To(BeEquivalentTo(&OrderByExpression{OrderFields: []OrderByField{
-		{FieldName: &CompoundName{Name: Identifier("a")}, FieldIndex: 0, Descending: true},
-		{FieldName: nil, FieldIndex: 2, Descending: false},
-		{FieldName: &CompoundName{Qualifier: &q, Name: Identifier("c")}, FieldIndex: 0, Descending: false},
-	}}))
+	g.Expect(s.Select.OrderBy).To(BeEquivalentTo(&OrderByExpression{
+		Location: Loc(1, 27),
+		OrderFields: []OrderByField{
+			{FieldName: &CompoundName{Name: Identifier("a"), Location: Loc(1, 36)}, FieldIndex: 0, Descending: true},
+			{FieldName: nil, FieldIndex: 2, Descending: false},
+			{FieldName: &CompoundName{Qualifier: &q, Name: Identifier("c"), Location: Loc(1, 47)}, FieldIndex: 0, Descending: false},
+		}}))
 }

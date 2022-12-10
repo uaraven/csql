@@ -22,6 +22,7 @@ package sql
 import (
 	"fmt"
 	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
+	. "github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/parser"
 	"strconv"
 	"strings"
@@ -177,7 +178,7 @@ func (c CsqlVisitorImpl) VisitLimitValue(ctx *parser.LimitValueContext) interfac
 }
 
 func (c CsqlVisitorImpl) VisitOrderBy(ctx *parser.OrderByContext) interface{} {
-	obe := OrderByExpression{OrderFields: []OrderByField{}}
+	obe := OrderByExpression{OrderFields: []OrderByField{}, Location: SLFromToken(ctx.GetStart())}
 	for idx, _ := range ctx.AllOrderByField() {
 		obe.OrderFields = append(obe.OrderFields, ctx.OrderByField(idx).Accept(c).(OrderByField))
 	}
@@ -376,7 +377,8 @@ func (c CsqlVisitorImpl) VisitProjectionField(ctx *parser.ProjectionFieldContext
 // VisitProjectionFieldName visits a parse tree produced by CsqlParser#projectionFieldName.
 func (c CsqlVisitorImpl) VisitProjectionFieldName(ctx *parser.ProjectionFieldNameContext) interface{} {
 	field := CompoundName{
-		Name: ctx.FieldName().Accept(c).(Identifier),
+		Location: SLFromToken(ctx.GetStart()),
+		Name:     ctx.FieldName().Accept(c).(Identifier),
 	}
 	if ctx.Qualifier() != nil {
 		tableName := ctx.Qualifier().Accept(c).(Identifier)

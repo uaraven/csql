@@ -21,7 +21,7 @@ package sql
 
 import (
 	"fmt"
-	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
+	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/funky"
 	"strconv"
 	"strings"
@@ -36,7 +36,7 @@ type CompoundName struct {
 	Qualifier *Identifier
 	// Name is a field name
 	Name     Identifier
-	Location *SourceLocation
+	Location *errors.SourceLocation
 }
 
 func (cn CompoundName) String() string {
@@ -137,6 +137,7 @@ func (obf OrderByField) String() string {
 }
 
 type OrderByExpression struct {
+	Location    *errors.SourceLocation
 	OrderFields []OrderByField
 }
 
@@ -254,7 +255,7 @@ func (js JoinedSource) String() string {
 // - String
 // - List
 type Literal struct {
-	Location     *SourceLocation
+	Location     *errors.SourceLocation
 	IsNull       bool
 	NumericValue *string
 	StringValue  *string
@@ -312,7 +313,7 @@ type Expression interface {
 type AndExpression struct {
 	LHS      Expression
 	RHS      Expression
-	Location *SourceLocation
+	Location *errors.SourceLocation
 }
 
 func (ae AndExpression) String() string {
@@ -322,7 +323,7 @@ func (ae AndExpression) String() string {
 type OrExpression struct {
 	LHS      Expression
 	RHS      Expression
-	Location *SourceLocation
+	Location *errors.SourceLocation
 }
 
 func (oe OrExpression) String() string {
@@ -330,7 +331,7 @@ func (oe OrExpression) String() string {
 }
 
 type NotExpression struct {
-	Location *SourceLocation
+	Location *errors.SourceLocation
 	Child    Expression
 }
 
@@ -342,7 +343,7 @@ type ComparisonExpression struct {
 	LHS      Expression
 	RHS      Expression
 	Operator string
-	Location *SourceLocation
+	Location *errors.SourceLocation
 }
 
 func (ce ComparisonExpression) String() string {
@@ -353,7 +354,7 @@ type BinaryExpression struct {
 	LHS      Expression
 	RHS      Expression
 	Operator string
-	Location *SourceLocation
+	Location *errors.SourceLocation
 }
 
 func (be BinaryExpression) String() string {
@@ -396,7 +397,7 @@ type BetweenExpression struct {
 	What     Expression
 	Low      Expression
 	High     Expression
-	Location *SourceLocation
+	Location *errors.SourceLocation
 }
 
 func (be BetweenExpression) String() string {
@@ -407,7 +408,7 @@ type InListExpression struct {
 	What     Expression
 	List     ListLiteral
 	NotIn    bool
-	Location *SourceLocation
+	Location *errors.SourceLocation
 }
 
 func (ile InListExpression) String() string {
@@ -435,16 +436,4 @@ func (ine IsNullExpression) String() string {
 	}
 	sb.WriteString("NULL")
 	return sb.String()
-}
-
-type SourceLocation struct {
-	Line   int
-	Column int
-}
-
-func SLFromToken(t antlr.Token) *SourceLocation {
-	return &SourceLocation{
-		Line:   t.GetLine(),
-		Column: t.GetColumn(),
-	}
 }
