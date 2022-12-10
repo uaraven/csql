@@ -5,7 +5,7 @@ csql is a small tool allowing to run SQL queries on CSV files.
 csql supports basic<sup>*</sup> `SELECT` statement features, including:
 
 - Joins
-  - Left, Right, Full, Cross and Inner<sup>**</sup>
+  - Left, Right, Full, Cross and Inner
 - UNION and UNION ALL
 - LIKE conditions
 - MATCH conditions (like LIKE, but using regular expressions)
@@ -17,10 +17,11 @@ csql supports basic<sup>*</sup> `SELECT` statement features, including:
 
 csql automatically converts values to integer and float types and nulls. 
 
+See [this document](docs/syntax.md) for detailed description of Csql syntax.
+
 ---
 <sup>*</sup> IN (select) and aggregations are not supported yet in version 0.1.x
 
-<sup>**</sup>Only JOIN ... ON ... is supported. JOIN USING is not supported.
 
 ## Usage
 
