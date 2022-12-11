@@ -28,7 +28,6 @@ import (
 	"github.com/uaraven/csql/sql"
 	"log"
 	"os"
-	"regexp"
 	"strings"
 )
 
@@ -209,12 +208,7 @@ func (s *CsqlShell) Terminate() {
 
 // isTerminalLine checks whether the input string terminates up with ';', meaning it is the last line in multiline input
 func (s *CsqlShell) isTerminalLine(input string) bool {
-	// TODO use proper string parsing, checking for escaped quotes, ignore ';' in unclosed strings
-	r := regexp.MustCompile("\".*\"")
-	input = r.ReplaceAllString(input, "")
-	r = regexp.MustCompile("'.*'")
-	input = r.ReplaceAllString(input, "")
-	return strings.HasSuffix(strings.TrimSpace(input), ";")
+	return RuneIndex(input, ';') == len(input)-1
 }
 
 func (s *CsqlShell) IsCommand(input string) bool {
