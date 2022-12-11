@@ -23,18 +23,21 @@ jobs:
     - name: Build release
       run: ./build.sh
 
+    - name: Commit version.txt
+      run: git add version.txt && git push
+
     - name: Tag release
       run: git tag "v$(cat version.txt)"
 
     - name: Push tag
       run: git push origin "v$(cat version.txt)"
 
-    - name: Create release
-      uses: Roang-zero1/github-create-release-action@v2
-      with:
-        version_regex: ^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#    - name: Create release
+#      uses: Roang-zero1/github-create-release-action@v3
+#      with:
+#        version_regex: ^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload release artifacts
       uses: Roang-zero1/github-upload-release-artifacts-action@v2

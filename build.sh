@@ -25,8 +25,8 @@ mkdir bin
 function build() {
   echo "Building for $1 ($2)"
   GOOS=$1 GOARCH=$2  go build -ldflags="-s -w -X 'main.Version=$(cat version.txt)'"
-  mkdir bin/$1_$2
-  mv csql* bin/$1_$2
+  zip csql_$1_$2.zip csql*
+  mv csql* bin/
 }
 
 function increment_version() {
