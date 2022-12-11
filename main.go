@@ -19,9 +19,7 @@
 
 package main
 
-import (
-	"github.com/uaraven/csql/cli"
-)
+import "github.com/uaraven/csql/cli"
 
 var Version = "0.1.0"
 
