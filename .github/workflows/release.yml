@@ -27,7 +27,7 @@ jobs:
       run: git tag "v$(cat version.txt)"
 
     - name: Push tag
-      run: git push "v$(cat version.txt)"
+      run: git push origin "v$(cat version.txt)"
 
     - name: Create release
       uses: Roang-zero1/github-create-release-action@v2
