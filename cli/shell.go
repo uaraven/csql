@@ -22,7 +22,7 @@ package cli
 import (
 	"fmt"
 	"github.com/peterh/liner"
-	"github.com/uaraven/ansi"
+	"github.com/uaraven/ansie"
 	"github.com/uaraven/csql/core"
 	"github.com/uaraven/csql/funky"
 	"github.com/uaraven/csql/sql"
@@ -38,7 +38,7 @@ const (
 )
 
 type CsqlShell struct {
-	C          *ansi.AnsiPrinter
+	C          *ansie.AnsiBuffer
 	line       *liner.State
 	commands   map[string]func([]string)
 	terminated bool
@@ -46,7 +46,7 @@ type CsqlShell struct {
 
 func NewCsqlShell(version string) *CsqlShell {
 	csql := &CsqlShell{
-		C:    ansi.NewAnsiFor(os.Stdout),
+		C:    ansie.NewAnsiFor(os.Stdout),
 		line: liner.NewLiner(),
 	}
 
@@ -62,7 +62,7 @@ func NewCsqlShell(version string) *CsqlShell {
 
 	csql.line.SetCtrlCAborts(true)
 	csql.loadHistory()
-	fmt.Println(csql.C.A("csql version ").Attr(ansi.Bold).A(version).Reset().CR().String())
+	fmt.Println(csql.C.A("csql version ").Attr(ansie.Bold).A(version).Reset().CR().String())
 
 	return csql
 }
@@ -72,12 +72,12 @@ func (s *CsqlShell) PrintMessage(text string) {
 }
 
 func (s *CsqlShell) PrintError(text string) {
-	fmt.Println(s.C.Fg(ansi.SysRed).A(text).Reset().String())
+	fmt.Println(s.C.Fg(ansie.SysRed).A(text).Reset().String())
 }
 
 func (s *CsqlShell) SetNullString(args []string) {
 	if args == nil || len(args) == 0 {
-		s.PrintMessage(s.C.A("Null String=").Attr(ansi.Bold).A(core.NullValueString).Reset().String())
+		s.PrintMessage(s.C.A("Null String=").Attr(ansie.Bold).A(core.NullValueString).Reset().String())
 	} else {
 		core.NullValueString = args[0]
 	}
@@ -118,7 +118,7 @@ func (s *CsqlShell) ListFiles(_ []string) {
 		}
 		var ftype string
 		if file.IsDir() {
-			ftype = s.C.Attr(ansi.Underline).A(file.Name() + "/").Reset().String()
+			ftype = s.C.Attr(ansie.Underline).A(file.Name() + "/").Reset().String()
 		} else {
 			ftype = file.Name()
 		}
@@ -147,8 +147,8 @@ func (s *CsqlShell) historyFileName() string {
 
 func (s *CsqlShell) loadHistory() {
 	if f, err := os.Open(s.historyFileName()); err == nil {
-		s.line.ReadHistory(f)
-		f.Close()
+		_, _ = s.line.ReadHistory(f)
+		_ = f.Close()
 	}
 }
 
@@ -156,8 +156,8 @@ func (s *CsqlShell) saveHistory() {
 	if f, err := os.Create(s.historyFileName()); err != nil {
 		log.Print("Error writing history file: ", err)
 	} else {
-		s.line.WriteHistory(f)
-		f.Close()
+		_, _ = s.line.WriteHistory(f)
+		_ = f.Close()
 	}
 }
 
@@ -203,11 +203,13 @@ func (s *CsqlShell) Start() {
 
 func (s *CsqlShell) Terminate() {
 	s.saveHistory()
-	s.line.Close()
+	_ = s.line.Close()
 	s.terminated = true
 }
 
+// isTerminalLine checks whether the input string terminates up with ';', meaning it is the last line in multiline input
 func (s *CsqlShell) isTerminalLine(input string) bool {
+	// TODO use proper string parsing, checking for escaped quotes, ignore ';' in unclosed strings
 	r := regexp.MustCompile("\".*\"")
 	input = r.ReplaceAllString(input, "")
 	r = regexp.MustCompile("'.*'")

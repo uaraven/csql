@@ -7,7 +7,7 @@ require (
 	github.com/deckarep/golang-set/v2 v2.1.0
 	github.com/onsi/gomega v1.24.1
 	github.com/peterh/liner v1.2.2
-	github.com/uaraven/ansi v0.1.0
+	github.com/uaraven/ansie v0.2.0
 	golang.org/x/exp v0.0.0-20221111094246-ab4555d3164f
 )
 
