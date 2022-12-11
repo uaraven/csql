@@ -19,6 +19,11 @@
 
 package funky
 
+import (
+	"fmt"
+	"golang.org/x/exp/constraints"
+)
+
 func Map[T any, R any](data []T, transformer func(T) R) []R {
 	result := make([]R, len(data))
 	for idx, elem := range data {
@@ -65,4 +70,28 @@ func Filter[T any](data []T, matcher func(T) bool) []T {
 		}
 	}
 	return result
+}
+
+func Fold[T any](data []T, zero T, folding func(T, T) T) T {
+	result := zero
+	for _, elem := range data {
+		result = folding(result, elem)
+	}
+	return result
+}
+
+func Max[T constraints.Ordered](data []T) T {
+	if len(data) == 0 {
+		panic(fmt.Errorf("cannot find max value in empty slice"))
+	}
+	if len(data) == 1 {
+		return data[0]
+	}
+	return Fold(data[1:], data[0], func(t1, t2 T) T {
+		if t1 > t2 {
+			return t1
+		} else {
+			return t2
+		}
+	})
 }

@@ -82,8 +82,7 @@ type DataSource interface {
 	CurrentRow() Row
 	// Rewind the dataset to ahead of the first row
 	Rewind()
-}
 
-type SliceDataSource interface {
+	// GetRows returns all the rows
 	GetRows() []Row
 }

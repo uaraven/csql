@@ -144,11 +144,5 @@ func decodeToValue(value string) Value {
 }
 
 func ReadAllRows(ds DataSource) []Row {
-	result := make([]Row, 0)
-	row := ds.NextRow()
-	for row != nil {
-		result = append(result, row)
-		row = ds.NextRow()
-	}
-	return result
+	return ds.GetRows()
 }

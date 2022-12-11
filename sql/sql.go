@@ -19,13 +19,11 @@
 
 package sql
 
-import (
-	"github.com/uaraven/csql/core"
-)
+import "github.com/uaraven/csql/core"
 
-func ExecuteSql(query string) []core.Row {
+func ExecuteSql(query string) core.DataSource {
 	ast := ParseSQL(query)
 	data := Transform(&ast)
 
-	return core.ReadAllRows(data)
+	return data
 }

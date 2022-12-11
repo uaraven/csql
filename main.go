@@ -19,8 +19,13 @@
 
 package main
 
-var Version = "development"
+import (
+	"github.com/uaraven/csql/cli"
+)
+
+var Version = "0.1.0"
 
 func main() {
-	println(Version)
+	shell := cli.NewCsqlShell(Version)
+	shell.Start()
 }

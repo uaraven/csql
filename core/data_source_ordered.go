@@ -67,12 +67,7 @@ func NewOrderByIndexL(index int, desc bool, l *errors.SourceLocation) OrderByFie
 }
 
 func NewOrderedDatasource(ds DataSource, orderBy []OrderByField, limit int) DataSource {
-	var rows []Row
-	if mds, ok := ds.(SliceDataSource); ok {
-		rows = mds.GetRows()
-	} else {
-		rows = ReadAllRows(ds)
-	}
+	rows := ds.GetRows()
 
 	if len(orderBy) > 0 {
 		sort.Slice(rows, func(i, j int) bool {
