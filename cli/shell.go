@@ -19,7 +19,6 @@
 
 package cli
 
-import "C"
 import (
 	"fmt"
 	"github.com/peterh/liner"
