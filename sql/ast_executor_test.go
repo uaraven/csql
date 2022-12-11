@@ -232,19 +232,19 @@ func TestAstExecutor_FullOuterJoin(t *testing.T) {
 func TestAstExecutor_Nulls(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	rows := ExecuteSql(`select * from "../test-data/nulls.csv"`)
+	rows := ExecuteSql(`select * from "../test-data/nulls.csv"`).GetRows()
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[1].Get("property").Value()).To(Equal(core.NewNullValue()))
 
-	rows = ExecuteSql(`select * from "../test-data/nulls.csv" where property is null`)
+	rows = ExecuteSql(`select * from "../test-data/nulls.csv" where property is null`).GetRows()
 	g.Expect(rows).To(HaveLen(1))
 	g.Expect(rows[0].Get("name").Value()).To(Equal(core.NewStringValue("Billy-Bob")))
 
-	rows = ExecuteSql(`select * from "../test-data/nulls.csv" where property is not null`)
+	rows = ExecuteSql(`select * from "../test-data/nulls.csv" where property is not null`).GetRows()
 	g.Expect(rows).To(HaveLen(1))
 	g.Expect(rows[0].Get("name").Value()).To(Equal(core.NewStringValue("Brbra")))
 
-	rows = ExecuteSql(`select id, null from "../test-data/nulls.csv" where name = 'Brbra'`)
+	rows = ExecuteSql(`select id, null from "../test-data/nulls.csv" where name = 'Brbra'`).GetRows()
 	g.Expect(rows).To(HaveLen(1))
 	g.Expect(rows[0].GetByIndex(1)).To(Equal(core.NewIntValue(1)))
 	g.Expect(rows[0].GetByIndex(2).Value()).To(BeNil())
@@ -254,18 +254,18 @@ func TestAstExecutor_Logical(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	rows := ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               first_name = 'James' and last_name = 'Snow'`)
+                                               first_name = 'James' and last_name = 'Snow'`).GetRows()
 	g.Expect(rows).To(HaveLen(1))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(2)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               first_name = 'John' or last_name = 'Clarkson'`)
+                                               first_name = 'John' or last_name = 'Clarkson'`).GetRows()
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(3)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               not (first_name = 'John' or last_name = 'Clarkson')`)
+                                               not (first_name = 'John' or last_name = 'Clarkson')`).GetRows()
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(2)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(4)))
@@ -276,35 +276,35 @@ func TestAstExecutor_Condition(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	rows := ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               id > 3`)
+                                               id > 3`).GetRows()
 	g.Expect(rows).To(HaveLen(1))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(4)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               id < 2`)
+                                               id < 2`).GetRows()
 	g.Expect(rows).To(HaveLen(1))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               id >= 3`)
+                                               id >= 3`).GetRows()
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(3)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(4)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               id <= 2`)
+                                               id <= 2`).GetRows()
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(2)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               first_name != 'James'`)
+                                               first_name != 'James'`).GetRows()
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(3)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               last_name <> 'Snow'`)
+                                               last_name <> 'Snow'`).GetRows()
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(3)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(4)))
@@ -314,19 +314,19 @@ func TestAstExecutor_Like(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	rows := ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               first_name like 'Jam%'`)
+                                               first_name like 'Jam%'`).GetRows()
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(2)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(4)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               first_name not like 'Jam%'`)
+                                               first_name not like 'Jam%'`).GetRows()
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(3)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               first_name like 'J' || 'am%'`)
+                                               first_name like 'J' || 'am%'`).GetRows()
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(2)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(4)))
@@ -336,19 +336,19 @@ func TestAstExecutor_Match(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	rows := ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               first_name match 'Jam.*'`)
+                                               first_name match 'Jam.*'`).GetRows()
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(2)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(4)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               first_name not match 'Jam.*'`)
+                                               first_name not match 'Jam.*'`).GetRows()
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(3)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               first_name match 'J[ae].*' || 'm.*'`)
+                                               first_name match 'J[ae].*' || 'm.*'`).GetRows()
 	g.Expect(rows).To(HaveLen(3))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(2)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(3)))
@@ -359,7 +359,7 @@ func TestAstExecutor_In(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	rows := ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               first_name in ('James', 'John')`)
+                                               first_name in ('James', 'John')`).GetRows()
 
 	g.Expect(rows).To(HaveLen(3))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
@@ -367,14 +367,14 @@ func TestAstExecutor_In(t *testing.T) {
 	g.Expect(rows[2].Get("id").Value()).To(Equal(core.NewIntValue(4)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               dept_id in (11, 1+1)`)
+                                               dept_id in (11, 1+1)`).GetRows()
 
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(3)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(4)))
 
 	rows = ExecuteSql(`select * from "../test-data/employees.csv" where 
-                                               dept_id not in (2, 3)`)
+                                               dept_id not in (2, 3)`).GetRows()
 
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
@@ -384,7 +384,7 @@ func TestAstExecutor_In(t *testing.T) {
 func TestAstTransformer_Limit(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	rows := ExecuteSql(`select * from "../test-data/employees.csv" limit 2`)
+	rows := ExecuteSql(`select * from "../test-data/employees.csv" limit 2`).GetRows()
 	g.Expect(rows).To(HaveLen(2))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(2)))
@@ -393,14 +393,14 @@ func TestAstTransformer_Limit(t *testing.T) {
 func TestAstTransformer_OrderBy(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	rows := ExecuteSql(`select * from "../test-data/employees.csv" order by width`)
+	rows := ExecuteSql(`select * from "../test-data/employees.csv" order by width`).GetRows()
 	g.Expect(rows).To(HaveLen(4))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(1)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(2)))
 	g.Expect(rows[2].Get("id").Value()).To(Equal(core.NewIntValue(4)))
 	g.Expect(rows[3].Get("id").Value()).To(Equal(core.NewIntValue(3)))
 
-	rows = ExecuteSql(`select * from "../test-data/employees.csv" order by last_name asc, 1 desc`)
+	rows = ExecuteSql(`select * from "../test-data/employees.csv" order by last_name asc, 1 desc`).GetRows()
 	g.Expect(rows).To(HaveLen(4))
 	g.Expect(rows[0].Get("id").Value()).To(Equal(core.NewIntValue(3)))
 	g.Expect(rows[1].Get("id").Value()).To(Equal(core.NewIntValue(4)))
@@ -414,7 +414,7 @@ func TestAstTransformer_UnionAll(t *testing.T) {
 	rows := ExecuteSql(`
 		select first_name, last_name from "../test-data/employees.csv" 
 		union all 
-		select first_name, last_name from "../test-data/people.csv"`)
+		select first_name, last_name from "../test-data/people.csv"`).GetRows()
 
 	g.Expect(rows).To(HaveLen(8))
 
@@ -431,7 +431,7 @@ func TestAstTransformer_Union(t *testing.T) {
 	rows := ExecuteSql(`
 		select first_name, last_name from "../test-data/employees.csv" 
 		union 
-		select first_name, last_name from "../test-data/people.csv"`)
+		select first_name, last_name from "../test-data/people.csv"`).GetRows()
 
 	g.Expect(rows).To(HaveLen(4))
 }
@@ -444,7 +444,7 @@ func TestAstTransformer_UnionRenaming(t *testing.T) {
 		union 
 		select first_name from "../test-data/people.csv"
 		union 
-		select name as first_name from "../test-data/dept.csv"`)
+		select name as first_name from "../test-data/dept.csv"`).GetRows()
 
 	g.Expect(rows).To(HaveLen(5))
 	names := funky.Map(rows, func(row core.Row) string {

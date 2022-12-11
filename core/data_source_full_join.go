@@ -39,7 +39,7 @@ func NewFullJoin(left DataSource, right DataSource, joinOn Condition) DataSource
 
 func fullJoin(left DataSource, right DataSource, header DataSourceHeader, joinOn Condition) []Row {
 	leftJoined, usedRightRows := leftJoin(left, right, header, joinOn)
-	unusedRightRows := funky.Filter(right.(SliceDataSource).GetRows(), func(row Row) bool {
+	unusedRightRows := funky.Filter(right.GetRows(), func(row Row) bool {
 		return !usedRightRows.Contains(row.Key())
 	})
 	counter := len(leftJoined) - 1
