@@ -1,10 +1,12 @@
 # This workflow will build a golang project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
-name: Build & Release
+name: Release Binaries
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   release:
@@ -20,11 +22,12 @@ jobs:
     - name: Test
       run: go test -v ./...
 
-    - name: Commit version.txt
-      run: git add version.txt && git push
+    - name: Build release
+      run: ./build.sh
 
-    - name: Tag release
-      run: git tag "v$(cat version.txt)"
-
-    - name: Push tag
-      run: git push origin "v$(cat version.txt)"
+    - name: Push binaries
+      uses: d1ceward/draft-assets-release-action@v1
+      with:
+        name: bin/*
+        path: bin/
+        token: ${{ secrets.GITHUB_TOKEN }}
