@@ -26,6 +26,7 @@ import (
 	"github.com/uaraven/ansi"
 	"github.com/uaraven/csql/core"
 	"github.com/uaraven/csql/funky"
+	"github.com/uaraven/csql/sql"
 	"log"
 	"os"
 	"regexp"
@@ -51,12 +52,13 @@ func NewCsqlShell(version string) *CsqlShell {
 	}
 
 	csql.commands = map[string]func([]string){
-		"help":  csql.Help,
-		"clear": csql.Clear,
-		"exit":  csql.Exit,
-		"ls":    csql.ListFiles,
-		"pwd":   csql.Pwd,
-		"cd":    csql.Cd,
+		"help":      csql.Help,
+		"clear":     csql.Clear,
+		"exit":      csql.Exit,
+		"ls":        csql.ListFiles,
+		"pwd":       csql.Pwd,
+		"cd":        csql.Cd,
+		"nullValue": csql.SetNullString,
 	}
 
 	csql.line.SetCtrlCAborts(true)
@@ -177,25 +179,26 @@ func (s *CsqlShell) Start() {
 				buffer.Reset()
 				continue
 			} else {
-				s.Terminate()
 				continue
 			}
 		} else if err != nil {
 			panic(err)
 		} else if inMultiline {
 			buffer.WriteString(input)
-			if s.isTerminalLine(input) {
-				sql := buffer.String()
-				buffer.Reset()
-				s.ExecuteQuery(sql)
-			}
 		} else if s.IsCommand(input) {
 			s.ExecuteCommand(input)
+			s.line.AppendHistory(input)
+			continue
 		} else {
 			buffer.WriteString(input)
 			buffer.WriteRune('\n')
 		}
-
+		if s.isTerminalLine(input) {
+			query := buffer.String()
+			buffer.Reset()
+			s.line.AppendHistory(query)
+			s.ExecuteQuery(query)
+		}
 	}
 }
 
@@ -219,8 +222,15 @@ func (s *CsqlShell) IsCommand(input string) bool {
 	return ok
 }
 
-func (s *CsqlShell) ExecuteQuery(sql string) {
-
+func (s *CsqlShell) ExecuteQuery(query string) {
+	ds := sql.ExecuteSql(query)
+	rows := core.ReadAllRows(ds)
+	for _, r := range rows {
+		for _, cell := range r.Values() {
+			fmt.Printf("%20v", cell.String())
+		}
+		fmt.Println()
+	}
 }
 
 func (s *CsqlShell) ExecuteCommand(input string) {
