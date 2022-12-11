@@ -134,6 +134,10 @@ func (sv stringValue) String() string {
 	return fmt.Sprintf("'%s'", sv.value)
 }
 
+func (sv stringValue) Repr() string {
+	return sv.value
+}
+
 func (sv stringValue) Equals(other Value) bool {
 	return other.Type() == sv.Type() && other.Value().(string) == sv.value
 }
@@ -172,6 +176,10 @@ func (iv intValue) AsBool() Value {
 
 func (iv intValue) String() string {
 	return fmt.Sprintf("%d", iv.value)
+}
+
+func (iv intValue) Repr() string {
+	return iv.String()
 }
 
 func (iv intValue) Equals(other Value) bool {
@@ -218,6 +226,10 @@ func (fv floatValue) String() string {
 	return fmt.Sprintf("%f", fv.value)
 }
 
+func (fv floatValue) Repr() string {
+	return fv.String()
+}
+
 func (fv floatValue) Equals(other Value) bool {
 	return other.Type() == fv.Type() && other.Value().(float64) == fv.value
 }
@@ -262,6 +274,10 @@ func (bv boolValue) String() string {
 	return fmt.Sprintf("%t", bv.value)
 }
 
+func (bv boolValue) Repr() string {
+	return bv.String()
+}
+
 func (bv boolValue) Evaluate(_ EvaluationContext) Value {
 	return &bv
 }
@@ -304,6 +320,10 @@ func (n nullValue) AsBool() Value {
 
 func (n nullValue) String() string {
 	return NullValueString
+}
+
+func (n nullValue) Repr() string {
+	return n.String()
 }
 
 func (n nullValue) Equals(other Value) bool {

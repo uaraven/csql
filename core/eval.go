@@ -59,6 +59,7 @@ type Value interface {
 	AsBool() Value
 	Equals(Value) bool
 	Less(Value) bool
+	Repr() string
 }
 
 func IsNumeric(v Value) bool {

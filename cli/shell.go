@@ -227,7 +227,7 @@ func (s *CsqlShell) ExecuteQuery(query string) {
 	rows := core.ReadAllRows(ds)
 	for _, r := range rows {
 		for _, cell := range r.Values() {
-			fmt.Printf("%20v", cell.String())
+			fmt.Printf("%20v", cell.Repr())
 		}
 		fmt.Println()
 	}
