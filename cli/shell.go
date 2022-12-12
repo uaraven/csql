@@ -24,8 +24,8 @@ import (
 	"github.com/peterh/liner"
 	"github.com/uaraven/ansie"
 	"github.com/uaraven/csql/core"
-	"github.com/uaraven/csql/funky"
 	"github.com/uaraven/csql/sql"
+	"golang.org/x/term"
 	"log"
 	"os"
 	"strings"
@@ -39,7 +39,7 @@ const (
 type CsqlShell struct {
 	C          *ansie.AnsiBuffer
 	line       *liner.State
-	commands   map[string]func([]string)
+	Commands   map[string]*Command
 	terminated bool
 }
 
@@ -49,21 +49,29 @@ func NewCsqlShell(version string) *CsqlShell {
 		line: liner.NewLiner(),
 	}
 
-	csql.commands = map[string]func([]string){
-		"help":      csql.Help,
-		"clear":     csql.Clear,
-		"exit":      csql.Exit,
-		"ls":        csql.ListFiles,
-		"pwd":       csql.Pwd,
-		"cd":        csql.Cd,
-		"nullValue": csql.SetNullString,
+	csql.Commands = map[string]*Command{
+		"help":  HelpCmd(),
+		"clear": ClearCmd(),
+		"exit":  ExitCmd(),
+		"ls":    LsCmd(),
+		"pwd":   PwdCmd(),
+		"cd":    CdCmd(),
+		"csv":   CsvCommand(),
 	}
 
 	csql.line.SetCtrlCAborts(true)
 	csql.loadHistory()
-	fmt.Println(csql.C.A("csql version ").Attr(ansie.Bold).A(version).Reset().CR().String())
+	fmt.Println(csql.C.A("csql version ").Attr(ansie.Bold).A(version).Reset().String())
 
 	return csql
+}
+
+func (s *CsqlShell) TerminalSize() (int, int) {
+	w, h, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		panic(err)
+	}
+	return w, h
 }
 
 func (s *CsqlShell) PrintMessage(text string) {
@@ -72,71 +80,6 @@ func (s *CsqlShell) PrintMessage(text string) {
 
 func (s *CsqlShell) PrintError(text string) {
 	fmt.Println(s.C.Fg(ansie.SysRed).A(text).Reset().String())
-}
-
-func (s *CsqlShell) SetNullString(args []string) {
-	if args == nil || len(args) == 0 {
-		s.PrintMessage(s.C.A("Null String=").Attr(ansie.Bold).A(core.NullValueString).Reset().String())
-	} else {
-		core.NullValueString = args[0]
-	}
-}
-
-func (s *CsqlShell) Pwd(args []string) {
-	path, err := os.Getwd()
-	if err != nil {
-		s.PrintError(fmt.Sprint(err))
-	}
-	s.PrintMessage(path)
-}
-
-func (s *CsqlShell) Cd(args []string) {
-	if len(args) != 1 {
-		s.PrintError(".cd accepts only one parameter - directory name")
-	}
-	err := os.Chdir(args[0])
-	if err != nil {
-		s.PrintError(fmt.Sprint(err))
-	}
-}
-
-func (s *CsqlShell) ListFiles(_ []string) {
-	files, err := os.ReadDir(".")
-	if err != nil {
-		s.PrintError(fmt.Sprint(err))
-	}
-	maxWidth := funky.Max(funky.Map(files, func(f os.DirEntry) int {
-		return len(f.Name())
-	}))
-	if maxWidth < 50 {
-		maxWidth = 50
-	}
-	for _, file := range files {
-		if strings.HasPrefix(file.Name(), ".") {
-			continue
-		}
-		var ftype string
-		if file.IsDir() {
-			ftype = s.C.Attr(ansie.Underline).A(file.Name() + "/").Reset().String()
-		} else {
-			ftype = file.Name()
-		}
-		s.PrintMessage(ftype)
-	}
-}
-
-func (s *CsqlShell) Help(_ []string) {
-
-}
-
-func (s *CsqlShell) Clear(_ []string) {
-	for i := 0; i < 100; i += 1 {
-		fmt.Println()
-	}
-}
-
-func (s *CsqlShell) Exit(_ []string) {
-	s.Terminate()
 }
 
 func (s *CsqlShell) historyFileName() string {
@@ -213,7 +156,7 @@ func (s *CsqlShell) isTerminalLine(input string) bool {
 
 func (s *CsqlShell) IsCommand(input string) bool {
 	inputData := strings.Split(input, " ")
-	_, ok := s.commands[inputData[0]]
+	_, ok := s.Commands[inputData[0]]
 	return ok
 }
 
@@ -230,9 +173,9 @@ func (s *CsqlShell) ExecuteQuery(query string) {
 
 func (s *CsqlShell) ExecuteCommand(input string) {
 	inputData := strings.Split(input, " ")
-	cmd, ok := s.commands[inputData[0]]
+	cmd, ok := s.Commands[inputData[0]]
 	if !ok {
 		return
 	}
-	cmd(inputData[1:])
+	cmd.Func(s, inputData[1:])
 }
