@@ -24,6 +24,7 @@ import (
 	"github.com/peterh/liner"
 	"github.com/uaraven/ansie"
 	"github.com/uaraven/csql/core"
+	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/sql"
 	"golang.org/x/term"
 	"log"
@@ -79,7 +80,7 @@ func (s *CsqlShell) PrintMessage(text string) {
 }
 
 func (s *CsqlShell) PrintError(text string) {
-	fmt.Println(s.C.Fg(ansie.SysRed).A(text).Reset().String())
+	fmt.Println(s.C.Fg(ansie.Red).A(text).Reset().String())
 }
 
 func (s *CsqlShell) historyFileName() string {
@@ -161,6 +162,17 @@ func (s *CsqlShell) IsCommand(input string) bool {
 }
 
 func (s *CsqlShell) ExecuteQuery(query string) {
+	defer func() {
+		if err := recover(); err != nil {
+			switch sqle := err.(type) {
+			case *errors.CsqlError:
+				s.PrintError(s.C.S("[%d:%d] ", sqle.Location.Line, sqle.Location.Column+1).
+					Attr(ansie.Bold).A(sqle.Message).Reset().String())
+			default:
+				s.PrintError(s.C.Attr(ansie.Bold).S("%v", err).Reset().String())
+			}
+		}
+	}()
 	ds := sql.ExecuteSql(query)
 	rows := core.ReadAllRows(ds)
 	for _, r := range rows {

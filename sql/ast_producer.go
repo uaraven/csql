@@ -64,8 +64,10 @@ func (e *Errors) ReportContextSensitivity(_ antlr.Parser, _ *antlr.DFA, _, _, _ 
 func ParseSQL(sql string) UnionSource {
 	fs := antlr.NewInputStream(sql)
 	lex := parser.NewCsqlLexer(fs)
+	lex.RemoveErrorListeners()
 	tokens := antlr.NewCommonTokenStream(lex, antlr.TokenDefaultChannel)
 	p := parser.NewCsqlParser(tokens)
+	p.RemoveErrorListeners()
 	errors := newErrors()
 	p.AddErrorListener(errors)
 	visitor := NewCsqlVisitor()
