@@ -24,6 +24,7 @@ import (
 	"github.com/uaraven/ansie"
 	"github.com/uaraven/csql/core"
 	"github.com/uaraven/csql/funky"
+	"golang.org/x/exp/constraints"
 	"golang.org/x/term"
 	"os"
 	"strings"
@@ -61,11 +62,11 @@ type Table struct {
 	TerminalWidth       int
 }
 
-func columnBgColorIndex(colorIdx int, offset uint) ansie.Colour {
-	r := uint(columnBgColour[colorIdx][0])
-	g := uint(columnBgColour[colorIdx][1])
-	b := uint(columnBgColour[colorIdx][2])
-	return ansie.RgbTo216Colours(r+offset, g+offset, b+offset)
+func columnBgColorIndex(colorIdx int, offset int) ansie.Colour {
+	r := max(columnBgColour[colorIdx][0]+offset, 0)
+	g := max(columnBgColour[colorIdx][1]+offset, 0)
+	b := max(columnBgColour[colorIdx][2]+offset, 0)
+	return ansie.RgbTo216Colours(uint(r), uint(g), uint(b))
 }
 
 func InitTable(ds core.DataSource, maxWidth int) *Table {
@@ -74,7 +75,7 @@ func InitTable(ds core.DataSource, maxWidth int) *Table {
 		c := Column{
 			Name:              t.Name(),
 			DataWidth:         len(t.Name()),
-			minWidth:          len(t.Name()),
+			minWidth:          len(t.Name()) + 2,
 			BgColour:          columnBgColorIndex(columnIdx, 0),
 			AlternateBgColour: columnBgColorIndex(columnIdx, 1),
 			HeaderFormat:      ansie.Ansi.Attr(ansie.Underline).Attr(ansie.Bold).String(),
@@ -113,7 +114,7 @@ func InitTable(ds core.DataSource, maxWidth int) *Table {
 	}
 	t := &Table{
 		Columns:             columns,
-		Zebra:               true,
+		Zebra:               false,
 		SeparateColumns:     true,
 		SeparateRows:        false,
 		VerticalSeparator:   '│',
@@ -133,18 +134,22 @@ func (t *Table) calculateWidths() {
 	totalMinWidth := funky.Sum(funky.Map(t.Columns, func(c Column) int {
 		return c.minWidth
 	}))
-	totalWidth := funky.Sum(funky.Map(t.Columns, func(c Column) int {
-		return c.DataWidth
-	}))
 	if t.SeparateColumns {
 		totalMinWidth += len(t.Columns) - 1
 	}
+
 	if totalMinWidth < t.TerminalWidth {
-		extraSpace := t.TerminalWidth - totalMinWidth
 		for idx, cw := range t.Columns {
-			t.Columns[idx].columnWidth = int(float64(cw.DataWidth*extraSpace) / float64(totalWidth))
+			t.Columns[idx].columnWidth = max(cw.minWidth, cw.DataWidth)
 		}
 	}
+}
+
+func max[T constraints.Ordered](t1 T, t2 T) T {
+	if t1 >= t2 {
+		return t1
+	}
+	return t2
 }
 
 func (t *Table) PrintHeader() string {
@@ -153,10 +158,12 @@ func (t *Table) PrintHeader() string {
 		sb.WriteString(strings.Repeat(string(t.HorizontalSeparator), t.TerminalWidth))
 	}
 	for idx, col := range t.Columns {
-		offset := (col.columnWidth - len(col.Name)) / 2
-		prefix := strings.Repeat(" ", offset)
-		suffix := strings.Repeat(" ", col.columnWidth-offset-len(col.Name))
-		sb.WriteString(ansie.Ansi.Bg(col.BgColour).A(prefix).
+		var suffix string
+		suffixLen := col.columnWidth - len(col.Name)
+		if suffixLen > 0 {
+			suffix = strings.Repeat(" ", suffixLen)
+		}
+		sb.WriteString(ansie.Ansi.Bg(col.BgColour).
 			S("%s%s", col.HeaderFormat, col.Name).Reset().Bg(col.BgColour).A(suffix).Reset().String())
 		if idx < len(t.Columns)-1 && t.SeparateColumns {
 			sb.WriteRune(t.VerticalSeparator)

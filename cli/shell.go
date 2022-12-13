@@ -26,6 +26,7 @@ import (
 	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/sql"
 	"golang.org/x/term"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -115,6 +116,11 @@ func (s *CsqlShell) Start() {
 			pr = prompt
 		}
 		input, err := s.line.Prompt(pr)
+		if err == io.EOF {
+			s.PrintMessage("Bye!")
+			s.Terminate()
+			break
+		}
 		if err == liner.ErrPromptAborted {
 			if inMultiline {
 				buffer.Reset()
@@ -133,11 +139,11 @@ func (s *CsqlShell) Start() {
 		} else {
 			buffer.WriteString(input)
 			buffer.WriteRune('\n')
+			s.line.AppendHistory(input)
 		}
 		if s.isTerminalLine(input) {
 			query := buffer.String()
 			buffer.Reset()
-			s.line.AppendHistory(query)
 			s.ExecuteQuery(query)
 		}
 	}
