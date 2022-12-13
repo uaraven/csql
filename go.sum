@@ -61,8 +61,8 @@ github.com/peterh/liner v1.2.2/go.mod h1:xFwJyiKIXJZUKItq5dGHZSTBRAuG/CpeNpWLyiN
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
-github.com/uaraven/ansie v0.3.0 h1:949/LC7UVVs+mcuEMGvUmLV/Omrgq5Dl/51InILlqAg=
-github.com/uaraven/ansie v0.3.0/go.mod h1:KYTPEYn2OPDimVxcPulkvHF1Csw1w5AU1mGKQa2hF9M=
+github.com/uaraven/ansie v0.3.2 h1:96+ZvoB/+FaAXOVT0SfKZRmG/mfXKvMpNayqljd7/ng=
+github.com/uaraven/ansie v0.3.2/go.mod h1:KYTPEYn2OPDimVxcPulkvHF1Csw1w5AU1mGKQa2hF9M=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.4.1/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=

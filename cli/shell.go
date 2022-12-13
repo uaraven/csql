@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"github.com/peterh/liner"
 	"github.com/uaraven/ansie"
-	"github.com/uaraven/csql/core"
 	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/sql"
 	"golang.org/x/term"
@@ -174,13 +173,9 @@ func (s *CsqlShell) ExecuteQuery(query string) {
 		}
 	}()
 	ds := sql.ExecuteSql(query)
-	rows := core.ReadAllRows(ds)
-	for _, r := range rows {
-		for _, cell := range r.Values() {
-			fmt.Printf("%20v", cell.Repr())
-		}
-		fmt.Println()
-	}
+	table := InitTable(ds, -1)
+	s.PrintMessage(table.PrintHeader())
+	s.PrintMessage(table.PrintData(ds.GetRows()))
 }
 
 func (s *CsqlShell) ExecuteCommand(input string) {

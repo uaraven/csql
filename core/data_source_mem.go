@@ -26,11 +26,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 )
 
 type memDataSource struct {
-	lock    sync.Mutex
 	name    string
 	index   int
 	data    []Row
@@ -43,7 +41,6 @@ func NewMemDataSourceFromCsv(csvFile string) DataSource {
 
 func NewMemDataSource(name string, headers []ColumnMetadata, rows []Row) DataSource {
 	ds := &memDataSource{
-		lock:  sync.Mutex{},
 		name:  name,
 		index: -1,
 		data:  rows,
@@ -113,8 +110,6 @@ func (cds *memDataSource) GetName() string {
 }
 
 func (cds *memDataSource) NextRow() Row {
-	cds.lock.Lock()
-	defer cds.lock.Unlock()
 	if cds.index+1 >= len(cds.data) {
 		return nil
 	}
@@ -123,8 +118,6 @@ func (cds *memDataSource) NextRow() Row {
 }
 
 func (cds *memDataSource) CurrentRow() Row {
-	cds.lock.Lock()
-	defer cds.lock.Unlock()
 	if cds.index < 0 {
 		return nil
 	}
@@ -132,13 +125,9 @@ func (cds *memDataSource) CurrentRow() Row {
 }
 
 func (cds *memDataSource) Rewind() {
-	cds.lock.Lock()
-	defer cds.lock.Unlock()
 	cds.index = -1
 }
 
 func (cds *memDataSource) GetRows() []Row {
-	dest := make([]Row, len(cds.data))
-	copy(dest, cds.data)
-	return dest
+	return cds.data
 }
