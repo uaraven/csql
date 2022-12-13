@@ -25,23 +25,23 @@ import (
 )
 
 func loadTestDatasource() DataSource {
-	return NewMemDataSourceFromCsv("../test-data/employees.csv")
+	return NewCsvDataSource("../test-data/employees.csv")
 }
 
 func loadDefaultTestMemDatasource() DataSource {
-	return NewMemDataSourceFromCsv("../test-data/employees.csv")
+	return NewCsvDataSource("../test-data/employees.csv")
 }
 
 func loadTestMemDatasource(name string) DataSource {
-	return NewMemDataSourceFromCsv(fmt.Sprintf("../test-data/%s.csv", name))
+	return NewCsvDataSource(fmt.Sprintf("../test-data/%s.csv", name))
 }
 
 func loadDsWithAlias(name string, alias string) DataSource {
-	return NewMemDataSourceWithAlias(fmt.Sprintf("../test-data/%s.csv", name), alias)
+	return NewCsvDataSourceWithAlias(fmt.Sprintf("../test-data/%s.csv", name), alias)
 }
 
 func loadTestMemDatasourceWithAlias(alias string) DataSource {
-	return NewMemDataSourceWithAlias("../test-data/employees.csv", alias)
+	return NewCsvDataSourceWithAlias("../test-data/employees.csv", alias)
 }
 
 type mapContext struct {
