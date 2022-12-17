@@ -28,7 +28,6 @@ import (
 	"golang.org/x/term"
 	"os"
 	"strings"
-	"unicode/utf8"
 )
 
 var (
@@ -132,7 +131,6 @@ func InitTable(ds core.DataSource, maxWidth int) *Table {
 //
 // If maxWidth <= 0, then default width of 80 columns is assumed
 func (t *Table) calculateWidths() {
-	t.TerminalWidth, _, _ = term.GetSize(0)
 	totalDataWidth := funky.Sum(funky.Map(t.Columns, func(c Column) int {
 		return c.DataWidth
 	}))
@@ -228,7 +226,7 @@ func (t *Table) PrintData(data []core.Row) string {
 
 		rowString := rowSb.String()
 
-		if utf8.RuneCountInString(rowString) < t.TerminalWidth {
+		if len([]rune(rowString)) < t.TerminalWidth {
 			sb.WriteRune('\n')
 		}
 
