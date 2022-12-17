@@ -95,3 +95,15 @@ func Max[T constraints.Ordered](data []T) T {
 		}
 	})
 }
+
+func Sum[T constraints.Integer](data []T) T {
+	if len(data) == 0 {
+		return 0
+	}
+	if len(data) == 1 {
+		return data[0]
+	}
+	return Fold(data, 0, func(t1, t2 T) T {
+		return t1 + t2
+	})
+}

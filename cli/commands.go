@@ -1,0 +1,163 @@
+/*
+ *    Copyright 2022 Oleksiy Voronin
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *    SPDX-License-Identifier: Apache-2.0
+ *    SPDX-FileCopyrightText: (c) 2022 Oleksiy Voronin <ovoronin@gmail.com>
+ */
+
+package cli
+
+import (
+	"fmt"
+	"github.com/uaraven/ansie"
+	"github.com/uaraven/csql/core"
+	"os"
+	"strings"
+)
+
+type CommandFunc func(shell *CsqlShell, parameters []string)
+
+type Command struct {
+	Name string
+	Help string
+	Func CommandFunc
+}
+
+func HelpCmd() *Command {
+	return &Command{
+		Name: "help",
+		Help: "Show the help message",
+		Func: func(shell *CsqlShell, params []string) {
+			for _, cmd := range shell.Commands {
+				shell.PrintMessage(shell.C.Attr(ansie.Bold).S("%-10s", cmd.Name).Reset().A(cmd.Help).String())
+			}
+		},
+	}
+}
+
+func ClearCmd() *Command {
+	return &Command{
+		Name: "clear",
+		Help: "Clear the screen",
+		Func: func(shell *CsqlShell, params []string) {
+			_, h := shell.TerminalSize()
+			if h < 0 {
+				h = 25
+			}
+			for i := 0; i < h; i += 1 {
+				shell.PrintMessage("")
+			}
+		},
+	}
+}
+
+func ExitCmd() *Command {
+	return &Command{
+		Name: "exit",
+		Help: "Close tht csql shell",
+		Func: func(shell *CsqlShell, _ []string) {
+			shell.Terminate()
+		},
+	}
+}
+
+func PwdCmd() *Command {
+	return &Command{
+		Name: "pwd",
+		Help: "Shows current directory",
+		Func: func(s *CsqlShell, args []string) {
+			path, err := os.Getwd()
+			if err != nil {
+				s.PrintError(fmt.Sprint(err))
+			}
+			s.PrintMessage(path)
+		},
+	}
+}
+
+func CdCmd() *Command {
+	return &Command{
+		Name: "cd",
+		Help: "Change current directory",
+		Func: func(s *CsqlShell, args []string) {
+			if len(args) != 1 {
+				s.PrintError(".cd accepts only one parameter - directory name")
+			}
+			err := os.Chdir(args[0])
+			if err != nil {
+				s.PrintError(fmt.Sprint(err))
+			}
+		},
+	}
+}
+
+func LsCmd() *Command {
+	return &Command{
+		Name: "ls",
+		Help: "List files in the current directory",
+		Func: func(s *CsqlShell, _ []string) {
+			files, err := os.ReadDir(".")
+			if err != nil {
+				s.PrintError(fmt.Sprint(err))
+			}
+			for _, file := range files {
+				if strings.HasPrefix(file.Name(), ".") {
+					continue
+				}
+				var ftype string
+				if file.IsDir() {
+					ftype = s.C.Attr(ansie.Underline).A(file.Name() + "/").Reset().String()
+				} else {
+					ftype = file.Name()
+				}
+				s.PrintMessage(ftype)
+			}
+		},
+	}
+}
+
+func CsvCommand() *Command {
+	return &Command{
+		Name: "csv",
+		Help: "Set or show csv file parameters. Type 'csv help' to view available options",
+		Func: func(s *CsqlShell, args []string) {
+			if args == nil || len(args) == 0 {
+				s.PrintMessage(s.C.A("Null String=").Attr(ansie.Bold).A(core.NullValueString).Reset().String())
+			}
+		},
+	}
+}
+
+func RuneIndex(s string, r rune) int {
+	runes := []rune(s)
+	index := 0
+	for index < len(runes) {
+		if runes[index] == '"' || runes[index] == '\'' {
+			closing := runes[index]
+			index++
+			for index < len(runes) && runes[index] != closing {
+				if runes[index] == '\\' {
+					index += 2 // skip escaped character
+				} else {
+					index++
+				}
+			}
+		} else if runes[index] == r {
+			return index
+		}
+		index++
+	}
+	return -1
+}

@@ -22,13 +22,13 @@ package cli
 import (
 	"fmt"
 	"github.com/peterh/liner"
-	"github.com/uaraven/ansi"
-	"github.com/uaraven/csql/core"
-	"github.com/uaraven/csql/funky"
+	"github.com/uaraven/ansie"
+	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/sql"
+	"golang.org/x/term"
+	"io"
 	"log"
 	"os"
-	"regexp"
 	"strings"
 )
 
@@ -38,33 +38,41 @@ const (
 )
 
 type CsqlShell struct {
-	C          *ansi.AnsiPrinter
+	C          *ansie.AnsiBuffer
 	line       *liner.State
-	commands   map[string]func([]string)
+	Commands   map[string]*Command
 	terminated bool
 }
 
 func NewCsqlShell(version string) *CsqlShell {
 	csql := &CsqlShell{
-		C:    ansi.NewAnsiFor(os.Stdout),
+		C:    ansie.NewAnsiFor(os.Stdout),
 		line: liner.NewLiner(),
 	}
 
-	csql.commands = map[string]func([]string){
-		"help":      csql.Help,
-		"clear":     csql.Clear,
-		"exit":      csql.Exit,
-		"ls":        csql.ListFiles,
-		"pwd":       csql.Pwd,
-		"cd":        csql.Cd,
-		"nullValue": csql.SetNullString,
+	csql.Commands = map[string]*Command{
+		"help":  HelpCmd(),
+		"clear": ClearCmd(),
+		"exit":  ExitCmd(),
+		"ls":    LsCmd(),
+		"pwd":   PwdCmd(),
+		"cd":    CdCmd(),
+		"csv":   CsvCommand(),
 	}
 
 	csql.line.SetCtrlCAborts(true)
 	csql.loadHistory()
-	fmt.Println(csql.C.A("csql version ").Attr(ansi.Bold).A(version).Reset().CR().String())
+	fmt.Println(csql.C.A("csql version ").Attr(ansie.Bold).A(version).Reset().String())
 
 	return csql
+}
+
+func (s *CsqlShell) TerminalSize() (int, int) {
+	w, h, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		panic(err)
+	}
+	return w, h
 }
 
 func (s *CsqlShell) PrintMessage(text string) {
@@ -72,72 +80,7 @@ func (s *CsqlShell) PrintMessage(text string) {
 }
 
 func (s *CsqlShell) PrintError(text string) {
-	fmt.Println(s.C.Fg(ansi.SysRed).A(text).Reset().String())
-}
-
-func (s *CsqlShell) SetNullString(args []string) {
-	if args == nil || len(args) == 0 {
-		s.PrintMessage(s.C.A("Null String=").Attr(ansi.Bold).A(core.NullValueString).Reset().String())
-	} else {
-		core.NullValueString = args[0]
-	}
-}
-
-func (s *CsqlShell) Pwd(args []string) {
-	path, err := os.Getwd()
-	if err != nil {
-		s.PrintError(fmt.Sprint(err))
-	}
-	s.PrintMessage(path)
-}
-
-func (s *CsqlShell) Cd(args []string) {
-	if len(args) != 1 {
-		s.PrintError(".cd accepts only one parameter - directory name")
-	}
-	err := os.Chdir(args[0])
-	if err != nil {
-		s.PrintError(fmt.Sprint(err))
-	}
-}
-
-func (s *CsqlShell) ListFiles(_ []string) {
-	files, err := os.ReadDir(".")
-	if err != nil {
-		s.PrintError(fmt.Sprint(err))
-	}
-	maxWidth := funky.Max(funky.Map(files, func(f os.DirEntry) int {
-		return len(f.Name())
-	}))
-	if maxWidth < 50 {
-		maxWidth = 50
-	}
-	for _, file := range files {
-		if strings.HasPrefix(file.Name(), ".") {
-			continue
-		}
-		var ftype string
-		if file.IsDir() {
-			ftype = s.C.Attr(ansi.Underline).A(file.Name() + "/").Reset().String()
-		} else {
-			ftype = file.Name()
-		}
-		s.PrintMessage(ftype)
-	}
-}
-
-func (s *CsqlShell) Help(_ []string) {
-
-}
-
-func (s *CsqlShell) Clear(_ []string) {
-	for i := 0; i < 100; i += 1 {
-		fmt.Println()
-	}
-}
-
-func (s *CsqlShell) Exit(_ []string) {
-	s.Terminate()
+	fmt.Println(s.C.Fg(ansie.Red).A(text).Reset().String())
 }
 
 func (s *CsqlShell) historyFileName() string {
@@ -147,8 +90,8 @@ func (s *CsqlShell) historyFileName() string {
 
 func (s *CsqlShell) loadHistory() {
 	if f, err := os.Open(s.historyFileName()); err == nil {
-		s.line.ReadHistory(f)
-		f.Close()
+		_, _ = s.line.ReadHistory(f)
+		_ = f.Close()
 	}
 }
 
@@ -156,8 +99,8 @@ func (s *CsqlShell) saveHistory() {
 	if f, err := os.Create(s.historyFileName()); err != nil {
 		log.Print("Error writing history file: ", err)
 	} else {
-		s.line.WriteHistory(f)
-		f.Close()
+		_, _ = s.line.WriteHistory(f)
+		_ = f.Close()
 	}
 }
 
@@ -173,6 +116,11 @@ func (s *CsqlShell) Start() {
 			pr = prompt
 		}
 		input, err := s.line.Prompt(pr)
+		if err == io.EOF {
+			s.PrintMessage("Bye!")
+			s.Terminate()
+			break
+		}
 		if err == liner.ErrPromptAborted {
 			if inMultiline {
 				buffer.Reset()
@@ -188,14 +136,14 @@ func (s *CsqlShell) Start() {
 			s.ExecuteCommand(input)
 			s.line.AppendHistory(input)
 			continue
-		} else {
+		} else if len(input) > 0 {
 			buffer.WriteString(input)
 			buffer.WriteRune('\n')
+			s.line.AppendHistory(input)
 		}
 		if s.isTerminalLine(input) {
 			query := buffer.String()
 			buffer.Reset()
-			s.line.AppendHistory(query)
 			s.ExecuteQuery(query)
 		}
 	}
@@ -203,40 +151,44 @@ func (s *CsqlShell) Start() {
 
 func (s *CsqlShell) Terminate() {
 	s.saveHistory()
-	s.line.Close()
+	_ = s.line.Close()
 	s.terminated = true
 }
 
+// isTerminalLine checks whether the input string terminates up with ';', meaning it is the last line in multiline input
 func (s *CsqlShell) isTerminalLine(input string) bool {
-	r := regexp.MustCompile("\".*\"")
-	input = r.ReplaceAllString(input, "")
-	r = regexp.MustCompile("'.*'")
-	input = r.ReplaceAllString(input, "")
-	return strings.HasSuffix(strings.TrimSpace(input), ";")
+	return len(input) > 0 && RuneIndex(input, ';') == len(input)-1
 }
 
 func (s *CsqlShell) IsCommand(input string) bool {
 	inputData := strings.Split(input, " ")
-	_, ok := s.commands[inputData[0]]
+	_, ok := s.Commands[inputData[0]]
 	return ok
 }
 
 func (s *CsqlShell) ExecuteQuery(query string) {
-	ds := sql.ExecuteSql(query)
-	rows := core.ReadAllRows(ds)
-	for _, r := range rows {
-		for _, cell := range r.Values() {
-			fmt.Printf("%20v", cell.Repr())
+	defer func() {
+		if err := recover(); err != nil {
+			switch sqle := err.(type) {
+			case *errors.CsqlError:
+				s.PrintError(s.C.S("[%d:%d] ", sqle.Location.Line, sqle.Location.Column+1).
+					Attr(ansie.Bold).A(sqle.Message).Reset().String())
+			default:
+				s.PrintError(s.C.Attr(ansie.Bold).S("%v", err).Reset().String())
+			}
 		}
-		fmt.Println()
-	}
+	}()
+	ds := sql.ExecuteSql(query)
+	table := InitTable(ds, -1)
+	s.PrintMessage(table.PrintHeader())
+	s.PrintMessage(table.PrintData(ds.GetRows()))
 }
 
 func (s *CsqlShell) ExecuteCommand(input string) {
 	inputData := strings.Split(input, " ")
-	cmd, ok := s.commands[inputData[0]]
+	cmd, ok := s.Commands[inputData[0]]
 	if !ok {
 		return
 	}
-	cmd(inputData[1:])
+	cmd.Func(s, inputData[1:])
 }

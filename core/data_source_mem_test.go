@@ -27,7 +27,7 @@ import (
 func TestLoadMemCsv(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ds := NewMemDataSourceFromCsv("../test-data/employees.csv")
+	ds := NewCsvDataSource("../test-data/employees.csv")
 
 	hdr := ds.Header()
 

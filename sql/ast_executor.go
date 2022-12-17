@@ -76,9 +76,9 @@ func (ae AstTransformer) TransformSelect(ast Select) core.DataSource {
 func (ae AstTransformer) TransformSourceName(ctx *SourceName) core.DataSource {
 	var ds core.DataSource
 	if ctx.Alias != nil {
-		ds = core.NewMemDataSourceWithAlias(string(ctx.Name), string(*ctx.Alias))
+		ds = core.NewCsvDataSourceWithAlias(string(ctx.Name), string(*ctx.Alias))
 	} else {
-		ds = core.NewMemDataSourceFromCsv(string(ctx.Name))
+		ds = core.NewCsvDataSource(string(ctx.Name))
 	}
 	return ds
 }

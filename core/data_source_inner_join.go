@@ -21,7 +21,6 @@ package core
 
 import (
 	"fmt"
-	"sync"
 )
 
 func NewCrossJoin(left DataSource, right DataSource) DataSource {
@@ -30,7 +29,6 @@ func NewCrossJoin(left DataSource, right DataSource) DataSource {
 
 func NewInnerJoin(left DataSource, right DataSource, joinCondition Condition) DataSource {
 	mds := &memDataSource{
-		lock:  sync.Mutex{},
 		name:  fmt.Sprintf("(%s JOIN %s)", left.GetName(), right.GetName()),
 		index: -1,
 	}

@@ -27,8 +27,8 @@ import (
 func TestRightOuterJoinDatasource_NextRow(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	left := NewMemDataSourceFromCsv("../test-data/authors.csv")
-	right := NewMemDataSourceFromCsv("../test-data/books.csv")
+	left := NewCsvDataSource("../test-data/authors.csv")
+	right := NewCsvDataSource("../test-data/books.csv")
 
 	joinCondition := NewEq(NewRowValue("authors.id"),
 		NewRowValue("books.author_id"))
@@ -58,8 +58,8 @@ func TestRightOuterJoinDatasource_NextRow(t *testing.T) {
 func TestRightOuterJoinDatasource_CurrentRow(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	left := NewMemDataSourceFromCsv("../test-data/authors.csv")
-	right := NewMemDataSourceFromCsv("../test-data/books.csv")
+	left := NewCsvDataSource("../test-data/authors.csv")
+	right := NewCsvDataSource("../test-data/books.csv")
 
 	joinCondition := NewEq(NewRowValue("authors.id"),
 		NewRowValue("books.author_id"))
@@ -74,8 +74,8 @@ func TestRightOuterJoinDatasource_CurrentRow(t *testing.T) {
 func TestRightOuterJoinDatasource_Rewind(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	left := NewMemDataSourceFromCsv("../test-data/authors.csv")
-	right := NewMemDataSourceFromCsv("../test-data/books.csv")
+	left := NewCsvDataSource("../test-data/authors.csv")
+	right := NewCsvDataSource("../test-data/books.csv")
 
 	joinCondition := NewEq(NewRowValue("authors.id"),
 		NewRowValue("books.author_id"))
@@ -93,8 +93,8 @@ func TestRightOuterJoinDatasource_Rewind(t *testing.T) {
 func TestRightOuterJoinDatasource_GetName(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	left := NewMemDataSourceFromCsv("../test-data/authors.csv")
-	right := NewMemDataSourceFromCsv("../test-data/books.csv")
+	left := NewCsvDataSource("../test-data/authors.csv")
+	right := NewCsvDataSource("../test-data/books.csv")
 
 	joinCondition := NewEq(NewRowValue("authors.id"),
 		NewRowValue("books.author_id"))
