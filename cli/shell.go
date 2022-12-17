@@ -136,7 +136,7 @@ func (s *CsqlShell) Start() {
 			s.ExecuteCommand(input)
 			s.line.AppendHistory(input)
 			continue
-		} else {
+		} else if len(input) > 0 {
 			buffer.WriteString(input)
 			buffer.WriteRune('\n')
 			s.line.AppendHistory(input)
@@ -157,7 +157,7 @@ func (s *CsqlShell) Terminate() {
 
 // isTerminalLine checks whether the input string terminates up with ';', meaning it is the last line in multiline input
 func (s *CsqlShell) isTerminalLine(input string) bool {
-	return RuneIndex(input, ';') == len(input)-1
+	return len(input) > 0 && RuneIndex(input, ';') == len(input)-1
 }
 
 func (s *CsqlShell) IsCommand(input string) bool {

@@ -28,6 +28,7 @@ import (
 	"golang.org/x/term"
 	"os"
 	"strings"
+	"unicode/utf8"
 )
 
 var (
@@ -131,18 +132,43 @@ func InitTable(ds core.DataSource, maxWidth int) *Table {
 //
 // If maxWidth <= 0, then default width of 80 columns is assumed
 func (t *Table) calculateWidths() {
-	totalMinWidth := funky.Sum(funky.Map(t.Columns, func(c Column) int {
-		return c.minWidth
+	t.TerminalWidth, _, _ = term.GetSize(0)
+	totalDataWidth := funky.Sum(funky.Map(t.Columns, func(c Column) int {
+		return c.DataWidth
 	}))
 	if t.SeparateColumns {
-		totalMinWidth += len(t.Columns) - 1
+		totalDataWidth += len(t.Columns) - 1
 	}
 
-	if totalMinWidth < t.TerminalWidth {
+	if totalDataWidth < t.TerminalWidth {
 		for idx, cw := range t.Columns {
 			t.Columns[idx].columnWidth = max(cw.minWidth, cw.DataWidth)
 		}
+	} else {
+		spaceToReduce := totalDataWidth - t.TerminalWidth
+		resizableColumns := make([]int, 0)
+		for idx, c := range t.Columns {
+			if c.DataWidth > c.minWidth {
+				resizableColumns = append(resizableColumns, idx)
+			} else {
+				t.Columns[idx].columnWidth = c.minWidth
+			}
+		}
+		reduceBy := spaceToReduce/len(resizableColumns) + 1
+		if t.SeparateColumns {
+			reduceBy += len(t.Columns) - 1
+		}
+		for _, idx := range resizableColumns {
+			t.Columns[idx].columnWidth = max(t.Columns[idx].minWidth, t.Columns[idx].DataWidth-reduceBy)
+		}
 	}
+	totalColWidth := funky.Sum(funky.Map(t.Columns, func(c Column) int {
+		return c.columnWidth
+	}))
+	if t.SeparateColumns {
+		totalColWidth += len(t.Columns) - 1
+	}
+	fmt.Printf("\n%d x %d\n", t.TerminalWidth, totalColWidth)
 }
 
 func max[T constraints.Ordered](t1 T, t2 T) T {
@@ -202,7 +228,7 @@ func (t *Table) PrintData(data []core.Row) string {
 
 		rowString := rowSb.String()
 
-		if len(rowString) < t.TerminalWidth {
+		if utf8.RuneCountInString(rowString) < t.TerminalWidth {
 			sb.WriteRune('\n')
 		}
 
