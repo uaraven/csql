@@ -462,5 +462,18 @@ func TestAstTransformer_UnionDifferentProjections(t *testing.T) {
 		union 
 		select first_name, first_name from "../test-data/people.csv"`)
 	}).To(Panic())
+}
 
+func TestAstTransformer_FunctionCall(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select to_string(id), to_upper(first_name) from "../test-data/employees.csv" where to_lower(last_name) = 'snow'`).
+		GetRows()
+	g.Expect(rows).To(HaveLen(2))
+
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal("1"))
+	g.Expect(rows[0].GetByIndex(2).Value()).To(Equal("JOHN"))
+	g.Expect(rows[1].GetByIndex(1).Value()).To(Equal("2"))
+	g.Expect(rows[1].GetByIndex(2).Value()).To(Equal("JAMES"))
 }

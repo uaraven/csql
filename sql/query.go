@@ -440,3 +440,16 @@ func (ine IsNullExpression) String() string {
 	sb.WriteString("NULL")
 	return sb.String()
 }
+
+type FunctionCall struct {
+	function string
+	args     []Expression
+	Location *errors.SourceLocation
+}
+
+func (fc FunctionCall) String() string {
+	args := strings.Join(funky.Map(fc.args, func(a Expression) string {
+		return a.String()
+	}), ", ")
+	return fmt.Sprintf("%s(%s)", fc.function, args)
+}

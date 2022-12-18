@@ -31,6 +31,7 @@ term: compoundName | literalValue;
 valueExpr
     : valueExpr binaryOperation valueExpr                 # valueBinaryExpr
     | term                                                # valueTerm
+    | funCall                                             # functionExpr
     | '(' valueExpr ')'                                   # valueParensExpr
     ;
 
@@ -52,6 +53,8 @@ whereExpr
 where: K_WHERE whereExpr;
 
 distinct: K_DISTINCT;
+
+funCall: function '(' valueExpr (',' valueExpr)* ')';
 
 projection: distinct? projectionField (',' projectionField)*;
 
@@ -121,6 +124,21 @@ orderByField
 
 fieldIndex: NUMERIC_LITERAL;
 
+function
+    : K_ROUND
+    | K_LEN
+    | K_TRUNC
+    | K_FRAC
+    | K_TO_STRING
+    | K_TO_FLOAT
+    | K_TO_INT
+    | K_SUBSTRING
+    | K_TO_UPPER
+    | K_TO_LOWER
+    | K_POW
+    | K_SQRT
+    ;
+
 K_AND: A N D;
 K_AS: A S;
 K_BETWEEN: B E T W E E N;
@@ -153,6 +171,18 @@ K_ASC: A S C;
 K_DESC: D E S C;
 K_UNION: U N I O N;
 K_ALL: A L L;
+K_TO_STRING: T O '_' S T R I N G;
+K_TO_FLOAT: T O '_' F L O A T;
+K_TO_INT: T O '_' I N T;
+K_ROUND: R O U N D;
+K_LEN: L E N;
+K_TRUNC: T R U N C;
+K_FRAC: F R A C;
+K_SUBSTRING: S U B S T R I N G;
+K_TO_UPPER: T O '_' U P P E R;
+K_TO_LOWER: T O '_' L O W E R;
+K_POW: P O W;
+K_SQRT: S Q R T;
 
 IDENTIFIER: SIMPLE_IDENTIFIER | QUOTED_IDENTIFIER;
 

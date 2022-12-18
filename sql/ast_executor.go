@@ -22,6 +22,7 @@ package sql
 import (
 	"fmt"
 	"github.com/uaraven/csql/core"
+	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/funky"
 	"strings"
 )
@@ -117,6 +118,8 @@ func (ae AstTransformer) TransformExpression(condition Expression) core.Conditio
 	switch cond := condition.(type) {
 	case Term:
 		return ae.TransformTerm(cond)
+	case FunctionCall:
+		return ae.TransformFunction(cond)
 	case AndExpression:
 		return ae.TransformAndExpression(cond)
 	case OrExpression:
@@ -328,4 +331,39 @@ func (ae AstTransformer) TransformBetweenExpression(cond BetweenExpression) core
 		core.WithLoc(core.NewGte(what, lower), cond.Location),
 		core.WithLoc(core.NewLte(what, upper), cond.Location),
 	)
+}
+
+func (ae AstTransformer) TransformFunction(f FunctionCall) core.Evaluator {
+	switch f.function {
+	case "round":
+		return core.NewRoundFunction(ae.TransformExpression(f.args[0]), f.Location)
+	case "len":
+		return core.NewLenFunction(ae.TransformExpression(f.args[0]), f.Location)
+	case "to_string":
+		return core.NewToStringFunc(ae.TransformExpression(f.args[0]), f.Location)
+	case "to_float":
+		return core.NewToFloatFunc(ae.TransformExpression(f.args[0]), f.Location)
+	case "to_int":
+		return core.NewToIntFunc(ae.TransformExpression(f.args[0]), f.Location)
+	case "trunc":
+		return core.NewTruncFunc(ae.TransformExpression(f.args[0]), f.Location)
+	case "frac":
+		return core.NewFracFunc(ae.TransformExpression(f.args[0]), f.Location)
+	case "to_upper":
+		return core.NewToUpperFunction(ae.TransformExpression(f.args[0]), f.Location)
+	case "to_lower":
+		return core.NewToLowerFunction(ae.TransformExpression(f.args[0]), f.Location)
+	case "sqrt":
+		return core.NewSqrtFunction(ae.TransformExpression(f.args[0]), f.Location)
+	case "pow":
+		return core.NewPowFunction(f.Location, funky.Map(f.args, func(arg Expression) core.Evaluator {
+			return ae.TransformExpression(arg)
+		})...)
+	case "substring":
+		return core.NewSubStringFunc(f.Location, funky.Map(f.args, func(arg Expression) core.Evaluator {
+			return ae.TransformExpression(arg)
+		})...)
+	default:
+		panic(errors.NewError(f.Location, fmt.Sprintf("Unsupported function: %s", f.function)))
+	}
 }

@@ -211,7 +211,7 @@ func (fv floatValue) AsInt() Value {
 }
 
 func (fv floatValue) AsFloat() Value {
-	return fv
+	return &fv
 }
 
 func (fv floatValue) AsBool() Value {

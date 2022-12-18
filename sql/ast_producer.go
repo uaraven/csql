@@ -589,3 +589,20 @@ func (c CsqlVisitorImpl) VisitQualifier(ctx *parser.QualifierContext) interface{
 	}
 	return parseIdentifier(ctx.GetText())
 }
+
+func (c CsqlVisitorImpl) VisitFunctionExpr(ctx *parser.FunctionExprContext) interface{} {
+	return ctx.FunCall().Accept(c)
+}
+
+func (c CsqlVisitorImpl) VisitFunCall(ctx *parser.FunCallContext) interface{} {
+	funcName := strings.ToLower(ctx.Function().GetText())
+	args := make([]Expression, len(ctx.AllValueExpr()))
+	for idx, ve := range ctx.AllValueExpr() {
+		args[idx] = ve.Accept(c).(Expression)
+	}
+	return FunctionCall{
+		function: funcName,
+		args:     args,
+		Location: SLFromToken(ctx.GetStart()),
+	}
+}
