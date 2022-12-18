@@ -31,19 +31,20 @@ import (
 )
 
 var (
-	columnBgColour = [][]ansie.Colour{
-		{1, 0, 0},
-		{0, 1, 0},
-		{0, 0, 1},
-		{1, 1, 0},
-		{1, 0, 1},
-		{0, 1, 1},
+	columnFgColour = [][]ansie.Colour{
+		{5, 0, 0},
+		{0, 5, 0},
+		{0, 0, 5},
+		{4, 4, 0},
+		{4, 0, 4},
+		{0, 4, 4},
 	}
 )
 
 type Column struct {
 	Name              string
 	DataWidth         int
+	FgColour          ansie.Colour
 	BgColour          ansie.Colour
 	AlternateBgColour ansie.Colour
 	HeaderFormat      string
@@ -62,10 +63,10 @@ type Table struct {
 	TerminalWidth       int
 }
 
-func columnBgColorIndex(colorIdx int, offset int) ansie.Colour {
-	r := max(columnBgColour[colorIdx][0]+offset, 0)
-	g := max(columnBgColour[colorIdx][1]+offset, 0)
-	b := max(columnBgColour[colorIdx][2]+offset, 0)
+func columnFgColorIndex(colorIdx int, offset int) ansie.Colour {
+	r := max(columnFgColour[colorIdx][0]+offset, 0)
+	g := max(columnFgColour[colorIdx][1]+offset, 0)
+	b := max(columnFgColour[colorIdx][2]+offset, 0)
 	return ansie.RgbTo216Colours(uint(r), uint(g), uint(b))
 }
 
@@ -76,12 +77,13 @@ func InitTable(ds core.DataSource, maxWidth int) *Table {
 			Name:              t.Name(),
 			DataWidth:         len(t.Name()),
 			minWidth:          len(t.Name()) + 2,
-			BgColour:          columnBgColorIndex(columnIdx, 0),
-			AlternateBgColour: columnBgColorIndex(columnIdx, 1),
+			FgColour:          columnFgColorIndex(columnIdx, 0),
+			BgColour:          ansie.Black,
+			AlternateBgColour: ansie.Grey11,
 			HeaderFormat:      ansie.Ansi.Attr(ansie.Underline).Attr(ansie.Bold).String(),
 		}
 		columnIdx++
-		if columnIdx >= len(columnBgColour) {
+		if columnIdx >= len(columnFgColour) {
 			columnIdx = 0
 		}
 		return c
@@ -114,7 +116,7 @@ func InitTable(ds core.DataSource, maxWidth int) *Table {
 	}
 	t := &Table{
 		Columns:             columns,
-		Zebra:               false,
+		Zebra:               true,
 		SeparateColumns:     true,
 		SeparateRows:        false,
 		VerticalSeparator:   '│',
@@ -166,7 +168,6 @@ func (t *Table) calculateWidths() {
 	if t.SeparateColumns {
 		totalColWidth += len(t.Columns) - 1
 	}
-	fmt.Printf("\n%d x %d\n", t.TerminalWidth, totalColWidth)
 }
 
 func max[T constraints.Ordered](t1 T, t2 T) T {
@@ -187,8 +188,8 @@ func (t *Table) PrintHeader() string {
 		if suffixLen > 0 {
 			suffix = strings.Repeat(" ", suffixLen)
 		}
-		sb.WriteString(ansie.Ansi.Bg(col.BgColour).
-			S("%s%s", col.HeaderFormat, col.Name).Reset().Bg(col.BgColour).A(suffix).Reset().String())
+		sb.WriteString(ansie.Ansi.Fg(ansie.BrightWhite).
+			S("%s%s", col.HeaderFormat, col.Name).Reset().Fg(ansie.BrightWhite).A(suffix).Reset().String())
 		if idx < len(t.Columns)-1 && t.SeparateColumns {
 			sb.WriteRune(t.VerticalSeparator)
 		}
@@ -215,7 +216,7 @@ func (t *Table) PrintData(data []core.Row) string {
 			if len(value) > col.columnWidth {
 				value = value[:col.columnWidth-1] + "…"
 			}
-			sb.WriteString(ansie.Ansi.Bg(bgColour).
+			sb.WriteString(ansie.Ansi.Fg(col.FgColour).Bg(bgColour).
 				S("%*s", -col.columnWidth, value).Reset().String())
 			rowSb.WriteString(fmt.Sprintf("%*s", -col.columnWidth, value))
 			if idx < len(t.Columns)-1 && t.SeparateColumns {
