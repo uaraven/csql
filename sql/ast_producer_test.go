@@ -515,3 +515,36 @@ func TestSelectOrderBy(t *testing.T) {
 			{Location: Loc(1, 47), FieldName: &CompoundName{Qualifier: &q, Name: Identifier("c"), Location: Loc(1, 47)}, FieldIndex: 0, Descending: false},
 		}}))
 }
+
+func TestSelectWithFunctions(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT len('abc') FROM Table1 WHERE TO_STRING(b) != TRUNC(13.2)")
+
+	v1 := "abc"
+	v2 := "13.2"
+	g.Expect(s.Select.Projection.ProjectionFields[0]).To(BeEquivalentTo(ProjectionField{
+		EvaluatedField: &EvaluatedProjectionField{Expr: FunctionCall{
+			function: "len",
+			args:     []Expression{Term{Value: &Literal{StringValue: &v1, Location: Loc(1, 11)}}},
+			Location: Loc(1, 7),
+		}}}))
+	g.Expect(s.Select.Filter).To(BeEquivalentTo(
+		ComparisonExpression{
+			LHS: FunctionCall{
+				function: "to_string",
+				args: []Expression{Term{Name: &CompoundName{
+					Name:     "b",
+					Location: Loc(1, 46),
+				}}},
+				Location: Loc(1, 36),
+			},
+			RHS: FunctionCall{
+				function: "trunc",
+				args:     []Expression{Term{Value: &Literal{NumericValue: &v2, Location: Loc(1, 58)}}},
+				Location: Loc(1, 52),
+			},
+			Operator: "!=",
+			Location: Loc(1, 36),
+		},
+	))
+}
