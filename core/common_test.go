@@ -21,7 +21,10 @@ package core
 
 import (
 	"fmt"
+	"github.com/onsi/gomega/format"
+	"github.com/onsi/gomega/types"
 	"github.com/uaraven/csql/funky"
+	"strings"
 )
 
 func loadTestDatasource() DataSource {
@@ -78,4 +81,67 @@ func (ec *mapContext) SetValue(name string, value string) {
 
 func (ec *mapContext) Clear() {
 	ec.values = make(map[string]string)
+}
+
+type columnValuePair struct {
+	column string
+	value  Value
+}
+
+func (cvp columnValuePair) String() string {
+	return fmt.Sprintf("%s = %s", cvp.column, cvp.value.String())
+}
+
+type RowMatcher struct {
+	Expected []columnValuePair
+}
+
+func (rowMatcher RowMatcher) String() string {
+	return strings.Join(funky.Map(rowMatcher.Expected, func(p columnValuePair) string {
+		return p.String()
+	}), ", ")
+}
+
+func HavingRowValues(columns []string, values ...Value) types.GomegaMatcher {
+	if len(columns) != len(values) {
+		panic(fmt.Errorf("Number of columns must be equal to number of values. \nColumns:%v\n Values:%v\n", columns, values))
+	}
+	pairs := make([]columnValuePair, len(columns))
+	for i := range columns {
+		pairs[i] = columnValuePair{
+			column: columns[i],
+			value:  values[i],
+		}
+	}
+	return &RowMatcher{Expected: pairs}
+}
+
+func (rowMatcher *RowMatcher) Match(actual interface{}) (success bool, err error) {
+	if actual == nil && rowMatcher.Expected == nil {
+		return false, fmt.Errorf("Both actual and expected must not be nil.")
+	}
+
+	convertedActual, ok := actual.(Row)
+	if !ok {
+		return false, fmt.Errorf("%v is not a Row", actual)
+	}
+
+	for _, colVal := range rowMatcher.Expected {
+		optValue := convertedActual.Get(colVal.column)
+		if optValue.IsEmpty() {
+			return false, fmt.Errorf("row doesn't contain column '%s'", colVal.column)
+		}
+		if !colVal.value.Equals(optValue.Value()) {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
+func (rowMatcher *RowMatcher) FailureMessage(actual interface{}) (message string) {
+	return format.Message(actual, "to have columns with values equal to", rowMatcher.Expected)
+}
+
+func (rowMatcher *RowMatcher) NegatedFailureMessage(actual interface{}) (message string) {
+	return format.Message(actual, "not to have columns with values equal to", rowMatcher.Expected)
 }

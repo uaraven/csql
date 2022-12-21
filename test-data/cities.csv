@@ -1,0 +1,16 @@
+id,city,country,population,area,region
+1,London,UK,8799800,1572.03,
+2,London,Canada,422324,420.5,ON
+3,London,USA,936,8.24,AR
+4,London,USA,10279,21.77,OH
+5,London,USA,8053,30.07,KY
+6,Waterloo,Belgium,30174,21.32,
+7,Waterloo,Canada,121436,64.06,ON
+8,Waterloo,Australia,16379,1.1,NSW
+9,Waterloo,USA,670,14.076,CA
+10,Warsaw,Poland,3053104,6100,Mazovia
+11,Warsaw,USA,2209,7.11,MO
+12,Odesa,Ukraine,1015826,162.42,
+13,Odessa,Canada,16221,341.04,ON
+14,Odessa,USA,8080,581.58,FL
+15,Dubrovnik,Croatia,42615,21.35,

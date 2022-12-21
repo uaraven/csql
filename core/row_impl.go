@@ -21,6 +21,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/funky"
 	"strconv"
 	"strings"
@@ -91,6 +92,9 @@ func (r rowImpl) Count() int {
 }
 
 func (r rowImpl) GetByIndex(index int) Value {
+	if index < 1 || index >= len(r.values) {
+		panic(errors.NewError(nil, fmt.Sprintf("Invalid column index: %d", index)))
+	}
 	return r.values[index-1]
 }
 
