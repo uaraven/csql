@@ -29,11 +29,12 @@ func TestGroupByCity(t *testing.T) {
 
 	src := loadTestMemDatasource("cities")
 
+	projection := []ProjectionColumn{NewColumn("*")}
 	groupBy := []GroupColumn{
 		{name: "city"},
 	}
 
-	aggDs := NewAggregationDs(src, groupBy)
+	aggDs := NewAggregationDs(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 
@@ -55,11 +56,12 @@ func TestGroupByCityIndex(t *testing.T) {
 
 	src := loadTestMemDatasource("cities")
 
+	projection := []ProjectionColumn{NewColumn("*")}
 	groupBy := []GroupColumn{
 		{index: 2},
 	}
 
-	aggDs := NewAggregationDs(src, groupBy)
+	aggDs := NewAggregationDs(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 
@@ -81,10 +83,11 @@ func TestGroupByInvalidColumn(t *testing.T) {
 
 	src := loadTestMemDatasource("cities")
 
+	projection := []ProjectionColumn{NewColumn("*")}
 	groupBy := []GroupColumn{
 		{name: "county"},
 	}
-	g.Expect(func() { NewAggregationDs(src, groupBy) }).To(Panic())
+	g.Expect(func() { NewAggregationDs(src, projection, groupBy) }).To(Panic())
 }
 
 func TestGroupByInvalidIndex(t *testing.T) {
@@ -92,10 +95,11 @@ func TestGroupByInvalidIndex(t *testing.T) {
 
 	src := loadTestMemDatasource("cities")
 
+	projection := []ProjectionColumn{NewColumn("*")}
 	groupBy := []GroupColumn{
 		{index: 12},
 	}
-	g.Expect(func() { NewAggregationDs(src, groupBy) }).To(Panic())
+	g.Expect(func() { NewAggregationDs(src, projection, groupBy) }).To(Panic())
 }
 
 func TestGroupByCityCountry(t *testing.T) {
@@ -103,12 +107,13 @@ func TestGroupByCityCountry(t *testing.T) {
 
 	src := loadTestMemDatasource("cities")
 
+	projection := []ProjectionColumn{NewColumn("*")}
 	groupBy := []GroupColumn{
 		{name: "city"},
 		{name: "country"},
 	}
 
-	aggDs := NewAggregationDs(src, groupBy)
+	aggDs := NewAggregationDs(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 
