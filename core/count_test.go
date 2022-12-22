@@ -81,3 +81,76 @@ func TestCountFunc_2(t *testing.T) {
 		HavingRowValues(columns, NewIntValue(2), NewStringValue("Poland")),
 	))
 }
+
+func TestCountFunc_Distinct(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	src := loadTestMemDatasource("cities")
+
+	projection := []ProjectionColumn{
+		{source: newCountFunction(nil, true, NewRowValue("city"))},
+		NewColumn("country")}
+	groupBy := []GroupColumn{
+		{name: "country"},
+	}
+
+	aggDs := NewAggregationDs(src, projection, groupBy)
+
+	rows := aggDs.GetRows()
+
+	g.Expect(aggDs.Header().ColumnsMetadata()).To(HaveLen(2))
+	g.Expect(rows).To(HaveLen(8))
+	columns := []string{"COUNT(DISTINCT city)", "country"}
+	g.Expect(rows).To(ContainElements(
+		HavingRowValues(columns, NewIntValue(1), NewStringValue("Belgium")),
+		HavingRowValues(columns, NewIntValue(1), NewStringValue("Australia")),
+		HavingRowValues(columns, NewIntValue(1), NewStringValue("Poland")),
+		HavingRowValues(columns, NewIntValue(1), NewStringValue("Ukraine")),
+		HavingRowValues(columns, NewIntValue(1), NewStringValue("Croatia")),
+		HavingRowValues(columns, NewIntValue(1), NewStringValue("UK")),
+		HavingRowValues(columns, NewIntValue(3), NewStringValue("Canada")),
+		HavingRowValues(columns, NewIntValue(4), NewStringValue("USA")),
+	))
+}
+
+func TestCountFunc_CountAll(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	src := loadTestMemDatasource("cities")
+
+	projection := []ProjectionColumn{
+		{source: newCountFunction(nil, false, NewRowValue("*"))}}
+	groupBy := []GroupColumn{}
+
+	aggDs := NewAggregationDs(src, projection, groupBy)
+
+	rows := aggDs.GetRows()
+
+	g.Expect(aggDs.Header().ColumnsMetadata()).To(HaveLen(1))
+	g.Expect(rows).To(HaveLen(1))
+	columns := []string{"COUNT(*)"}
+	g.Expect(rows).To(ContainElements(
+		HavingRowValues(columns, NewIntValue(15)),
+	))
+}
+
+func TestCountFunc_CountAllDistinct(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	src := loadTestMemDatasource("cities")
+
+	projection := []ProjectionColumn{
+		{source: newCountFunction(nil, true, NewRowValue("*"))}}
+	groupBy := []GroupColumn{}
+
+	aggDs := NewAggregationDs(src, projection, groupBy)
+
+	rows := aggDs.GetRows()
+
+	g.Expect(aggDs.Header().ColumnsMetadata()).To(HaveLen(1))
+	g.Expect(rows).To(HaveLen(1))
+	columns := []string{"COUNT(DISTINCT *)"}
+	g.Expect(rows).To(ContainElements(
+		HavingRowValues(columns, NewIntValue(15)),
+	))
+}

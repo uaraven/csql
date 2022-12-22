@@ -22,6 +22,7 @@ package core
 import (
 	"fmt"
 	"github.com/uaraven/csql/errors"
+	"strings"
 )
 
 type AggregateFunction interface {
@@ -74,11 +75,19 @@ func newAggFunction(name string, implementor AggregateFunctionImplementor, loc *
 	}
 }
 
+type countFunction struct {
+	AggregateFunction
+	arg         Evaluator
+	distinct    bool
+	loc         *errors.SourceLocation
+	implementor AggregateFunctionImplementor
+}
+
 func newCountFunction(loc *errors.SourceLocation, distinct bool, arg Evaluator) AggregateFunction {
-	return &aggFunctionImpl{
-		name: "COUNT",
-		arg:  arg,
-		loc:  loc,
+	return &countFunction{
+		arg:      arg,
+		loc:      loc,
+		distinct: distinct,
 		implementor: func(rows []Row, function AggregateFunction) Value {
 			countAll := isCountAll(arg)
 			duplicates := make(map[string]bool)
@@ -102,6 +111,33 @@ func newCountFunction(loc *errors.SourceLocation, distinct bool, arg Evaluator) 
 			return NewIntValue(int64(counter))
 		},
 	}
+}
+
+func (cf countFunction) Name() string {
+	return "COUNT"
+}
+
+func (cf countFunction) GetArg() Evaluator {
+	return cf.arg
+}
+
+func (cf countFunction) Location() *errors.SourceLocation {
+	return cf.loc
+}
+
+func (cf countFunction) EvaluateAgg(rows []Row) Value {
+	return cf.implementor(rows, cf)
+}
+
+func (cf countFunction) String() string {
+	var sb strings.Builder
+	sb.WriteString("COUNT(")
+	if cf.distinct {
+		sb.WriteString("DISTINCT ")
+	}
+	sb.WriteString(cf.arg.String())
+	sb.WriteRune(')')
+	return sb.String()
 }
 
 func isCountAll(evaluator Evaluator) bool {
