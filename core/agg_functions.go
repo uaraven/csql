@@ -22,6 +22,7 @@ package core
 import (
 	"fmt"
 	"github.com/uaraven/csql/errors"
+	"github.com/uaraven/csql/util"
 	"strings"
 )
 
@@ -83,7 +84,34 @@ type countFunction struct {
 	implementor AggregateFunctionImplementor
 }
 
-func newCountFunction(loc *errors.SourceLocation, distinct bool, arg Evaluator) AggregateFunction {
+func newSumFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
+	return aggFunctionImpl{
+		arg:  arg,
+		name: "SUM",
+		loc:  loc,
+		implementor: func(rows []Row, function AggregateFunction) Value {
+			sum := NewIntValue(0)
+			for _, row := range rows {
+				value := arg.Evaluate(row)
+				if !IsNumeric(value) {
+					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for sum: %v", value)))
+				}
+				if sum.Type() == TypeFloat || value.Type() == TypeFloat {
+					a := sum.AsFloat().Value().(float64)
+					b := value.AsFloat().Value().(float64)
+					sum = util.Must(wrapInFloat(operationExecutor(addition, a, b)))
+				} else {
+					a := sum.AsInt().Value().(int64)
+					b := value.AsInt().Value().(int64)
+					sum = util.Must(wrapInInt(operationExecutor(addition, a, b)))
+				}
+			}
+			return sum
+		},
+	}
+}
+
+func newCountFunction(distinct bool, arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
 	return &countFunction{
 		arg:      arg,
 		loc:      loc,

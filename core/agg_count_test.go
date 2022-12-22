@@ -30,7 +30,7 @@ func TestCountFunc_1(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newCountFunction(nil, false, NewRowValue("country"))},
+		{source: newCountFunction(false, NewRowValue("country"), nil)},
 		NewColumn("city")}
 	groupBy := []GroupColumn{
 		{name: "city"},
@@ -59,7 +59,7 @@ func TestCountFunc_2(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newCountFunction(nil, false, NewRowValue("country"))},
+		{source: newCountFunction(false, NewRowValue("country"), nil)},
 		NewColumn("country")}
 	groupBy := []GroupColumn{
 		{name: "city"},
@@ -88,7 +88,7 @@ func TestCountFunc_Distinct(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newCountFunction(nil, true, NewRowValue("city"))},
+		{source: newCountFunction(true, NewRowValue("city"), nil)},
 		NewColumn("country")}
 	groupBy := []GroupColumn{
 		{name: "country"},
@@ -119,7 +119,7 @@ func TestCountFunc_CountAll(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newCountFunction(nil, false, NewRowValue("*"))}}
+		{source: newCountFunction(false, NewRowValue("*"), nil)}}
 	groupBy := []GroupColumn{}
 
 	aggDs := NewAggregationDs(src, projection, groupBy)
@@ -140,7 +140,7 @@ func TestCountFunc_CountAllDistinct(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newCountFunction(nil, true, NewRowValue("*"))}}
+		{source: newCountFunction(true, NewRowValue("*"), nil)}}
 	groupBy := []GroupColumn{}
 
 	aggDs := NewAggregationDs(src, projection, groupBy)
@@ -152,5 +152,26 @@ func TestCountFunc_CountAllDistinct(t *testing.T) {
 	columns := []string{"COUNT(DISTINCT *)"}
 	g.Expect(rows).To(ContainElements(
 		HavingRowValues(columns, NewIntValue(15)),
+	))
+}
+
+func TestCountFunc_CountDistinct(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	src := loadTestMemDatasource("cities")
+
+	projection := []ProjectionColumn{
+		{source: newCountFunction(true, NewRowValue("city"), nil)}}
+	groupBy := []GroupColumn{}
+
+	aggDs := NewAggregationDs(src, projection, groupBy)
+
+	rows := aggDs.GetRows()
+
+	g.Expect(aggDs.Header().ColumnsMetadata()).To(HaveLen(1))
+	g.Expect(rows).To(HaveLen(1))
+	columns := []string{"COUNT(DISTINCT city)"}
+	g.Expect(rows).To(ContainElements(
+		HavingRowValues(columns, NewIntValue(6)),
 	))
 }
