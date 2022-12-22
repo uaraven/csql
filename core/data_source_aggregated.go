@@ -45,35 +45,68 @@ func NewAggregationDs(source DataSource, projection []ProjectionColumn, groupBy 
 
 	var result []Row
 	if len(aggregateFunctions) == 0 {
-		result = applyGroupingNoAggregates(rowGroups)
+		result = foldGroupNoAggregates(rowGroups)
 		intermediate := NewMemDataSource(source.GetName(), source.Header().ColumnsMetadata(), result)
 		return NewProjectionDataSource(intermediate, projection, false)
 	} else {
-		result = applyAggregates(rowGroups)
-		return NewMemDataSource(source.GetName(), source.Header().ColumnsMetadata(), result)
+		projection = ExpandProjection(projection, source.Header())
+		newHeader := NewHeaderWithProjection(source, projection)
+		result = applyAggregates(rowGroups, projection, newHeader, aggregateFunctions)
+		return NewMemDataSource(source.GetName(), newHeader.ColumnsMetadata(), result)
 	}
 }
 
-func applyAggregates(groups [][]Row) []Row {
-	return nil
-}
-
-func applyGroupingNoAggregates(rowGroups [][]Row) []Row {
+func applyAggregates(groups [][]Row, projection []ProjectionColumn, headers DataSourceHeader, aggregates map[int]AggregateFunction) []Row {
 	result := make([]Row, 0)
-	for _, rows := range rowGroups {
-		if len(rows) == 0 {
-			continue
+	rowId := 0
+	for _, row := range groups {
+		if len(row) > 0 {
+			projectedRow := projectRow(projection, headers, row[0])
+			values := projectedRow.Values()
+			for index, v := range aggregates {
+				value := v.EvaluateAgg(row)
+				values[index] = value
+			}
+			nrow := newRowWithId(rowId, headers, values)
+			result = append(result, nrow)
+			rowId++
 		}
-		result = append(result, rows[0])
 	}
 	return result
 }
 
-func filterAggregateFunctions(projection []ProjectionColumn) []AggregationFunction {
-	result := make([]AggregationFunction, 0)
-	for _, column := range projection {
-		if aggF, ok := column.source.(AggregationFunction); ok {
-			result = append(result, aggF)
+func projectRow(projection []ProjectionColumn, header DataSourceHeader, row Row) Row {
+	resultValues := make([]Value, header.ColumnCount())
+	for idx, prj := range projection {
+		var v Value
+		if _, isAgg := prj.source.(AggregateFunction); isAgg {
+			v = nullV
+		} else {
+			v = prj.source.Evaluate(row)
+		}
+		resultValues[idx] = v
+	}
+	return newRowWithId(row.Id(), header, resultValues)
+}
+
+func foldGroupNoAggregates(rowGroups [][]Row) []Row {
+	result := make([]Row, 0)
+	rowId := 0
+	for _, rows := range rowGroups {
+		if len(rows) == 0 {
+			continue
+		}
+		result = append(result, updateRowId(rowId, rows[0]))
+		rowId++
+	}
+	return result
+}
+
+func filterAggregateFunctions(projection []ProjectionColumn) map[int]AggregateFunction {
+	result := make(map[int]AggregateFunction)
+	for idx, column := range projection {
+		if aggF, ok := column.source.(AggregateFunction); ok {
+			result[idx] = aggF
 		}
 	}
 	return result

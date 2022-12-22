@@ -22,6 +22,7 @@ package core
 import (
 	"fmt"
 	"github.com/uaraven/csql/errors"
+	"github.com/uaraven/csql/funky"
 	"math"
 	"strings"
 )
@@ -30,14 +31,20 @@ type SqlFunction interface {
 	Evaluator
 	GetArgs() []Evaluator
 	Location() *errors.SourceLocation
+	Name() string
 }
 
 type SqlFunctionImplementor func(ctx EvaluationContext, function SqlFunction) Value
 
 type sqlFunctionImpl struct {
+	name        string
 	args        []Evaluator
 	loc         *errors.SourceLocation
 	implementor SqlFunctionImplementor
+}
+
+func (sf sqlFunctionImpl) Name() string {
+	return sf.name
 }
 
 func (sf sqlFunctionImpl) GetArgs() []Evaluator {
@@ -52,24 +59,32 @@ func (sf sqlFunctionImpl) Evaluate(ctx EvaluationContext) Value {
 	return sf.implementor(ctx, sf)
 }
 
-func newSqlFunction(implementor SqlFunctionImplementor, loc *errors.SourceLocation, args ...Evaluator) SqlFunction {
+func (sf sqlFunctionImpl) String() string {
+	argsS := funky.Map(sf.args, func(a Evaluator) string {
+		return a.String()
+	})
+	return fmt.Sprintf("%s(%s)", sf.name, strings.Join(argsS, ", "))
+}
+
+func newSqlFunction(name string, implementor SqlFunctionImplementor, loc *errors.SourceLocation, args ...Evaluator) SqlFunction {
 	return &sqlFunctionImpl{
+		name:        name,
 		args:        args,
 		loc:         loc,
 		implementor: implementor,
 	}
 }
 
-func onlyArg(name string, f SqlFunction) Evaluator {
+func onlyArg(f SqlFunction) Evaluator {
 	if len(f.GetArgs()) > 1 {
-		panic(errors.NewError(f.Location(), fmt.Sprintf("%s expects one argument", name)))
+		panic(errors.NewError(f.Location(), fmt.Sprintf("%s expects one argument", f.Name())))
 	}
 	return f.GetArgs()[0]
 }
 
 func NewLenFunction(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
-	return newSqlFunction(func(ctx EvaluationContext, f SqlFunction) Value {
-		arg1 := onlyArg("LEN", f)
+	return newSqlFunction("LEN", func(ctx EvaluationContext, f SqlFunction) Value {
+		arg1 := onlyArg(f)
 		value := arg1.Evaluate(ctx)
 		if value.Type() != TypeString {
 			panic(errors.NewTypeMismatch(f.Location(), arg1, "string", f))
@@ -79,8 +94,8 @@ func NewLenFunction(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
 }
 
 func NewRoundFunction(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
-	return newSqlFunction(func(ctx EvaluationContext, f SqlFunction) Value {
-		arg1 := onlyArg("ROUND", f)
+	return newSqlFunction("ROUND", func(ctx EvaluationContext, f SqlFunction) Value {
+		arg1 := onlyArg(f)
 		value := arg1.Evaluate(ctx)
 		if value.Type() != TypeFloat && value.Type() != TypeInt {
 			panic(errors.NewTypeMismatch(f.Location(), arg1, "numeric", f))
@@ -90,16 +105,16 @@ func NewRoundFunction(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
 }
 
 func NewToStringFunc(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
-	return newSqlFunction(func(ctx EvaluationContext, f SqlFunction) Value {
-		arg1 := onlyArg("TO_STRING", f)
+	return newSqlFunction("TO_STRING", func(ctx EvaluationContext, f SqlFunction) Value {
+		arg1 := onlyArg(f)
 		value := arg1.Evaluate(ctx)
 		return value.AsString()
 	}, loc, arg)
 }
 
 func NewToFloatFunc(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
-	return newSqlFunction(func(ctx EvaluationContext, f SqlFunction) Value {
-		arg1 := onlyArg("TO_FLOAT", f)
+	return newSqlFunction("TO_FLOAT", func(ctx EvaluationContext, f SqlFunction) Value {
+		arg1 := onlyArg(f)
 		value := arg1.Evaluate(ctx)
 		newVal := value.AsFloat()
 		if newVal == nil {
@@ -110,8 +125,8 @@ func NewToFloatFunc(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
 }
 
 func NewToIntFunc(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
-	return newSqlFunction(func(ctx EvaluationContext, f SqlFunction) Value {
-		arg1 := onlyArg("TO_INT", f)
+	return newSqlFunction("TO_INT", func(ctx EvaluationContext, f SqlFunction) Value {
+		arg1 := onlyArg(f)
 		value := arg1.Evaluate(ctx)
 		newVal := value.AsInt()
 		if newVal == nil {
@@ -122,8 +137,8 @@ func NewToIntFunc(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
 }
 
 func NewTruncFunc(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
-	return newSqlFunction(func(ctx EvaluationContext, f SqlFunction) Value {
-		arg1 := onlyArg("TRUNC", f)
+	return newSqlFunction("TRUNC", func(ctx EvaluationContext, f SqlFunction) Value {
+		arg1 := onlyArg(f)
 		value := arg1.Evaluate(ctx)
 		if value.Type() != TypeFloat && value.Type() != TypeInt {
 			panic(errors.NewTypeMismatch(f.Location(), arg1, "numeric", f))
@@ -133,8 +148,8 @@ func NewTruncFunc(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
 }
 
 func NewFracFunc(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
-	return newSqlFunction(func(ctx EvaluationContext, f SqlFunction) Value {
-		arg1 := onlyArg("FRAC", f)
+	return newSqlFunction("FRAC", func(ctx EvaluationContext, f SqlFunction) Value {
+		arg1 := onlyArg(f)
 		value := arg1.Evaluate(ctx)
 		if value.Type() != TypeFloat && value.Type() != TypeInt {
 			panic(errors.NewTypeMismatch(f.Location(), arg1, "numeric", f))
@@ -145,7 +160,7 @@ func NewFracFunc(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
 }
 
 func NewSubStringFunc(loc *errors.SourceLocation, args ...Evaluator) SqlFunction {
-	return newSqlFunction(func(ctx EvaluationContext, f SqlFunction) Value {
+	return newSqlFunction("SUBSTRING", func(ctx EvaluationContext, f SqlFunction) Value {
 		args := f.GetArgs()
 		if len(args) != 3 {
 			panic(errors.NewError(f.Location(), "SUBSTRING function expects 3 parameters"))
@@ -181,8 +196,8 @@ func NewSubStringFunc(loc *errors.SourceLocation, args ...Evaluator) SqlFunction
 }
 
 func NewToUpperFunction(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
-	return newSqlFunction(func(ctx EvaluationContext, f SqlFunction) Value {
-		arg1 := onlyArg("TO_UPPER", f)
+	return newSqlFunction("TO_UPPER", func(ctx EvaluationContext, f SqlFunction) Value {
+		arg1 := onlyArg(f)
 		value := arg1.Evaluate(ctx)
 		if value.Type() != TypeString {
 			panic(errors.NewTypeMismatch(f.Location(), arg1, "string", f))
@@ -192,8 +207,8 @@ func NewToUpperFunction(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
 }
 
 func NewToLowerFunction(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
-	return newSqlFunction(func(ctx EvaluationContext, f SqlFunction) Value {
-		arg1 := onlyArg("TO_LOWER", f)
+	return newSqlFunction("TO_LOWER", func(ctx EvaluationContext, f SqlFunction) Value {
+		arg1 := onlyArg(f)
 		value := arg1.Evaluate(ctx)
 		if value.Type() != TypeString {
 			panic(errors.NewTypeMismatch(f.Location(), arg1, "string", f))
@@ -203,8 +218,8 @@ func NewToLowerFunction(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
 }
 
 func NewSqrtFunction(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
-	return newSqlFunction(func(ctx EvaluationContext, f SqlFunction) Value {
-		arg1 := onlyArg("SQRT", f)
+	return newSqlFunction("SQRT", func(ctx EvaluationContext, f SqlFunction) Value {
+		arg1 := onlyArg(f)
 		value := arg1.Evaluate(ctx)
 		if value.Type() != TypeFloat && value.Type() != TypeInt {
 			panic(errors.NewTypeMismatch(f.Location(), arg1, "numeric", f))
@@ -215,7 +230,7 @@ func NewSqrtFunction(arg Evaluator, loc *errors.SourceLocation) SqlFunction {
 }
 
 func NewPowFunction(loc *errors.SourceLocation, args ...Evaluator) SqlFunction {
-	return newSqlFunction(func(ctx EvaluationContext, f SqlFunction) Value {
+	return newSqlFunction("POW", func(ctx EvaluationContext, f SqlFunction) Value {
 		args := f.GetArgs()
 		if len(args) != 2 {
 			panic(errors.NewError(f.Location(), "POW function expects 2 parameters"))

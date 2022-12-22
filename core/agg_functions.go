@@ -24,23 +24,29 @@ import (
 	"github.com/uaraven/csql/errors"
 )
 
-type AggregationFunction interface {
+type AggregateFunction interface {
 	Evaluator
-	GetArgs() []Evaluator
+	Name() string
+	GetArg() Evaluator
 	Location() *errors.SourceLocation
 	EvaluateAgg(rows []Row) Value
 }
 
-type AggregationFunctionImplementor func(rows []Row, function AggregationFunction) Value
+type AggregateFunctionImplementor func(rows []Row, function AggregateFunction) Value
 
 type aggFunctionImpl struct {
-	args        []Evaluator
+	arg         Evaluator
+	name        string
 	loc         *errors.SourceLocation
-	implementor AggregationFunctionImplementor
+	implementor AggregateFunctionImplementor
 }
 
-func (sf aggFunctionImpl) GetArgs() []Evaluator {
-	return sf.args
+func (sf aggFunctionImpl) Name() string {
+	return sf.name
+}
+
+func (sf aggFunctionImpl) GetArg() Evaluator {
+	return sf.arg
 }
 
 func (sf aggFunctionImpl) Location() *errors.SourceLocation {
@@ -55,20 +61,25 @@ func (sf aggFunctionImpl) EvaluateAgg(rows []Row) Value {
 	return sf.implementor(rows, sf)
 }
 
-func newAggFunction(implementor AggregationFunctionImplementor, loc *errors.SourceLocation, args ...Evaluator) AggregationFunction {
+func (sf aggFunctionImpl) String() string {
+	return fmt.Sprintf("%s(%s)", sf.name, sf.arg.String())
+}
+
+func newAggFunction(name string, implementor AggregateFunctionImplementor, loc *errors.SourceLocation, args Evaluator) AggregateFunction {
 	return &aggFunctionImpl{
-		args:        args,
+		name:        name,
+		arg:         args,
 		loc:         loc,
 		implementor: implementor,
 	}
 }
 
-func newCountFunction(loc *errors.SourceLocation, distinct bool, args ...Evaluator) AggregationFunction {
+func newCountFunction(loc *errors.SourceLocation, distinct bool, arg Evaluator) AggregateFunction {
 	return &aggFunctionImpl{
-		args: args,
+		name: "COUNT",
+		arg:  arg,
 		loc:  loc,
-		implementor: func(rows []Row, function AggregationFunction) Value {
-			arg := onlyOneArg("COUNT", function)
+		implementor: func(rows []Row, function AggregateFunction) Value {
 			countAll := isCountAll(arg)
 			duplicates := make(map[string]bool)
 			counter := 0
@@ -91,13 +102,6 @@ func newCountFunction(loc *errors.SourceLocation, distinct bool, args ...Evaluat
 			return NewIntValue(int64(counter))
 		},
 	}
-}
-
-func onlyOneArg(name string, f AggregationFunction) Evaluator {
-	if len(f.GetArgs()) > 1 {
-		panic(errors.NewError(f.Location(), fmt.Sprintf("%s expects one argument", name)))
-	}
-	return f.GetArgs()[0]
 }
 
 func isCountAll(evaluator Evaluator) bool {

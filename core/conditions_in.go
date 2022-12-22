@@ -19,7 +19,11 @@
 
 package core
 
-import "github.com/uaraven/csql/funky"
+import (
+	"fmt"
+	"github.com/uaraven/csql/funky"
+	"strings"
+)
 
 type inCondition struct {
 	left  Evaluator
@@ -31,6 +35,13 @@ func NewInList(left Evaluator, right []Evaluator) Evaluator {
 		left:  left,
 		right: right,
 	}
+}
+
+func (ie inCondition) String() string {
+	rightS := funky.Map(ie.right, func(re Evaluator) string {
+		return re.String()
+	})
+	return fmt.Sprintf("%s ON (%s)", ie.left, strings.Join(rightS, ", "))
 }
 
 func (ie inCondition) Evaluate(context EvaluationContext) Value {

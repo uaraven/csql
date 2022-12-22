@@ -41,6 +41,7 @@ type EvaluationContext interface {
 }
 
 type Evaluator interface {
+	fmt.Stringer
 	Evaluate(EvaluationContext) Value
 }
 
