@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/util"
+	"math"
 	"strings"
 )
 
@@ -107,6 +108,102 @@ func newSumFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 				}
 			}
 			return sum
+		},
+	}
+}
+
+func newAvgFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
+	return aggFunctionImpl{
+		arg:  arg,
+		name: "AVG",
+		loc:  loc,
+		implementor: func(rows []Row, function AggregateFunction) Value {
+			sum := NewIntValue(0)
+			for _, row := range rows {
+				value := arg.Evaluate(row)
+				if !IsNumeric(value) {
+					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for sum: %v", value)))
+				}
+				if sum.Type() == TypeFloat || value.Type() == TypeFloat {
+					a := sum.AsFloat().Value().(float64)
+					b := value.AsFloat().Value().(float64)
+					sum = util.Must(wrapInFloat(operationExecutor(addition, a, b)))
+				} else {
+					a := sum.AsInt().Value().(int64)
+					b := value.AsInt().Value().(int64)
+					sum = util.Must(wrapInInt(operationExecutor(addition, a, b)))
+				}
+			}
+			switch sum.Type() {
+			case TypeInt:
+				return NewFloatValue(float64(sum.Value().(int64)) / float64(len(rows)))
+			case TypeFloat:
+				return NewFloatValue(sum.Value().(float64) / float64(len(rows)))
+			default:
+				panic(fmt.Errorf("unexpected type in AVG"))
+			}
+		},
+	}
+}
+
+func newMinFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
+	return aggFunctionImpl{
+		arg:  arg,
+		name: "MIN",
+		loc:  loc,
+		implementor: func(rows []Row, function AggregateFunction) Value {
+			min := arg.Evaluate(rows[0])
+			for _, row := range rows {
+				value := arg.Evaluate(row)
+				if !IsNumeric(value) {
+					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for min: %v", value)))
+				}
+				if min.Type() == TypeFloat || value.Type() == TypeFloat {
+					a := min.AsFloat().Value().(float64)
+					b := value.AsFloat().Value().(float64)
+					min = NewFloatValue(math.Min(a, b))
+				} else {
+					a := min.AsInt().Value().(int64)
+					b := value.AsInt().Value().(int64)
+					if a < b {
+						min = NewIntValue(a)
+					} else {
+						min = NewIntValue(b)
+					}
+				}
+			}
+			return min
+		},
+	}
+}
+
+func newMaxFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
+	return aggFunctionImpl{
+		arg:  arg,
+		name: "MAX",
+		loc:  loc,
+		implementor: func(rows []Row, function AggregateFunction) Value {
+			max := arg.Evaluate(rows[0])
+			for _, row := range rows[1:] {
+				value := arg.Evaluate(row)
+				if !IsNumeric(value) {
+					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for max: %v", value)))
+				}
+				if max.Type() == TypeFloat || value.Type() == TypeFloat {
+					a := max.AsFloat().Value().(float64)
+					b := value.AsFloat().Value().(float64)
+					max = NewFloatValue(math.Max(a, b))
+				} else {
+					a := max.AsInt().Value().(int64)
+					b := value.AsInt().Value().(int64)
+					if a > b {
+						max = NewIntValue(a)
+					} else {
+						max = NewIntValue(b)
+					}
+				}
+			}
+			return max
 		},
 	}
 }

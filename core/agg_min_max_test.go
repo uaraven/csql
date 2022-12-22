@@ -24,34 +24,13 @@ import (
 	"testing"
 )
 
-func TestSumFunc1(t *testing.T) {
+func TestMinFunc_GroupBy(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newSumFunction(NewRowValue("population"), nil)}}
-	groupBy := []GroupColumn{}
-
-	aggDs := NewAggregationDs(src, projection, groupBy)
-
-	rows := aggDs.GetRows()
-
-	g.Expect(aggDs.Header().ColumnsMetadata()).To(HaveLen(1))
-	g.Expect(rows).To(HaveLen(1))
-	columns := []string{"SUM(population)"}
-	g.Expect(rows).To(ContainElements(
-		HavingRowValues(columns, NewIntValue(13548106)),
-	))
-}
-
-func TestSumFunc_GroupBy(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	src := loadTestMemDatasource("cities")
-
-	projection := []ProjectionColumn{
-		{source: newSumFunction(NewRowValue("population"), nil)},
+		{source: newMinFunction(NewRowValue("population"), nil)},
 		NewColumn("city")}
 	groupBy := []GroupColumn{{name: "city"}}
 
@@ -61,13 +40,40 @@ func TestSumFunc_GroupBy(t *testing.T) {
 
 	g.Expect(aggDs.Header().ColumnsMetadata()).To(HaveLen(2))
 	g.Expect(rows).To(HaveLen(6))
-	columns := []string{"SUM(population)", "city"}
+	columns := []string{"MIN(population)", "city"}
 	g.Expect(rows).To(ContainElements(
 		HavingRowValues(columns, NewIntValue(42615), NewStringValue("Dubrovnik")),
-		HavingRowValues(columns, NewIntValue(9241392), NewStringValue("London")),
+		HavingRowValues(columns, NewIntValue(936), NewStringValue("London")),
 		HavingRowValues(columns, NewIntValue(1015826), NewStringValue("Odesa")),
-		HavingRowValues(columns, NewIntValue(24301), NewStringValue("Odessa")),
-		HavingRowValues(columns, NewIntValue(3055313), NewStringValue("Warsaw")),
-		HavingRowValues(columns, NewIntValue(168659), NewStringValue("Waterloo")),
+		HavingRowValues(columns, NewIntValue(8080), NewStringValue("Odessa")),
+		HavingRowValues(columns, NewIntValue(2209), NewStringValue("Warsaw")),
+		HavingRowValues(columns, NewIntValue(670), NewStringValue("Waterloo")),
+	))
+}
+
+func TestMaxFunc_GroupBy(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	src := loadTestMemDatasource("cities")
+
+	projection := []ProjectionColumn{
+		{source: newMaxFunction(NewRowValue("population"), nil)},
+		NewColumn("city")}
+	groupBy := []GroupColumn{{name: "city"}}
+
+	aggDs := NewAggregationDs(src, projection, groupBy)
+
+	rows := aggDs.GetRows()
+
+	g.Expect(aggDs.Header().ColumnsMetadata()).To(HaveLen(2))
+	g.Expect(rows).To(HaveLen(6))
+	columns := []string{"MAX(population)", "city"}
+	g.Expect(rows).To(ContainElements(
+		HavingRowValues(columns, NewIntValue(42615), NewStringValue("Dubrovnik")),
+		HavingRowValues(columns, NewIntValue(8799800), NewStringValue("London")),
+		HavingRowValues(columns, NewIntValue(1015826), NewStringValue("Odesa")),
+		HavingRowValues(columns, NewIntValue(16221), NewStringValue("Odessa")),
+		HavingRowValues(columns, NewIntValue(3053104), NewStringValue("Warsaw")),
+		HavingRowValues(columns, NewIntValue(121436), NewStringValue("Waterloo")),
 	))
 }
