@@ -548,3 +548,84 @@ func TestSelectWithFunctions(t *testing.T) {
 		},
 	))
 }
+
+func TestSelectWithCountFunctions(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT count(distinct a) FROM Table1")
+
+	g.Expect(s.Select.Projection.ProjectionFields[0]).To(BeEquivalentTo(ProjectionField{
+		EvaluatedField: &EvaluatedProjectionField{Expr: CountFunctionCall{
+			distinct: true,
+			arg: CompoundName{
+				Name:     "a",
+				Location: Loc(1, 22),
+			},
+			Location: Loc(1, 7),
+		}}}))
+}
+
+func TestSelectWithCountAll(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT count(*) FROM Table1")
+
+	g.Expect(s.Select.Projection.ProjectionFields[0]).To(BeEquivalentTo(ProjectionField{
+		EvaluatedField: &EvaluatedProjectionField{Expr: CountFunctionCall{
+			distinct: false,
+			arg: CompoundName{
+				Name:     "*",
+				Location: Loc(1, 13),
+			},
+			Location: Loc(1, 7),
+		}}}))
+}
+
+func TestSelectWithAvg(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT avg(abc) FROM Table1")
+
+	g.Expect(s.Select.Projection.ProjectionFields[0]).To(BeEquivalentTo(ProjectionField{
+		EvaluatedField: &EvaluatedProjectionField{Expr: AggregateFunctionCall{
+			function: "avg",
+			arg: Term{
+				Name: &CompoundName{
+					Name:     "abc",
+					Location: Loc(1, 11),
+				}},
+			Location: Loc(1, 7),
+		}}}))
+}
+
+func TestSelectWithAvgGroupBy(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT avg(abc) FROM Table1 GROUP BY bc, 1")
+
+	g.Expect(s.Select.Projection.ProjectionFields[0]).To(BeEquivalentTo(ProjectionField{
+		EvaluatedField: &EvaluatedProjectionField{Expr: AggregateFunctionCall{
+			function: "avg",
+			arg: Term{
+				Name: &CompoundName{
+					Name:     "abc",
+					Location: Loc(1, 11),
+				}},
+			Location: Loc(1, 7),
+		}}}))
+
+	g.Expect(s.Select.GroupBy).To(BeEquivalentTo(&GroupByExpression{
+		Location: Loc(1, 28),
+		GroupFields: []GroupByField{
+			{
+				FieldName: &CompoundName{
+					Name:     "bc",
+					Location: Loc(1, 37),
+				},
+				FieldIndex: 0,
+				Location:   Loc(1, 37),
+			},
+			{
+				FieldName:  nil,
+				FieldIndex: 1,
+				Location:   Loc(1, 41),
+			},
+		},
+	}))
+}

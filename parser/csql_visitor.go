@@ -80,6 +80,15 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#funCall.
 	VisitFunCall(ctx *FunCallContext) interface{}
 
+	// Visit a parse tree produced by CsqlParser#aggregateFunCall.
+	VisitAggregateFunCall(ctx *AggregateFunCallContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#countFunc.
+	VisitCountFunc(ctx *CountFuncContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#aggregateFunc.
+	VisitAggregateFunc(ctx *AggregateFuncContext) interface{}
+
 	// Visit a parse tree produced by CsqlParser#projection.
 	VisitProjection(ctx *ProjectionContext) interface{}
 
@@ -178,6 +187,12 @@ type CsqlVisitor interface {
 
 	// Visit a parse tree produced by CsqlParser#fieldIndex.
 	VisitFieldIndex(ctx *FieldIndexContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#groupBy.
+	VisitGroupBy(ctx *GroupByContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#groupByField.
+	VisitGroupByField(ctx *GroupByFieldContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#function.
 	VisitFunction(ctx *FunctionContext) interface{}

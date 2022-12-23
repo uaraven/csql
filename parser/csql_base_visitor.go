@@ -104,6 +104,18 @@ func (v *BaseCsqlVisitor) VisitFunCall(ctx *FunCallContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseCsqlVisitor) VisitAggregateFunCall(ctx *AggregateFunCallContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitCountFunc(ctx *CountFuncContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitAggregateFunc(ctx *AggregateFuncContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseCsqlVisitor) VisitProjection(ctx *ProjectionContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -233,6 +245,14 @@ func (v *BaseCsqlVisitor) VisitOrderByField(ctx *OrderByFieldContext) interface{
 }
 
 func (v *BaseCsqlVisitor) VisitFieldIndex(ctx *FieldIndexContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitGroupBy(ctx *GroupByContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitGroupByField(ctx *GroupByFieldContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

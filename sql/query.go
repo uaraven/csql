@@ -50,13 +50,14 @@ func (cn CompoundName) String() string {
 
 // Select represents a SELECT query. Select consists of
 // projection, Sources AKA "FROM" and Filter expressions,
-// Limit and OrderBy.
+// Limit, OrderBy and GroupBy
 type Select struct {
 	Projection SelectProjection
 	From       DataSource
 	Filter     Expression
 	Limit      int32 // 0 means no limit
 	OrderBy    *OrderByExpression
+	GroupBy    *GroupByExpression
 }
 
 func (sel Select) String() string {
@@ -64,6 +65,17 @@ func (sel Select) String() string {
 	sb.WriteString(fmt.Sprintf("SELECT %v\nFROM %v", sel.Projection, sel.From))
 	if sel.Filter != nil {
 		sb.WriteString(fmt.Sprintf(" %v", sel.Filter))
+	}
+	if sel.OrderBy != nil {
+		sb.WriteString(sel.OrderBy.String())
+		sb.WriteRune('\n')
+	}
+	if sel.Limit > 0 {
+		sb.WriteString(fmt.Sprintf("LIMIT %d\n", sel.Limit))
+	}
+	if sel.GroupBy != nil {
+		sb.WriteString(sel.GroupBy.String())
+		sb.WriteRune('\n')
 	}
 	return sb.String()
 }
@@ -135,6 +147,34 @@ func (obf OrderByField) String() string {
 		sb.WriteString(" DESC")
 	}
 	return sb.String()
+}
+
+type GroupByField struct {
+	FieldName  *CompoundName
+	FieldIndex int32 // 0 means no index
+	Location   *errors.SourceLocation
+}
+
+func (gbf GroupByField) String() string {
+	var sb strings.Builder
+	if gbf.FieldName != nil {
+		sb.WriteString(gbf.FieldName.String())
+	} else {
+		sb.WriteString(strconv.FormatInt(int64(gbf.FieldIndex), 10))
+	}
+	return sb.String()
+}
+
+type GroupByExpression struct {
+	Location    *errors.SourceLocation
+	GroupFields []GroupByField
+}
+
+func (gbe GroupByExpression) String() string {
+	fieldNames := funky.Map(gbe.GroupFields, func(g GroupByField) string {
+		return g.String()
+	})
+	return "GROUP BY " + strings.Join(fieldNames, ", ")
 }
 
 type OrderByExpression struct {
@@ -452,4 +492,32 @@ func (fc FunctionCall) String() string {
 		return a.String()
 	}), ", ")
 	return fmt.Sprintf("%s(%s)", fc.function, args)
+}
+
+type AggregateFunctionCall struct {
+	function      string
+	countDistinct bool
+	arg           Expression
+	Location      *errors.SourceLocation
+}
+
+func (fc AggregateFunctionCall) String() string {
+	return fmt.Sprintf("%s(%s)", fc.function, fc.arg.String())
+}
+
+type CountFunctionCall struct {
+	arg      Expression
+	distinct bool
+	Location *errors.SourceLocation
+}
+
+func (cfc CountFunctionCall) String() string {
+	var sb strings.Builder
+	sb.WriteString("COUNT(")
+	if cfc.distinct {
+		sb.WriteString(" DISTINCT ")
+	}
+	sb.WriteString(cfc.String())
+	sb.WriteRune(')')
+	return sb.String()
 }
