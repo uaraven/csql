@@ -30,11 +30,11 @@ func TestMinFunc_GroupBy(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newMinFunction(NewRowValue("population"), nil)},
+		{source: NewMinFunction(NewRowValue("population"), nil)},
 		NewColumn("city")}
-	groupBy := []GroupColumn{{name: "city"}}
+	groupBy := []GroupByColumn{{name: "city"}}
 
-	aggDs := NewAggregationDs(src, projection, groupBy)
+	aggDs := NewAggregationDataSource(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 
@@ -57,11 +57,11 @@ func TestMaxFunc_GroupBy(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newMaxFunction(NewRowValue("population"), nil)},
+		{source: NewMaxFunction(NewRowValue("population"), nil)},
 		NewColumn("city")}
-	groupBy := []GroupColumn{{name: "city"}}
+	groupBy := []GroupByColumn{{name: "city"}}
 
-	aggDs := NewAggregationDs(src, projection, groupBy)
+	aggDs := NewAggregationDataSource(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 

@@ -30,11 +30,11 @@ func TestGroupByCity(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{NewColumn("*")}
-	groupBy := []GroupColumn{
+	groupBy := []GroupByColumn{
 		{name: "city"},
 	}
 
-	aggDs := NewAggregationDs(src, projection, groupBy)
+	aggDs := NewAggregationDataSource(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 
@@ -57,11 +57,11 @@ func TestGroupByCityIndex(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{NewColumn("*")}
-	groupBy := []GroupColumn{
+	groupBy := []GroupByColumn{
 		{index: 2},
 	}
 
-	aggDs := NewAggregationDs(src, projection, groupBy)
+	aggDs := NewAggregationDataSource(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 
@@ -84,10 +84,10 @@ func TestGroupByInvalidColumn(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{NewColumn("*")}
-	groupBy := []GroupColumn{
+	groupBy := []GroupByColumn{
 		{name: "county"},
 	}
-	g.Expect(func() { NewAggregationDs(src, projection, groupBy) }).To(Panic())
+	g.Expect(func() { NewAggregationDataSource(src, projection, groupBy) }).To(Panic())
 }
 
 func TestGroupByInvalidIndex(t *testing.T) {
@@ -96,10 +96,10 @@ func TestGroupByInvalidIndex(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{NewColumn("*")}
-	groupBy := []GroupColumn{
+	groupBy := []GroupByColumn{
 		{index: 12},
 	}
-	g.Expect(func() { NewAggregationDs(src, projection, groupBy) }).To(Panic())
+	g.Expect(func() { NewAggregationDataSource(src, projection, groupBy) }).To(Panic())
 }
 
 func TestGroupByCityCountry(t *testing.T) {
@@ -108,12 +108,12 @@ func TestGroupByCityCountry(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{NewColumn("*")}
-	groupBy := []GroupColumn{
+	groupBy := []GroupByColumn{
 		{name: "city"},
 		{name: "country"},
 	}
 
-	aggDs := NewAggregationDs(src, projection, groupBy)
+	aggDs := NewAggregationDataSource(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 

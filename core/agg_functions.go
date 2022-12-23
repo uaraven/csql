@@ -85,7 +85,7 @@ type countFunction struct {
 	implementor AggregateFunctionImplementor
 }
 
-func newSumFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
+func NewSumFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
 	return aggFunctionImpl{
 		arg:  arg,
 		name: "SUM",
@@ -112,7 +112,7 @@ func newSumFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 	}
 }
 
-func newAvgFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
+func NewAvgFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
 	return aggFunctionImpl{
 		arg:  arg,
 		name: "AVG",
@@ -146,7 +146,7 @@ func newAvgFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 	}
 }
 
-func newMinFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
+func NewMinFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
 	return aggFunctionImpl{
 		arg:  arg,
 		name: "MIN",
@@ -177,7 +177,7 @@ func newMinFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 	}
 }
 
-func newMaxFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
+func NewMaxFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
 	return aggFunctionImpl{
 		arg:  arg,
 		name: "MAX",
@@ -208,7 +208,7 @@ func newMaxFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 	}
 }
 
-func newCountFunction(distinct bool, arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
+func NewCountFunction(distinct bool, arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
 	return &countFunction{
 		arg:      arg,
 		loc:      loc,

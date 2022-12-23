@@ -30,10 +30,10 @@ func TestSumFunc1(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newSumFunction(NewRowValue("population"), nil)}}
-	groupBy := []GroupColumn{}
+		{source: NewSumFunction(NewRowValue("population"), nil)}}
+	groupBy := []GroupByColumn{}
 
-	aggDs := NewAggregationDs(src, projection, groupBy)
+	aggDs := NewAggregationDataSource(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 
@@ -51,11 +51,11 @@ func TestSumFunc_GroupBy(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newSumFunction(NewRowValue("population"), nil)},
+		{source: NewSumFunction(NewRowValue("population"), nil)},
 		NewColumn("city")}
-	groupBy := []GroupColumn{{name: "city"}}
+	groupBy := []GroupByColumn{{name: "city"}}
 
-	aggDs := NewAggregationDs(src, projection, groupBy)
+	aggDs := NewAggregationDataSource(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 
@@ -78,11 +78,11 @@ func TestAvgFunc_GroupBy(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newAvgFunction(NewRowValue("population"), nil)},
+		{source: NewAvgFunction(NewRowValue("population"), nil)},
 		NewColumn("city")}
-	groupBy := []GroupColumn{{name: "city"}}
+	groupBy := []GroupByColumn{{name: "city"}}
 
-	aggDs := NewAggregationDs(src, projection, groupBy)
+	aggDs := NewAggregationDataSource(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 

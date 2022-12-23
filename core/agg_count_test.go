@@ -30,13 +30,13 @@ func TestCountFunc_1(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newCountFunction(false, NewRowValue("country"), nil)},
+		{source: NewCountFunction(false, NewRowValue("country"), nil)},
 		NewColumn("city")}
-	groupBy := []GroupColumn{
+	groupBy := []GroupByColumn{
 		{name: "city"},
 	}
 
-	aggDs := NewAggregationDs(src, projection, groupBy)
+	aggDs := NewAggregationDataSource(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 
@@ -59,13 +59,13 @@ func TestCountFunc_2(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newCountFunction(false, NewRowValue("country"), nil)},
+		{source: NewCountFunction(false, NewRowValue("country"), nil)},
 		NewColumn("country")}
-	groupBy := []GroupColumn{
+	groupBy := []GroupByColumn{
 		{name: "city"},
 	}
 
-	aggDs := NewAggregationDs(src, projection, groupBy)
+	aggDs := NewAggregationDataSource(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 
@@ -88,13 +88,13 @@ func TestCountFunc_Distinct(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newCountFunction(true, NewRowValue("city"), nil)},
+		{source: NewCountFunction(true, NewRowValue("city"), nil)},
 		NewColumn("country")}
-	groupBy := []GroupColumn{
+	groupBy := []GroupByColumn{
 		{name: "country"},
 	}
 
-	aggDs := NewAggregationDs(src, projection, groupBy)
+	aggDs := NewAggregationDataSource(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 
@@ -119,10 +119,10 @@ func TestCountFunc_CountAll(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newCountFunction(false, NewRowValue("*"), nil)}}
-	groupBy := []GroupColumn{}
+		{source: NewCountFunction(false, NewRowValue("*"), nil)}}
+	groupBy := []GroupByColumn{}
 
-	aggDs := NewAggregationDs(src, projection, groupBy)
+	aggDs := NewAggregationDataSource(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 
@@ -140,10 +140,10 @@ func TestCountFunc_CountAllDistinct(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newCountFunction(true, NewRowValue("*"), nil)}}
-	groupBy := []GroupColumn{}
+		{source: NewCountFunction(true, NewRowValue("*"), nil)}}
+	groupBy := []GroupByColumn{}
 
-	aggDs := NewAggregationDs(src, projection, groupBy)
+	aggDs := NewAggregationDataSource(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 
@@ -161,10 +161,10 @@ func TestCountFunc_CountDistinct(t *testing.T) {
 	src := loadTestMemDatasource("cities")
 
 	projection := []ProjectionColumn{
-		{source: newCountFunction(true, NewRowValue("city"), nil)}}
-	groupBy := []GroupColumn{}
+		{source: NewCountFunction(true, NewRowValue("city"), nil)}}
+	groupBy := []GroupByColumn{}
 
-	aggDs := NewAggregationDs(src, projection, groupBy)
+	aggDs := NewAggregationDataSource(src, projection, groupBy)
 
 	rows := aggDs.GetRows()
 

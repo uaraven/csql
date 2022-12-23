@@ -57,6 +57,11 @@ func NewExpressionColumnL(src Evaluator, alias string, location *errors.SourceLo
 	return ProjectionColumn{source: src, alias: alias, loc: location}
 }
 
+func (pc ProjectionColumn) IsAggregate() bool {
+	_, isAggregate := pc.source.(AggregateFunction)
+	return isAggregate
+}
+
 func NewSimpleProjection(sourceNames []string, aliases []string) []ProjectionColumn {
 	if len(sourceNames) != len(aliases) {
 		panic(fmt.Errorf("projection requires equal number of names and aliases.\nNames:%v\nAliases:%v", sourceNames, aliases))

@@ -495,10 +495,9 @@ func (fc FunctionCall) String() string {
 }
 
 type AggregateFunctionCall struct {
-	function      string
-	countDistinct bool
-	arg           Expression
-	Location      *errors.SourceLocation
+	function string
+	arg      Expression
+	Location *errors.SourceLocation
 }
 
 func (fc AggregateFunctionCall) String() string {
@@ -506,7 +505,7 @@ func (fc AggregateFunctionCall) String() string {
 }
 
 type CountFunctionCall struct {
-	arg      Expression
+	arg      CompoundName
 	distinct bool
 	Location *errors.SourceLocation
 }

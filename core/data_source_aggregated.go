@@ -26,13 +26,29 @@ import (
 	"strings"
 )
 
-type GroupColumn struct {
+type GroupByColumn struct {
 	name  string
 	index int
 	loc   *errors.SourceLocation
 }
 
-func NewAggregationDs(source DataSource, projection []ProjectionColumn, groupBy []GroupColumn) DataSource {
+func NewGroupByIndex(index int, loc *errors.SourceLocation) GroupByColumn {
+	return GroupByColumn{
+		name:  "",
+		index: index,
+		loc:   loc,
+	}
+}
+
+func NewGroupByName(name string, loc *errors.SourceLocation) GroupByColumn {
+	return GroupByColumn{
+		name:  name,
+		index: 0,
+		loc:   loc,
+	}
+}
+
+func NewAggregationDataSource(source DataSource, projection []ProjectionColumn, groupBy []GroupByColumn) DataSource {
 	rowGroups := groupRows(source, groupBy)
 
 	aggregateFunctions := filterAggregateFunctions(projection)
@@ -112,7 +128,7 @@ func filterAggregateFunctions(projection []ProjectionColumn) map[int]AggregateFu
 	return result
 }
 
-func groupRows(ds DataSource, by []GroupColumn) [][]Row {
+func groupRows(ds DataSource, by []GroupByColumn) [][]Row {
 	groupings := make(map[string][]Row)
 	for _, row := range ds.GetRows() {
 		vals := make([]Value, len(by))
@@ -133,7 +149,7 @@ func groupRows(ds DataSource, by []GroupColumn) [][]Row {
 	return results
 }
 
-func getByGroupColumn(row Row, column GroupColumn) Value {
+func getByGroupColumn(row Row, column GroupByColumn) Value {
 	if column.name != "" {
 		optValue := row.Get(column.name)
 		if optValue.IsEmpty() {

@@ -60,18 +60,32 @@ func (ae AstTransformer) TransformSelect(ast Select) core.DataSource {
 		where := ae.TransformExpression(ast.Filter)
 		ds = core.NewFilteredDataSource(ds, where)
 	}
-
 	var orderBy []core.OrderByField
 	if ast.OrderBy != nil {
 		orderBy = ae.TransformOrderByExpression(ast.OrderBy)
 	}
-	if ast.Limit > 0 || len(orderBy) > 0 {
-		ds = core.NewOrderedDatasource(ds, orderBy, int(ast.Limit))
-	}
 
 	projection := ae.TransformProjection(ast.Projection.ProjectionFields)
 
-	return core.NewProjectionDataSource(ds, projection, ast.Projection.Distinct)
+	if ast.GroupBy != nil || hasAggregates(projection) {
+		groupBy := ae.TransformGroupByExpression(ast.GroupBy)
+		ds := core.NewAggregationDataSource(ds, projection, groupBy)
+		if ast.Limit > 0 || len(orderBy) > 0 {
+			ds = core.NewOrderedDatasource(ds, orderBy, int(ast.Limit))
+		}
+		return ds
+	} else {
+		if ast.Limit > 0 || len(orderBy) > 0 {
+			ds = core.NewOrderedDatasource(ds, orderBy, int(ast.Limit))
+		}
+		return core.NewProjectionDataSource(ds, projection, ast.Projection.Distinct)
+	}
+}
+
+func hasAggregates(projection []core.ProjectionColumn) bool {
+	return funky.AnyMatches(projection, func(c core.ProjectionColumn) bool {
+		return c.IsAggregate()
+	})
 }
 
 func (ae AstTransformer) TransformSourceName(ctx *SourceName) core.DataSource {
@@ -239,7 +253,14 @@ func (ae AstTransformer) TransformNamedProjectionField(field *CompoundName, alia
 }
 
 func (ae AstTransformer) TransformEvaluatedField(field *EvaluatedProjectionField, alias *Identifier) core.ProjectionColumn {
-	expr := ae.TransformExpression(field.Expr)
+	var expr core.Evaluator
+	if aggF, isAggregate := field.Expr.(AggregateFunctionCall); isAggregate {
+		expr = ae.TransformAggregateFunction(aggF)
+	} else if cnt, isCount := field.Expr.(CountFunctionCall); isCount {
+		expr = ae.TransformCountFunction(cnt)
+	} else {
+		expr = ae.TransformExpression(field.Expr)
+	}
 	var aliasStr string
 	if alias != nil {
 		aliasStr = string(*alias)
@@ -365,5 +386,44 @@ func (ae AstTransformer) TransformFunction(f FunctionCall) core.Evaluator {
 		})...)
 	default:
 		panic(errors.NewError(f.Location, fmt.Sprintf("Unsupported function: %s", f.function)))
+	}
+}
+
+func (ae AstTransformer) TransformAggregateFunction(f AggregateFunctionCall) core.Evaluator {
+	switch strings.ToLower(f.function) {
+	case "min":
+		return core.NewMinFunction(ae.TransformExpression(f.arg), f.Location)
+	case "max":
+		return core.NewMaxFunction(ae.TransformExpression(f.arg), f.Location)
+	case "avg":
+		return core.NewAvgFunction(ae.TransformExpression(f.arg), f.Location)
+	case "sum":
+		return core.NewSumFunction(ae.TransformExpression(f.arg), f.Location)
+	default:
+		panic(errors.NewError(f.Location, fmt.Sprintf("unknown aggregate function: %v", f)))
+	}
+}
+
+func (ae AstTransformer) TransformCountFunction(c CountFunctionCall) core.Evaluator {
+	return core.NewCountFunction(c.distinct, ae.TransformCompoundName(&c.arg), c.Location)
+}
+
+func (ae AstTransformer) TransformGroupByExpression(groupBy *GroupByExpression) []core.GroupByColumn {
+	if groupBy == nil {
+		return []core.GroupByColumn{}
+	}
+	result := make([]core.GroupByColumn, len(groupBy.GroupFields))
+	for idx, gf := range groupBy.GroupFields {
+		result[idx] = ae.TransformGroupByField(gf)
+	}
+	return result
+}
+
+func (ae AstTransformer) TransformGroupByField(gbf GroupByField) core.GroupByColumn {
+	if gbf.FieldIndex > 0 {
+		return core.NewGroupByIndex(int(gbf.FieldIndex), gbf.Location)
+	} else {
+		fn := ae.TransformCompoundName(gbf.FieldName).(core.Identifiable)
+		return core.NewGroupByName(fn.Identifier(), gbf.Location)
 	}
 }

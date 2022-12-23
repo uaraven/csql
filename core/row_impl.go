@@ -150,3 +150,16 @@ func decodeToValue(value string) Value {
 func ReadAllRows(ds DataSource) []Row {
 	return ds.GetRows()
 }
+
+func RowsToSlice(rows []Row, columns ...string) [][]interface{} {
+	results := make([][]interface{}, len(rows))
+	for idx, row := range rows {
+		values := make([]interface{}, len(columns))
+		for cidx, column := range columns {
+			value := row.Get(column).OrPanic(fmt.Errorf("no column '%s' in the row", column)).Value()
+			values[cidx] = value
+		}
+		results[idx] = values
+	}
+	return results
+}
