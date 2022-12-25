@@ -58,6 +58,7 @@ type Select struct {
 	Limit      int32 // 0 means no limit
 	OrderBy    *OrderByExpression
 	GroupBy    *GroupByExpression
+	Having     Expression
 }
 
 func (sel Select) String() string {

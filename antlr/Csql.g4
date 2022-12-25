@@ -32,6 +32,7 @@ valueExpr
     : valueExpr binaryOperation valueExpr                 # valueBinaryExpr
     | term                                                # valueTerm
     | funCall                                             # functionExpr
+    | aggregateFunCall					                  # aggregateFuncExpr
     | '(' valueExpr ')'                                   # valueParensExpr
     ;
 
@@ -51,6 +52,8 @@ whereExpr
     ;
 
 where: K_WHERE whereExpr;
+
+having: K_HAVING whereExpr;
 
 distinct: K_DISTINCT;
 
@@ -103,7 +106,7 @@ sources: dataSource (',' dataSource)*;
 unionSelects:
     selectStatement (K_UNION K_ALL? unionSelects)*;
 
-selectStatement: K_SELECT projection K_FROM sources where? orderBy? limit? groupBy?;
+selectStatement: K_SELECT projection K_FROM sources where? orderBy? limit? groupBy? having?;
 
 signedNumber: ( '+' | '-')? NUMERIC_LITERAL;
 
@@ -206,6 +209,7 @@ K_AVG: A V G;
 K_MIN: M I N;
 K_MAX: M A X;
 K_GROUP: G R O U P;
+K_HAVING: H A V I N G;
 
 IDENTIFIER: SIMPLE_IDENTIFIER | QUOTED_IDENTIFIER;
 

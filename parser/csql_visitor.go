@@ -35,6 +35,9 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#functionExpr.
 	VisitFunctionExpr(ctx *FunctionExprContext) interface{}
 
+	// Visit a parse tree produced by CsqlParser#aggregateFuncExpr.
+	VisitAggregateFuncExpr(ctx *AggregateFuncExprContext) interface{}
+
 	// Visit a parse tree produced by CsqlParser#condition.
 	VisitCondition(ctx *ConditionContext) interface{}
 
@@ -73,6 +76,9 @@ type CsqlVisitor interface {
 
 	// Visit a parse tree produced by CsqlParser#where.
 	VisitWhere(ctx *WhereContext) interface{}
+
+	// Visit a parse tree produced by CsqlParser#having.
+	VisitHaving(ctx *HavingContext) interface{}
 
 	// Visit a parse tree produced by CsqlParser#distinct.
 	VisitDistinct(ctx *DistinctContext) interface{}

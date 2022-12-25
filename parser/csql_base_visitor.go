@@ -44,6 +44,10 @@ func (v *BaseCsqlVisitor) VisitFunctionExpr(ctx *FunctionExprContext) interface{
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseCsqlVisitor) VisitAggregateFuncExpr(ctx *AggregateFuncExprContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseCsqlVisitor) VisitCondition(ctx *ConditionContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -93,6 +97,10 @@ func (v *BaseCsqlVisitor) VisitAndExpr(ctx *AndExprContext) interface{} {
 }
 
 func (v *BaseCsqlVisitor) VisitWhere(ctx *WhereContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitHaving(ctx *HavingContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

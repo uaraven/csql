@@ -546,3 +546,38 @@ func TestAstTransformer_AvgGroupBy(t *testing.T) {
 		[]interface{}{42164.75, "Waterloo"},
 	))
 }
+
+func TestAstTransformer_Having(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select min(area), country from "../test-data/cities.csv"
+		group by country
+		having sum(population) > 10000`).
+		GetRows()
+
+	g.Expect(rows).To(HaveLen(8))
+	columns := []string{"MIN(area)", "country"}
+	g.Expect(core.RowsToSlice(rows, columns...)).To(ContainElements(
+		[]interface{}{1.1, "Australia"},
+		[]interface{}{21.32, "Belgium"},
+		[]interface{}{64.06, "Canada"},
+		[]interface{}{21.35, "Croatia"},
+		[]interface{}{int64(6100), "Poland"},
+		[]interface{}{1572.03, "UK"},
+		[]interface{}{7.11, "USA"},
+		[]interface{}{162.42, "Ukraine"},
+	))
+}
+
+func TestAstTransformer_AggregateFunctionInWhere(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	g.Expect(func() {
+		ExecuteSql(`
+		select * from "../test-data/cities.csv"
+		where sum(population) > 10000`).
+			GetRows()
+	}).To(Panic())
+
+}

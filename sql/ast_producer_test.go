@@ -629,3 +629,35 @@ func TestSelectWithAvgGroupBy(t *testing.T) {
 		},
 	}))
 }
+
+func TestSelectWithHaving(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT * FROM Table1 GROUP BY bc HAVING min(a) > 10 and b = 's'")
+
+	v1 := "10"
+	v2 := "s"
+	g.Expect(s.Select.Having).ToNot(BeNil())
+	g.Expect(s.Select.Having).To(BeEquivalentTo(
+		AndExpression{
+			LHS: ComparisonExpression{
+				Operator: ">",
+				LHS: AggregateFunctionCall{
+					function: "min",
+					arg:      Term{Name: &CompoundName{Name: "a", Location: Loc(1, 44)}},
+					Location: Loc(1, 40),
+				},
+				RHS: Term{
+					Value: &Literal{NumericValue: &v1, Location: Loc(1, 49)},
+				},
+				Location: Loc(1, 40),
+			},
+			RHS: ComparisonExpression{
+				LHS:      Term{Name: &CompoundName{Name: "b", Location: Loc(1, 56)}},
+				RHS:      Term{Value: &Literal{StringValue: &v2, Location: Loc(1, 60)}},
+				Operator: "=",
+				Location: Loc(1, 56),
+			},
+			Location: Loc(1, 40),
+		},
+	))
+}

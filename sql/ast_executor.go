@@ -69,12 +69,19 @@ func (ae AstTransformer) TransformSelect(ast Select) core.DataSource {
 
 	if ast.GroupBy != nil || hasAggregates(projection) {
 		groupBy := ae.TransformGroupByExpression(ast.GroupBy)
-		ds := core.NewAggregationDataSource(ds, projection, groupBy)
+		var having core.Evaluator
+		if ast.Having != nil {
+			having = ae.TransformExpression(ast.Having)
+		}
+		ds := core.NewAggregationDataSourceHaving(ds, projection, groupBy, having)
 		if ast.Limit > 0 || len(orderBy) > 0 {
 			ds = core.NewOrderedDatasource(ds, orderBy, int(ast.Limit))
 		}
 		return ds
 	} else {
+		if ast.Having != nil {
+			panic(errors.NewError(nil, "HAVING clause in non-aggregate query"))
+		}
 		if ast.Limit > 0 || len(orderBy) > 0 {
 			ds = core.NewOrderedDatasource(ds, orderBy, int(ast.Limit))
 		}
@@ -134,6 +141,8 @@ func (ae AstTransformer) TransformExpression(condition Expression) core.Conditio
 		return ae.TransformTerm(cond)
 	case FunctionCall:
 		return ae.TransformFunction(cond)
+	case AggregateFunctionCall:
+		return ae.TransformAggregateFunction(cond)
 	case AndExpression:
 		return ae.TransformAndExpression(cond)
 	case OrExpression:

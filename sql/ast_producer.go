@@ -159,6 +159,10 @@ func (c CsqlVisitorImpl) VisitSelectStatement(ctx *parser.SelectStatementContext
 		gbe := ctx.GroupBy().Accept(c).(GroupByExpression)
 		astSelect.GroupBy = &gbe
 	}
+	if ctx.Having() != nil {
+		having := ctx.Having().Accept(c).(Expression)
+		astSelect.Having = having
+	}
 	return astSelect
 }
 
@@ -601,6 +605,10 @@ func (c CsqlVisitorImpl) VisitFunctionExpr(ctx *parser.FunctionExprContext) inte
 	return ctx.FunCall().Accept(c)
 }
 
+func (c CsqlVisitorImpl) VisitAggregateFuncExpr(ctx *parser.AggregateFuncExprContext) interface{} {
+	return ctx.AggregateFunCall().Accept(c)
+}
+
 func (c CsqlVisitorImpl) VisitFunCall(ctx *parser.FunCallContext) interface{} {
 	funcName := strings.ToLower(ctx.Function().GetText())
 	args := make([]Expression, len(ctx.AllValueExpr()))
@@ -661,4 +669,8 @@ func (c CsqlVisitorImpl) VisitCountFunc(ctx *parser.CountFuncContext) interface{
 		distinct: distinct,
 		Location: SLFromToken(ctx.GetStart()),
 	}
+}
+
+func (c CsqlVisitorImpl) VisitHaving(ctx *parser.HavingContext) interface{} {
+	return ctx.WhereExpr().Accept(c).(Expression)
 }
