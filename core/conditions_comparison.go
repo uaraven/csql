@@ -92,11 +92,23 @@ func (cc ComparisonCondition) Evaluate(ctx EvaluationContext) Value {
 	rv := cc.right.Evaluate(ctx)
 	switch lv.Type() {
 	case TypeString:
-		return NewBoolValue(getComparator(lv.Value().(string), cc.operator)(rv.Value().(string)))
+		rs, err := EnsureString(rv)
+		if err != nil {
+			panic(errors.NewTypeMismatch(cc.loc, cc.right, "string", ctx))
+		}
+		return NewBoolValue(getComparator(lv.Value().(string), cc.operator)(rs))
 	case TypeInt:
-		return NewBoolValue(getComparator(lv.Value().(int64), cc.operator)(rv.Value().(int64)))
+		ri, err := EnsureInt(rv)
+		if err != nil {
+			panic(errors.NewTypeMismatch(cc.loc, cc.right, "integer", ctx))
+		}
+		return NewBoolValue(getComparator(lv.Value().(int64), cc.operator)(ri))
 	case TypeFloat:
-		return NewBoolValue(getComparator(lv.Value().(float64), cc.operator)(rv.Value().(float64)))
+		rf, err := EnsureFloat(rv)
+		if err != nil {
+			panic(errors.NewTypeMismatch(cc.loc, cc.right, "float", ctx))
+		}
+		return NewBoolValue(getComparator(lv.Value().(float64), cc.operator)(rf))
 	case TypeNull:
 		return NewBoolValue(false)
 	default:

@@ -44,6 +44,10 @@ func (v *BaseCsqlVisitor) VisitFunctionExpr(ctx *FunctionExprContext) interface{
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseCsqlVisitor) VisitAggregateFuncExpr(ctx *AggregateFuncExprContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseCsqlVisitor) VisitCondition(ctx *ConditionContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -96,11 +100,27 @@ func (v *BaseCsqlVisitor) VisitWhere(ctx *WhereContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseCsqlVisitor) VisitHaving(ctx *HavingContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseCsqlVisitor) VisitDistinct(ctx *DistinctContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
 func (v *BaseCsqlVisitor) VisitFunCall(ctx *FunCallContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitAggregateFunCall(ctx *AggregateFunCallContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitCountFunc(ctx *CountFuncContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitAggregateFunc(ctx *AggregateFuncContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -233,6 +253,14 @@ func (v *BaseCsqlVisitor) VisitOrderByField(ctx *OrderByFieldContext) interface{
 }
 
 func (v *BaseCsqlVisitor) VisitFieldIndex(ctx *FieldIndexContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitGroupBy(ctx *GroupByContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseCsqlVisitor) VisitGroupByField(ctx *GroupByFieldContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

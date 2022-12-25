@@ -21,6 +21,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/funky"
 	"strconv"
 	"strings"
@@ -91,6 +92,9 @@ func (r rowImpl) Count() int {
 }
 
 func (r rowImpl) GetByIndex(index int) Value {
+	if index < 1 || index > len(r.values) {
+		panic(errors.NewError(nil, fmt.Sprintf("Invalid column index: %d", index)))
+	}
 	return r.values[index-1]
 }
 
@@ -145,4 +149,17 @@ func decodeToValue(value string) Value {
 
 func ReadAllRows(ds DataSource) []Row {
 	return ds.GetRows()
+}
+
+func RowsToSlice(rows []Row, columns ...string) [][]interface{} {
+	results := make([][]interface{}, len(rows))
+	for idx, row := range rows {
+		values := make([]interface{}, len(columns))
+		for cidx, column := range columns {
+			value := row.Get(column).OrPanic(fmt.Errorf("no column '%s' in the row", column)).Value()
+			values[cidx] = value
+		}
+		results[idx] = values
+	}
+	return results
 }

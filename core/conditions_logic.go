@@ -19,6 +19,10 @@
 
 package core
 
+import (
+	"fmt"
+)
+
 type andCondition struct {
 	left  Evaluator
 	right Evaluator
@@ -29,6 +33,10 @@ func NewAnd(left Evaluator, right Evaluator) Evaluator {
 		left:  left,
 		right: right,
 	}
+}
+
+func (ac andCondition) String() string {
+	return fmt.Sprintf("%s AND %s", ac.left, ac.right)
 }
 
 func (ac andCondition) Evaluate(ctx EvaluationContext) Value {
@@ -51,6 +59,10 @@ func NewOr(left Evaluator, right Evaluator) Evaluator {
 	}
 }
 
+func (oc orCondition) String() string {
+	return fmt.Sprintf("%s OR %s", oc.left, oc.right)
+}
+
 func (oc orCondition) Evaluate(ctx EvaluationContext) Value {
 	if oc.left.Evaluate(ctx).AsBool().Value().(bool) {
 		return ValueTrue
@@ -65,6 +77,10 @@ type notCondition struct {
 
 func NewNot(arg Evaluator) Evaluator {
 	return &notCondition{arg: arg}
+}
+
+func (nc notCondition) String() string {
+	return fmt.Sprintf("NOT %s", nc.arg)
 }
 
 func (nc notCondition) Evaluate(ctx EvaluationContext) Value {

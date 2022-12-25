@@ -19,6 +19,10 @@
 
 package core
 
+import (
+	"strings"
+)
+
 type isNullCondition struct {
 	expr   Evaluator
 	negate bool
@@ -29,6 +33,17 @@ func NewIsNull(expr Evaluator, negate bool) Evaluator {
 		expr:   expr,
 		negate: negate,
 	}
+}
+
+func (inc isNullCondition) String() string {
+	var sb strings.Builder
+	sb.WriteString(inc.expr.String())
+	sb.WriteString(" IS ")
+	if inc.negate {
+		sb.WriteString("NOT ")
+	}
+	sb.WriteString("NULL")
+	return sb.String()
 }
 
 func (inc isNullCondition) Evaluate(context EvaluationContext) Value {

@@ -477,3 +477,107 @@ func TestAstTransformer_FunctionCall(t *testing.T) {
 	g.Expect(rows[1].GetByIndex(1).Value()).To(Equal("2"))
 	g.Expect(rows[1].GetByIndex(2).Value()).To(Equal("JAMES"))
 }
+
+func TestAstTransformer_Count(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select count(distinct city) from "../test-data/cities.csv"`).
+		GetRows()
+	g.Expect(rows).To(HaveLen(1))
+
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(int64(6)))
+}
+
+func TestAstTransformer_CountGrouping(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select count(city), country from "../test-data/cities.csv"
+		group by country`).
+		GetRows()
+	g.Expect(rows).To(HaveLen(8))
+	g.Expect(core.RowsToSlice(rows, "COUNT(city)", "country")).To(ContainElements(
+		[]interface{}{int64(1), "Belgium"},
+		[]interface{}{int64(1), "Australia"},
+		[]interface{}{int64(1), "Poland"},
+		[]interface{}{int64(1), "Ukraine"},
+		[]interface{}{int64(1), "Croatia"},
+		[]interface{}{int64(1), "UK"},
+		[]interface{}{int64(3), "Canada"},
+		[]interface{}{int64(6), "USA"},
+	))
+}
+
+func TestAstTransformer_MaxGroupBy(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select max(area), country from "../test-data/cities.csv"
+		group by country`).
+		GetRows()
+	g.Expect(rows).To(HaveLen(8))
+	g.Expect(core.RowsToSlice(rows, "MAX(area)", "country")).To(ContainElements(
+		[]interface{}{21.32, "Belgium"},
+		[]interface{}{1.1, "Australia"},
+		[]interface{}{int64(6100), "Poland"},
+		[]interface{}{162.42, "Ukraine"},
+		[]interface{}{21.35, "Croatia"},
+		[]interface{}{1572.03, "UK"},
+		[]interface{}{420.5, "Canada"},
+		[]interface{}{581.58, "USA"},
+	))
+}
+
+func TestAstTransformer_AvgGroupBy(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select avg(population), city from "../test-data/cities.csv"
+		group by city`).
+		GetRows()
+	g.Expect(rows).To(HaveLen(6))
+	g.Expect(core.RowsToSlice(rows, "AVG(population)", "city")).To(ContainElements(
+		[]interface{}{42615.0, "Dubrovnik"},
+		[]interface{}{1848278.4, "London"},
+		[]interface{}{1015826.0, "Odesa"},
+		[]interface{}{12150.5, "Odessa"},
+		[]interface{}{1527656.5, "Warsaw"},
+		[]interface{}{42164.75, "Waterloo"},
+	))
+}
+
+func TestAstTransformer_Having(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select min(area), country from "../test-data/cities.csv"
+		group by country
+		having sum(population) > 10000`).
+		GetRows()
+
+	g.Expect(rows).To(HaveLen(8))
+	columns := []string{"MIN(area)", "country"}
+	g.Expect(core.RowsToSlice(rows, columns...)).To(ContainElements(
+		[]interface{}{1.1, "Australia"},
+		[]interface{}{21.32, "Belgium"},
+		[]interface{}{64.06, "Canada"},
+		[]interface{}{21.35, "Croatia"},
+		[]interface{}{int64(6100), "Poland"},
+		[]interface{}{1572.03, "UK"},
+		[]interface{}{7.11, "USA"},
+		[]interface{}{162.42, "Ukraine"},
+	))
+}
+
+func TestAstTransformer_AggregateFunctionInWhere(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	g.Expect(func() {
+		ExecuteSql(`
+		select * from "../test-data/cities.csv"
+		where sum(population) > 10000`).
+			GetRows()
+	}).To(Panic())
+
+}

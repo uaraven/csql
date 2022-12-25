@@ -32,6 +32,7 @@ valueExpr
     : valueExpr binaryOperation valueExpr                 # valueBinaryExpr
     | term                                                # valueTerm
     | funCall                                             # functionExpr
+    | aggregateFunCall					                  # aggregateFuncExpr
     | '(' valueExpr ')'                                   # valueParensExpr
     ;
 
@@ -52,13 +53,26 @@ whereExpr
 
 where: K_WHERE whereExpr;
 
+having: K_HAVING whereExpr;
+
 distinct: K_DISTINCT;
 
 funCall: function '(' valueExpr (',' valueExpr)* ')';
 
+aggregateFunCall: (aggregateFunc '(' valueExpr ')') | countFunc;
+
+countFunc: K_COUNT '(' K_DISTINCT? projectionFieldName ')';
+
+aggregateFunc
+    : K_SUM
+    | K_AVG
+    | K_MIN
+    | K_MAX
+    ;
+
 projection: distinct? projectionField (',' projectionField)*;
 
-projectionField: (projectionFieldName | valueExpr ) (K_AS? alias)?;
+projectionField: (projectionFieldName | valueExpr | aggregateFunCall ) (K_AS? alias)?;
 
 projectionFieldName: (qualifier '.')? fieldName;
 
@@ -92,7 +106,7 @@ sources: dataSource (',' dataSource)*;
 unionSelects:
     selectStatement (K_UNION K_ALL? unionSelects)*;
 
-selectStatement: K_SELECT projection K_FROM sources where? orderBy? limit?;
+selectStatement: K_SELECT projection K_FROM sources where? orderBy? limit? groupBy? having?;
 
 signedNumber: ( '+' | '-')? NUMERIC_LITERAL;
 
@@ -123,6 +137,12 @@ orderByField
     ;
 
 fieldIndex: NUMERIC_LITERAL;
+
+groupBy: K_GROUP K_BY groupByField (',' groupByField)*;
+
+groupByField
+    : (compoundName | fieldIndex)
+    ;
 
 function
     : K_ROUND
@@ -183,6 +203,13 @@ K_TO_UPPER: T O '_' U P P E R;
 K_TO_LOWER: T O '_' L O W E R;
 K_POW: P O W;
 K_SQRT: S Q R T;
+K_COUNT: C O U N T;
+K_SUM: S U M;
+K_AVG: A V G;
+K_MIN: M I N;
+K_MAX: M A X;
+K_GROUP: G R O U P;
+K_HAVING: H A V I N G;
 
 IDENTIFIER: SIMPLE_IDENTIFIER | QUOTED_IDENTIFIER;
 

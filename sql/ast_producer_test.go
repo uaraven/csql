@@ -548,3 +548,116 @@ func TestSelectWithFunctions(t *testing.T) {
 		},
 	))
 }
+
+func TestSelectWithCountFunctions(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT count(distinct a) FROM Table1")
+
+	g.Expect(s.Select.Projection.ProjectionFields[0]).To(BeEquivalentTo(ProjectionField{
+		EvaluatedField: &EvaluatedProjectionField{Expr: CountFunctionCall{
+			distinct: true,
+			arg: CompoundName{
+				Name:     "a",
+				Location: Loc(1, 22),
+			},
+			Location: Loc(1, 7),
+		}}}))
+}
+
+func TestSelectWithCountAll(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT count(*) FROM Table1")
+
+	g.Expect(s.Select.Projection.ProjectionFields[0]).To(BeEquivalentTo(ProjectionField{
+		EvaluatedField: &EvaluatedProjectionField{Expr: CountFunctionCall{
+			distinct: false,
+			arg: CompoundName{
+				Name:     "*",
+				Location: Loc(1, 13),
+			},
+			Location: Loc(1, 7),
+		}}}))
+}
+
+func TestSelectWithAvg(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT avg(abc) FROM Table1")
+
+	g.Expect(s.Select.Projection.ProjectionFields[0]).To(BeEquivalentTo(ProjectionField{
+		EvaluatedField: &EvaluatedProjectionField{Expr: AggregateFunctionCall{
+			function: "avg",
+			arg: Term{
+				Name: &CompoundName{
+					Name:     "abc",
+					Location: Loc(1, 11),
+				}},
+			Location: Loc(1, 7),
+		}}}))
+}
+
+func TestSelectWithAvgGroupBy(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT avg(abc) FROM Table1 GROUP BY bc, 1")
+
+	g.Expect(s.Select.Projection.ProjectionFields[0]).To(BeEquivalentTo(ProjectionField{
+		EvaluatedField: &EvaluatedProjectionField{Expr: AggregateFunctionCall{
+			function: "avg",
+			arg: Term{
+				Name: &CompoundName{
+					Name:     "abc",
+					Location: Loc(1, 11),
+				}},
+			Location: Loc(1, 7),
+		}}}))
+
+	g.Expect(s.Select.GroupBy).To(BeEquivalentTo(&GroupByExpression{
+		Location: Loc(1, 28),
+		GroupFields: []GroupByField{
+			{
+				FieldName: &CompoundName{
+					Name:     "bc",
+					Location: Loc(1, 37),
+				},
+				FieldIndex: 0,
+				Location:   Loc(1, 37),
+			},
+			{
+				FieldName:  nil,
+				FieldIndex: 1,
+				Location:   Loc(1, 41),
+			},
+		},
+	}))
+}
+
+func TestSelectWithHaving(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT * FROM Table1 GROUP BY bc HAVING min(a) > 10 and b = 's'")
+
+	v1 := "10"
+	v2 := "s"
+	g.Expect(s.Select.Having).ToNot(BeNil())
+	g.Expect(s.Select.Having).To(BeEquivalentTo(
+		AndExpression{
+			LHS: ComparisonExpression{
+				Operator: ">",
+				LHS: AggregateFunctionCall{
+					function: "min",
+					arg:      Term{Name: &CompoundName{Name: "a", Location: Loc(1, 44)}},
+					Location: Loc(1, 40),
+				},
+				RHS: Term{
+					Value: &Literal{NumericValue: &v1, Location: Loc(1, 49)},
+				},
+				Location: Loc(1, 40),
+			},
+			RHS: ComparisonExpression{
+				LHS:      Term{Name: &CompoundName{Name: "b", Location: Loc(1, 56)}},
+				RHS:      Term{Value: &Literal{StringValue: &v2, Location: Loc(1, 60)}},
+				Operator: "=",
+				Location: Loc(1, 56),
+			},
+			Location: Loc(1, 40),
+		},
+	))
+}

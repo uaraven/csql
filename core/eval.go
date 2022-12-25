@@ -37,11 +37,21 @@ const (
 // EvaluationContext provides a way to retrieve value by name during evaluation
 type EvaluationContext interface {
 	Get(string) funky.Option[Value]
-	Id() int
+}
+
+type AggregateContext interface {
+	EvaluationContext
+	RowSet() []Row
 }
 
 type Evaluator interface {
+	fmt.Stringer
 	Evaluate(EvaluationContext) Value
+}
+
+type AggregateEvaluator interface {
+	Evaluator
+	AggregateEvaluate(ctx AggregateContext) Value
 }
 
 type Condition interface {

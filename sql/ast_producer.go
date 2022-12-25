@@ -155,6 +155,14 @@ func (c CsqlVisitorImpl) VisitSelectStatement(ctx *parser.SelectStatementContext
 		obe := ctx.OrderBy().Accept(c).(OrderByExpression)
 		astSelect.OrderBy = &obe
 	}
+	if ctx.GroupBy() != nil {
+		gbe := ctx.GroupBy().Accept(c).(GroupByExpression)
+		astSelect.GroupBy = &gbe
+	}
+	if ctx.Having() != nil {
+		having := ctx.Having().Accept(c).(Expression)
+		astSelect.Having = having
+	}
 	return astSelect
 }
 
@@ -364,11 +372,14 @@ func (c CsqlVisitorImpl) VisitProjectionField(ctx *parser.ProjectionFieldContext
 	if ctx.ProjectionFieldName() != nil {
 		field := ctx.ProjectionFieldName().Accept(c).(CompoundName)
 		projectionField.NamedField = &field
-	} else {
+	} else if ctx.ValueExpr() != nil {
 		expr := ctx.ValueExpr().Accept(c).(Expression)
 		projectionField.EvaluatedField = &EvaluatedProjectionField{
 			Expr: expr,
 		}
+	} else {
+		expr := ctx.AggregateFunCall().Accept(c).(Expression)
+		projectionField.EvaluatedField = &EvaluatedProjectionField{Expr: expr}
 	}
 	if ctx.Alias() != nil {
 		alias := ctx.Alias().Accept(c).(Identifier)
@@ -594,6 +605,10 @@ func (c CsqlVisitorImpl) VisitFunctionExpr(ctx *parser.FunctionExprContext) inte
 	return ctx.FunCall().Accept(c)
 }
 
+func (c CsqlVisitorImpl) VisitAggregateFuncExpr(ctx *parser.AggregateFuncExprContext) interface{} {
+	return ctx.AggregateFunCall().Accept(c)
+}
+
 func (c CsqlVisitorImpl) VisitFunCall(ctx *parser.FunCallContext) interface{} {
 	funcName := strings.ToLower(ctx.Function().GetText())
 	args := make([]Expression, len(ctx.AllValueExpr()))
@@ -605,4 +620,57 @@ func (c CsqlVisitorImpl) VisitFunCall(ctx *parser.FunCallContext) interface{} {
 		args:     args,
 		Location: SLFromToken(ctx.GetStart()),
 	}
+}
+
+func (c CsqlVisitorImpl) VisitGroupBy(ctx *parser.GroupByContext) interface{} {
+	fields := make([]GroupByField, len(ctx.AllGroupByField()))
+	for idx, f := range ctx.AllGroupByField() {
+		fields[idx] = f.Accept(c).(GroupByField)
+	}
+	return GroupByExpression{
+		Location:    SLFromToken(ctx.GetStart()),
+		GroupFields: fields,
+	}
+}
+
+func (c CsqlVisitorImpl) VisitGroupByField(ctx *parser.GroupByFieldContext) interface{} {
+	gbf := GroupByField{
+		Location: SLFromToken(ctx.GetStart()),
+	}
+	if ctx.CompoundName() != nil {
+		fieldName := ctx.CompoundName().Accept(c).(CompoundName)
+		gbf.FieldName = &fieldName
+	} else {
+		gbf.FieldIndex = ctx.FieldIndex().Accept(c).(int32)
+	}
+	return gbf
+
+}
+
+func (c CsqlVisitorImpl) VisitAggregateFunCall(ctx *parser.AggregateFunCallContext) interface{} {
+	if ctx.CountFunc() != nil {
+		return ctx.CountFunc().Accept(c).(CountFunctionCall)
+	} else {
+		funcName := strings.ToLower(ctx.AggregateFunc().GetText())
+		args := ctx.ValueExpr().Accept(c).(Expression)
+		return AggregateFunctionCall{
+			function: funcName,
+			arg:      args,
+			Location: SLFromToken(ctx.GetStart()),
+		}
+	}
+}
+
+func (c CsqlVisitorImpl) VisitCountFunc(ctx *parser.CountFuncContext) interface{} {
+	distinct := ctx.K_DISTINCT() != nil
+	field := ctx.ProjectionFieldName().Accept(c).(CompoundName)
+	return CountFunctionCall{
+		arg:      field,
+		distinct: distinct,
+		Location: SLFromToken(ctx.GetStart()),
+	}
+}
+
+func (c CsqlVisitorImpl) VisitHaving(ctx *parser.HavingContext) interface{} {
+	return ctx.WhereExpr().Accept(c).(Expression)
 }
