@@ -48,10 +48,29 @@ func NewGroupByName(name string, loc *errors.SourceLocation) GroupByColumn {
 	}
 }
 
-func NewAggregationDataSource(source DataSource, projection []ProjectionColumn, groupBy []GroupByColumn) DataSource {
+func NewAggregationDataSource(source DataSource,
+	projection []ProjectionColumn,
+	groupBy []GroupByColumn) DataSource {
+	return NewAggregationDataSourceHaving(source, projection, groupBy, nil)
+}
+
+func NewAggregationDataSourceHaving(
+	source DataSource,
+	projection []ProjectionColumn,
+	groupBy []GroupByColumn,
+	having Evaluator) DataSource {
 	rowGroups := groupRows(source, groupBy)
 
 	aggregateFunctions := filterAggregateFunctions(projection)
+
+	if len(aggregateFunctions) == 0 && len(groupBy) == 0 && having != nil {
+		panic(errors.NewError(nil, "HAVING clause on non-aggregate query"))
+	}
+
+	//aggregateHaving, isAgg := having.(AggregateEvaluator)
+	//if !isAgg {
+	//	panic(fmt.Errorf("expecting aggregate evaluator"))
+	//}
 
 	// if there are aggregate functions in the projection then build a new header with
 	// additional columns for the aggregate function results and add those results to
@@ -61,31 +80,34 @@ func NewAggregationDataSource(source DataSource, projection []ProjectionColumn, 
 
 	var result []Row
 	if len(aggregateFunctions) == 0 {
-		result = foldGroupNoAggregates(rowGroups)
+		result = foldGroupNoAggregates(rowGroups, having)
 		intermediate := NewMemDataSource(source.GetName(), source.Header().ColumnsMetadata(), result)
 		return NewProjectionDataSource(intermediate, projection, false)
 	} else {
 		projection = ExpandProjection(projection, source.Header())
 		newHeader := NewHeaderWithProjection(source, projection)
-		result = applyAggregates(rowGroups, projection, newHeader, aggregateFunctions)
+		result = applyAggregates(rowGroups, projection, newHeader, aggregateFunctions, having)
 		return NewMemDataSource(source.GetName(), newHeader.ColumnsMetadata(), result)
 	}
 }
 
-func applyAggregates(groups [][]Row, projection []ProjectionColumn, headers DataSourceHeader, aggregates map[int]AggregateFunction) []Row {
+func applyAggregates(groups [][]Row, projection []ProjectionColumn, headers DataSourceHeader, aggregates map[int]AggregateFunction, having Evaluator) []Row {
 	result := make([]Row, 0)
 	rowId := 0
 	for _, row := range groups {
 		if len(row) > 0 {
-			projectedRow := projectRow(projection, headers, row[0])
-			values := projectedRow.Values()
-			for index, v := range aggregates {
-				value := v.EvaluateAgg(row)
-				values[index] = value
+			aggregateCtx := NewAggregateContext(row)
+			if having == nil || having.Evaluate(aggregateCtx).Equals(ValueTrue) {
+				projectedRow := projectRow(projection, headers, row[0])
+				values := projectedRow.Values()
+				for index, v := range aggregates {
+					value := v.AggregateEvaluate(aggregateCtx)
+					values[index] = value
+				}
+				nrow := newRowWithId(rowId, headers, values)
+				result = append(result, nrow)
+				rowId++
 			}
-			nrow := newRowWithId(rowId, headers, values)
-			result = append(result, nrow)
-			rowId++
 		}
 	}
 	return result
@@ -105,15 +127,17 @@ func projectRow(projection []ProjectionColumn, header DataSourceHeader, row Row)
 	return newRowWithId(row.Id(), header, resultValues)
 }
 
-func foldGroupNoAggregates(rowGroups [][]Row) []Row {
+func foldGroupNoAggregates(rowGroups [][]Row, having Evaluator) []Row {
 	result := make([]Row, 0)
 	rowId := 0
 	for _, rows := range rowGroups {
 		if len(rows) == 0 {
 			continue
 		}
-		result = append(result, updateRowId(rowId, rows[0]))
-		rowId++
+		if having == nil || having.Evaluate(NewAggregateContext(rows)).Equals(ValueTrue) {
+			result = append(result, updateRowId(rowId, rows[0]))
+			rowId++
+		}
 	}
 	return result
 }

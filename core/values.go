@@ -380,6 +380,20 @@ func EnsureString(v Value) (string, error) {
 	return v.Value().(string), nil
 }
 
+func EnsureInt(v Value) (int64, error) {
+	if v.Type() != TypeInt && v.Type() != TypeFloat {
+		return 0, fmt.Errorf(errors.TypeMismatchMsg(v, "integer", nil))
+	}
+	return v.AsInt().Value().(int64), nil
+}
+
+func EnsureFloat(v Value) (float64, error) {
+	if v.Type() != TypeInt && v.Type() != TypeFloat {
+		return 0, fmt.Errorf(errors.TypeMismatchMsg(v, "float", nil))
+	}
+	return v.AsFloat().Value().(float64), nil
+}
+
 func DecodeNumericL(value string, l *errors.SourceLocation) Value {
 	i64, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {

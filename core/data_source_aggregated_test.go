@@ -130,3 +130,68 @@ func TestGroupByCityCountry(t *testing.T) {
 		HavingRowValues(columns, NewStringValue("London"), NewStringValue("Canada"), NewIntValue(422324)),
 	))
 }
+
+func TestAggregateDataSource_Having(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	src := loadTestMemDatasource("cities")
+
+	projection := []ProjectionColumn{
+		NewExpressionColumn(NewMinFunction(NewRowValue("area"), nil), ""),
+		NewColumn("country"),
+	}
+	groupBy := []GroupByColumn{
+		{name: "country"},
+	}
+	having := NewGt(NewSumFunction(NewRowValue("population"), nil), NewIntValue(10000))
+
+	aggDs := NewAggregationDataSourceHaving(src, projection, groupBy, having)
+
+	rows := aggDs.GetRows()
+
+	g.Expect(aggDs.Header().ColumnsMetadata()).To(HaveLen(2))
+	g.Expect(rows).To(HaveLen(8))
+	columns := []string{"MIN(area)", "country"}
+	g.Expect(rows).To(ContainElements(
+		HavingRowValues(columns, NewFloatValue(1.1), NewStringValue("Australia")),
+		HavingRowValues(columns, NewFloatValue(21.32), NewStringValue("Belgium")),
+		HavingRowValues(columns, NewFloatValue(64.06), NewStringValue("Canada")),
+		HavingRowValues(columns, NewFloatValue(21.35), NewStringValue("Croatia")),
+		HavingRowValues(columns, NewIntValue(6100), NewStringValue("Poland")),
+		HavingRowValues(columns, NewFloatValue(1572.03), NewStringValue("UK")),
+		HavingRowValues(columns, NewFloatValue(7.11), NewStringValue("USA")),
+		HavingRowValues(columns, NewFloatValue(162.42), NewStringValue("Ukraine")),
+	))
+}
+
+func TestAggregateDataSource_HavingWithoutAggregate(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	src := loadTestMemDatasource("cities")
+
+	projection := []ProjectionColumn{
+		NewExpressionColumn(NewMinFunction(NewRowValue("area"), nil), ""),
+		NewColumn("country"),
+	}
+	groupBy := []GroupByColumn{
+		{name: "country"},
+	}
+	having := NewGt(NewRowValue("population"), NewIntValue(10000))
+
+	aggDs := NewAggregationDataSourceHaving(src, projection, groupBy, having)
+
+	rows := aggDs.GetRows()
+
+	g.Expect(aggDs.Header().ColumnsMetadata()).To(HaveLen(2))
+	g.Expect(rows).To(HaveLen(7))
+	columns := []string{"MIN(area)", "country"}
+	g.Expect(rows).To(ContainElements(
+		HavingRowValues(columns, NewFloatValue(21.32), NewStringValue("Belgium")),
+		HavingRowValues(columns, NewFloatValue(64.06), NewStringValue("Canada")),
+		HavingRowValues(columns, NewFloatValue(21.35), NewStringValue("Croatia")),
+		HavingRowValues(columns, NewIntValue(6100), NewStringValue("Poland")),
+		HavingRowValues(columns, NewFloatValue(1572.03), NewStringValue("UK")),
+		HavingRowValues(columns, NewFloatValue(162.42), NewStringValue("Ukraine")),
+		HavingRowValues(columns, NewFloatValue(1.1), NewStringValue("Australia")),
+	))
+}

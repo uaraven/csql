@@ -22,17 +22,38 @@ package core
 import (
 	"fmt"
 	"github.com/uaraven/csql/errors"
+	"github.com/uaraven/csql/funky"
 	"github.com/uaraven/csql/util"
 	"math"
 	"strings"
 )
+
+type aggregateContextImpl struct {
+	rows []Row
+}
+
+func NewAggregateContext(rows []Row) AggregateContext {
+	return &aggregateContextImpl{rows: rows}
+}
+
+func (aci aggregateContextImpl) Get(s string) funky.Option[Value] {
+	if len(aci.rows) > 0 {
+		return aci.rows[0].Get(s)
+	} else {
+		return funky.SomeOf[Value](nullV)
+	}
+}
+
+func (aci aggregateContextImpl) RowSet() []Row {
+	return aci.rows
+}
 
 type AggregateFunction interface {
 	Evaluator
 	Name() string
 	GetArg() Evaluator
 	Location() *errors.SourceLocation
-	EvaluateAgg(rows []Row) Value
+	AggregateEvaluate(ctx AggregateContext) Value
 }
 
 type AggregateFunctionImplementor func(rows []Row, function AggregateFunction) Value
@@ -57,11 +78,14 @@ func (sf aggFunctionImpl) Location() *errors.SourceLocation {
 }
 
 func (sf aggFunctionImpl) Evaluate(ctx EvaluationContext) Value {
+	if aggCtx, isAgg := ctx.(AggregateContext); isAgg {
+		return sf.AggregateEvaluate(aggCtx)
+	}
 	panic(errors.NewError(sf.loc, "Aggregate function cannot be used as a scalar"))
 }
 
-func (sf aggFunctionImpl) EvaluateAgg(rows []Row) Value {
-	return sf.implementor(rows, sf)
+func (sf aggFunctionImpl) AggregateEvaluate(ctx AggregateContext) Value {
+	return sf.implementor(ctx.RowSet(), sf)
 }
 
 func (sf aggFunctionImpl) String() string {
@@ -250,8 +274,8 @@ func (cf countFunction) Location() *errors.SourceLocation {
 	return cf.loc
 }
 
-func (cf countFunction) EvaluateAgg(rows []Row) Value {
-	return cf.implementor(rows, cf)
+func (cf countFunction) AggregateEvaluate(ctx AggregateContext) Value {
+	return cf.implementor(ctx.RowSet(), cf)
 }
 
 func (cf countFunction) String() string {
