@@ -81,6 +81,12 @@ func (sf aggFunctionImpl) Evaluate(ctx EvaluationContext) Value {
 	if aggCtx, isAgg := ctx.(AggregateContext); isAgg {
 		return sf.AggregateEvaluate(aggCtx)
 	}
+	if rowCtx, isRow := ctx.(*rowImpl); isRow {
+		aggCtx := aggregateContextImpl{
+			rows: []Row{rowCtx},
+		}
+		return sf.AggregateEvaluate(aggCtx)
+	}
 	panic(errors.NewError(sf.loc, "Aggregate function cannot be used as a scalar"))
 }
 

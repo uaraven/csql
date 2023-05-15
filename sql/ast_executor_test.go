@@ -584,9 +584,13 @@ func TestAstTransformer_AggregateFunctionInWhere(t *testing.T) {
 func TestAstTransformer_AggregateFunctionInProjectionInExpression(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	g.Expect(func() {
-		ExecuteSql(`
+	rows := ExecuteSql(`
 		select avg(population) / 2 from "../test-data/cities.csv"`).
-			GetRows()
-	}).NotTo(Panic())
+		GetRows()
+	g.Expect(rows).To(HaveLen(15))
+	columns := []string{"AVG(population) / 2"}
+	g.Expect(core.RowsToSlice(rows, columns...)).To(ContainElements(
+		[]interface{}{8799800.0 / 2},
+		[]interface{}{422324.0 / 2},
+	))
 }

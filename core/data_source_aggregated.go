@@ -148,6 +148,21 @@ func filterAggregateFunctions(projection []ProjectionColumn) map[int]AggregateFu
 	return result
 }
 
+func expressionContainsAggregate(e Evaluator) bool {
+	switch v := e.(type) {
+	case AggregateFunction:
+		return true
+	case SqlFunction:
+		return funky.AnyMatches(v.GetArgs(), func(evaluator Evaluator) bool {
+			_, ok := evaluator.(AggregateFunction)
+			return ok
+		})
+	case binaryExpression:
+		return expressionContainsAggregate(v.left) || expressionContainsAggregate(v.right)
+	}
+	return false
+}
+
 func groupRows(ds DataSource, by []GroupByColumn) [][]Row {
 	groupings := make(map[string][]Row)
 	for _, row := range ds.GetRows() {
