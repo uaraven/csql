@@ -24,7 +24,7 @@ mkdir bin
 
 function build() {
   echo "Building for $1 ($2)"
-  GOOS=$1 GOARCH=$2  go build -ldflags="-s -w -X 'main.Version=$(cat version.txt)'"
+  GOOS=$1 GOARCH=$2  go build -ldflags="-s -w -X 'main.Version=$3'"
   zip csql_$1_$2.zip csql*
   mv csql* bin/
 }
@@ -34,16 +34,16 @@ function increment_version() {
   echo "$version" > version.txt
 }
 
-if [[ "$1" != "--no-version" ]] ; then
-  increment_version
+if [[ "$1" == "" ]] ; then
+  version="Local"
 else
-  echo "Skipping version increment"
+  version="$1"
 fi
 
-echo "Building version $(cat version.txt)"
+echo "Building version $version"
 
-build darwin amd64
-build darwin arm64
-build linux amd64
-build windows amd64
+build darwin amd64 "$version"
+build darwin arm64 "$version"
+build linux amd64 "$version"
+build windows amd64 "$version"
 
