@@ -24,16 +24,19 @@ import (
 	"github.com/uaraven/csql/cli"
 	"github.com/uaraven/csql/core"
 	"log"
+	"strings"
 )
 
 var Version = "0.2.1"
 
 var opts struct {
-	NullValue *string `long:"null" description:"Sets the string value to be treated as NULL"`
+	NullValue *string `short:"n" long:"null" description:"Sets the string value to be treated as NULL"`
+	RunQuery  bool    `short:"c" long:"command" description:"Runs the query passed as command line arguments"`
+	Output    *string `short:"o" long:"output" description:"Output results into a file"`
 }
 
 func main() {
-	_, err := flags.Parse(&opts)
+	args, err := flags.Parse(&opts)
 	if err != nil {
 		log.Fatalf("Invalid command line arguments: %v", err)
 	}
@@ -41,6 +44,16 @@ func main() {
 		core.NullValueString = *opts.NullValue
 
 	}
-	shell := cli.NewCsqlShell(Version)
-	shell.Start()
+	if opts.RunQuery {
+		query := strings.Join(args, " ")
+		if opts.Output == nil {
+			cli.ExecuteQuery(query)
+		} else {
+			cli.ExecuteToCsv(query, *opts.Output)
+
+		}
+	} else {
+		shell := cli.NewCsqlShell(Version)
+		shell.Start()
+	}
 }
