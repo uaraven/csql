@@ -34,7 +34,11 @@ function increment_version() {
   echo "$version" > version.txt
 }
 
-increment_version
+if [[ "$1" != "--no-version" ]] ; then
+  increment_version
+else
+  echo "Skipping version increment"
+fi
 
 echo "Building version $(cat version.txt)"
 

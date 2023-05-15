@@ -6,7 +6,7 @@ name: Release Binaries
 on:
   push:
     tags:
-      - "v*"
+      - "v**"
 
 jobs:
   release:
@@ -17,13 +17,13 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.19
+        go-version: 1.20
 
     - name: Test
       run: go test -v ./...
 
     - name: Build release
-      run: ./build.sh
+      run: ./build.sh --no-version
 
     - name: Push binaries
       uses: d1ceward/draft-assets-release-action@v1
