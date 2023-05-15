@@ -136,11 +136,16 @@ func CsvCommand() *Command {
 		Name: "csv",
 		Help: "Set or show csv file parameters. Type 'csv help' to view available options",
 		Func: func(s *CsqlShell, params []string) {
-			if params == nil || len(params) == 0 {
+			status := func() {
 				s.PrintMessage(s.C.A("Null String=").Attr(ansie.Bold).A(core.NullValueString).Reset().String())
+				s.PrintMessage(s.C.A("Separator=").Attr(ansie.Bold).S("%q", string(core.CSVSeparator)).Reset().String())
+			}
+			if params == nil || len(params) == 0 {
+				status()
 			} else {
 				var opts struct {
-					Null *string `long:"null"`
+					Null      *string `long:"null"`
+					Separator *string `long:"separator"`
 				}
 				args, err := flags.ParseArgs(&opts, params)
 				if err != nil {
@@ -151,13 +156,21 @@ func CsvCommand() *Command {
 					return s == "help"
 				}) {
 					s.PrintMessage("set --null=\"<null string>\", i.e. set --null=\"\" to treat empty strings as null")
+					s.PrintMessage("set --separator=\"<csv separator>\", i.e. set --separator=\\t to use tab separator")
 					return
 				}
 				if opts.Null != nil {
 					core.NullValueString = util.Unquote(*opts.Null)
-					s.PrintMessage(s.C.A("Null String=").Attr(ansie.Bold).A(core.NullValueString).Reset().String())
+
+				}
+				if opts.Separator != nil {
+					err = core.SetCsvSeparator(*opts.Separator)
+					if err != nil {
+						s.PrintError(fmt.Sprintf("Failed to set separator %v", err))
+					}
 				}
 
+				status()
 			}
 		},
 	}

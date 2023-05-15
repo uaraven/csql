@@ -22,11 +22,29 @@ package core
 import (
 	"bufio"
 	"encoding/csv"
+	"fmt"
+	"github.com/uaraven/csql/util"
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
+
+var CSVSeparator = ','
+
+func SetCsvSeparator(separator string) error {
+	sep := util.Unquote(separator)
+	sep, err := strconv.Unquote("\"" + sep + "\"")
+	if err != nil {
+		return err
+	}
+	if len(sep) > 1 {
+		return fmt.Errorf("separator cannot consist of multiple characters")
+	}
+	CSVSeparator = rune(sep[0])
+	return nil
+}
 
 func NewCsvDataSource(csvFile string) DataSource {
 	return NewCsvDataSourceWithAlias(csvFile, "")
@@ -48,6 +66,7 @@ func NewCsvDataSourceWithAlias(csvFile string, alias string) DataSource {
 	defer func() { _ = file.Close() }()
 	csvReader := csv.NewReader(bufio.NewReader(file))
 	csvReader.TrimLeadingSpace = true
+	csvReader.Comma = CSVSeparator
 	headers, err := csvReader.Read()
 	if err != nil {
 		panic(err)

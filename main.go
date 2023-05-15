@@ -32,6 +32,7 @@ var Version = "local v0.2 series"
 var opts struct {
 	NullValue *string `short:"n" long:"null" description:"Sets the string value to be treated as NULL"`
 	RunQuery  bool    `short:"c" long:"command" description:"Runs the query passed as command line arguments"`
+	Separator *string `short:"s" long:"separator" description:"CSV separator character"`
 	Output    *string `short:"o" long:"output" description:"Output results into a file"`
 }
 
@@ -42,7 +43,12 @@ func main() {
 	}
 	if opts.NullValue != nil {
 		core.NullValueString = *opts.NullValue
-
+	}
+	if opts.Separator != nil {
+		err = core.SetCsvSeparator(*opts.Separator)
+		if err != nil {
+			log.Fatalf("Failed to set CSV separator %v", err)
+		}
 	}
 	if opts.RunQuery {
 		query := strings.Join(args, " ")
