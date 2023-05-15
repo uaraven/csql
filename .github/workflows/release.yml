@@ -19,6 +19,9 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+      
+    - name: Building
+      run: ./build.sh
 
     - name: Commit version.txt
       run: git add version.txt && git push
