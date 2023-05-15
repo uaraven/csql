@@ -30,6 +30,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 const (
@@ -51,13 +52,14 @@ func NewCsqlShell(version string) *CsqlShell {
 	}
 
 	csql.Commands = map[string]*Command{
-		"help":  HelpCmd(),
-		"clear": ClearCmd(),
-		"exit":  ExitCmd(),
-		"ls":    LsCmd(),
-		"pwd":   PwdCmd(),
-		"cd":    CdCmd(),
-		"csv":   CsvCommand(),
+		"help":    HelpCmd(),
+		"clear":   ClearCmd(),
+		"exit":    ExitCmd(),
+		"ls":      LsCmd(),
+		"pwd":     PwdCmd(),
+		"cd":      CdCmd(),
+		"csv":     CsvCommand(),
+		"inspect": InspectCommand(),
 	}
 
 	csql.line.SetCtrlCAborts(true)
@@ -178,10 +180,13 @@ func (s *CsqlShell) ExecuteQuery(query string) {
 			}
 		}
 	}()
+	start := time.Now()
 	ds := sql.ExecuteSql(query)
+	completed := time.Now().Sub(start)
 	table := InitTable(ds, -1)
 	s.PrintMessage(table.PrintHeader())
 	s.PrintMessage(table.PrintData(ds.GetRows()))
+	s.PrintMessage(fmt.Sprintf("Rows: %d, elapsed time: %5.3f sec", len(ds.GetRows()), completed.Seconds()))
 }
 
 func (s *CsqlShell) ExecuteCommand(input string) {

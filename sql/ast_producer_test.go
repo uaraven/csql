@@ -630,6 +630,31 @@ func TestSelectWithAvgGroupBy(t *testing.T) {
 	}))
 }
 
+func TestSelectWithAvgInExpression(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT avg(abc) / 2 FROM Table1")
+
+	v1 := "2"
+	g.Expect(s.Select.Projection.ProjectionFields[0]).To(BeEquivalentTo(ProjectionField{
+		EvaluatedField: &EvaluatedProjectionField{Expr: BinaryExpression{
+			LHS: AggregateFunctionCall{
+				function: "avg",
+				arg: Term{
+					Name: &CompoundName{
+						Name:     "abc",
+						Location: Loc(1, 11),
+					}},
+				Location: Loc(1, 7),
+			},
+			RHS: Term{Value: &Literal{
+				Location:     Loc(1, 18),
+				NumericValue: &v1,
+			}},
+			Operator: "/",
+			Location: Loc(1, 7),
+		}}}))
+}
+
 func TestSelectWithHaving(t *testing.T) {
 	g := NewGomegaWithT(t)
 	s := ParseSQL("SELECT * FROM Table1 GROUP BY bc HAVING min(a) > 10 and b = 's'")

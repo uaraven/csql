@@ -22,29 +22,18 @@ package core
 import (
 	"bufio"
 	"encoding/csv"
-	"errors"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-const csvExt = ".csv"
-
 func NewCsvDataSource(csvFile string) DataSource {
 	return NewCsvDataSourceWithAlias(csvFile, "")
 }
 
 func NewCsvDataSourceWithAlias(csvFile string, alias string) DataSource {
-	if filepath.Ext(csvFile) == "" {
-		_, err := os.Stat(csvFile)
-		if err != nil && errors.Is(err, os.ErrNotExist) {
-			_, err = os.Stat(csvFile + csvExt)
-			if err == nil {
-				csvFile = csvFile + csvExt
-			}
-		}
-	}
+	csvFile = ExpandCsvFileName(csvFile)
 	_, nameExt := filepath.Split(csvFile)
 	var justName string
 	if alias != "" {

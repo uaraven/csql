@@ -579,5 +579,14 @@ func TestAstTransformer_AggregateFunctionInWhere(t *testing.T) {
 		where sum(population) > 10000`).
 			GetRows()
 	}).To(Panic())
+}
 
+func TestAstTransformer_AggregateFunctionInProjectionInExpression(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	g.Expect(func() {
+		ExecuteSql(`
+		select avg(population) / 2 from "../test-data/cities.csv"`).
+			GetRows()
+	}).NotTo(Panic())
 }

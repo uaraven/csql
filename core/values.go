@@ -405,3 +405,19 @@ func DecodeNumericL(value string, l *errors.SourceLocation) Value {
 	}
 	return NewIntValueL(i64, l)
 }
+
+// ParseStringToValue parses a string and converts it into a value of appropriate type
+func ParseStringToValue(value string) Value {
+	i64, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		f64, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			if value == NullValueString {
+				return NewNullValue()
+			}
+			return NewStringValue(value)
+		}
+		return NewFloatValue(f64)
+	}
+	return NewIntValue(i64)
+}

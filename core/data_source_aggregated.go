@@ -67,11 +67,6 @@ func NewAggregationDataSourceHaving(
 		panic(errors.NewError(nil, "HAVING clause on non-aggregate query"))
 	}
 
-	//aggregateHaving, isAgg := having.(AggregateEvaluator)
-	//if !isAgg {
-	//	panic(fmt.Errorf("expecting aggregate evaluator"))
-	//}
-
 	// if there are aggregate functions in the projection then build a new header with
 	// additional columns for the aggregate function results and add those results to
 	// each row generated from grouped sets.
@@ -148,6 +143,7 @@ func filterAggregateFunctions(projection []ProjectionColumn) map[int]AggregateFu
 		if aggF, ok := column.source.(AggregateFunction); ok {
 			result[idx] = aggF
 		}
+		// TODO: Handle aggregate functions in
 	}
 	return result
 }

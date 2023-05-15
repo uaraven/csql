@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/funky"
-	"strconv"
 	"strings"
 )
 
@@ -38,7 +37,7 @@ func parseRowWithId(id int, headers DataSourceHeader, values []string) Row {
 		id:     id,
 		header: headers,
 		values: funky.Map(values, func(s string) Value {
-			return decodeToValue(s)
+			return ParseStringToValue(s)
 		}),
 	}
 }
@@ -130,21 +129,6 @@ func (r rowImpl) Key() string {
 		sb.WriteString(v.Evaluate(r).String())
 	}
 	return sb.String()
-}
-
-func decodeToValue(value string) Value {
-	i64, err := strconv.ParseInt(value, 10, 64)
-	if err != nil {
-		f64, err := strconv.ParseFloat(value, 64)
-		if err != nil {
-			if value == NullValueString {
-				return NewNullValue()
-			}
-			return NewStringValue(value)
-		}
-		return NewFloatValue(f64)
-	}
-	return NewIntValue(i64)
 }
 
 func ReadAllRows(ds DataSource) []Row {

@@ -14,6 +14,7 @@ require (
 
 require (
 	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/jessevdk/go-flags v1.5.0 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	golang.org/x/net v0.7.0 // indirect

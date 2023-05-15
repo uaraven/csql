@@ -62,7 +62,7 @@ func newMapContext() *mapContext {
 
 func (ec *mapContext) Get(name string) funky.Option[Value] {
 	if val, present := ec.values[name]; present {
-		return funky.SomeOf(decodeToValue(val))
+		return funky.SomeOf(ParseStringToValue(val))
 	}
 	return funky.NoneOf[Value]()
 }

@@ -21,9 +21,12 @@ package cli
 
 import (
 	"fmt"
+	"github.com/jessevdk/go-flags"
 	"github.com/uaraven/ansie"
 	"github.com/uaraven/csql/core"
+	"github.com/uaraven/csql/funky"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -135,6 +138,43 @@ func CsvCommand() *Command {
 		Func: func(s *CsqlShell, args []string) {
 			if args == nil || len(args) == 0 {
 				s.PrintMessage(s.C.A("Null String=").Attr(ansie.Bold).A(core.NullValueString).Reset().String())
+			}
+		},
+	}
+}
+
+func InspectCommand() *Command {
+	return &Command{
+		Name: "inspect",
+		Help: "Inspect a CSV file. Returns columns and their types",
+		Func: func(shell *CsqlShell, parameters []string) {
+			var opts struct {
+			}
+			args, err := flags.ParseArgs(&opts, parameters)
+			if err != nil {
+				shell.PrintError("Expected file name as a parameter to 'inspect'")
+				return
+			}
+			for _, fName := range args {
+				fileName, err := strconv.Unquote(fName)
+				if err != nil {
+					fileName = fName
+				}
+				csvFile := core.ExpandCsvFileName(fileName)
+				csvStruct, err := InspectCsv(csvFile)
+				if err != nil {
+					shell.PrintError(fmt.Sprintf("%v", err))
+					return
+				}
+				width := funky.Max(funky.Map(csvStruct, func(t CsvColumn) int {
+					return len(t.Name)
+				}))
+				shell.PrintMessage(fileName)
+				shell.PrintMessage(strings.Repeat("-", len(fileName)))
+				for _, column := range csvStruct {
+					shell.PrintMessage(fmt.Sprintf("%*s: %s", width, column.Name, column.Type))
+				}
+				shell.PrintMessage("")
 			}
 		},
 	}
