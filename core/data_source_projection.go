@@ -58,7 +58,7 @@ func NewExpressionColumnL(src Evaluator, alias string, location *errors.SourceLo
 }
 
 func (pc ProjectionColumn) IsAggregate() bool {
-	_, isAggregate := pc.source.(AggregateFunction)
+	isAggregate := expressionContainsAggregate(pc.source)
 	return isAggregate
 }
 
