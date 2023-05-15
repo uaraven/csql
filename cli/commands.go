@@ -155,8 +155,8 @@ func CsvCommand() *Command {
 				if funky.AnyMatches(args, func(s string) bool {
 					return s == "help"
 				}) {
-					s.PrintMessage("set --null=\"<null string>\", i.e. set --null=\"\" to treat empty strings as null")
-					s.PrintMessage("set --separator=\"<csv separator>\", i.e. set --separator=\\t to use tab separator")
+					s.PrintMessage("csv --null=\"<null string>\", i.e. csv --null=\"\" to treat empty strings as null")
+					s.PrintMessage("csv --separator=\"<csv separator>\", i.e. csv --separator=\\t to use tab as a csv field separator")
 					return
 				}
 				if opts.Null != nil {
