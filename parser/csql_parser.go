@@ -44,10 +44,10 @@ func csqlParserInit() {
 		"K_ON", "K_DISTINCT", "K_LIKE", "K_FULL", "K_LIMIT", "K_ORDER", "K_BY",
 		"K_ASC", "K_DESC", "K_UNION", "K_ALL", "K_TO_STRING", "K_TO_FLOAT",
 		"K_TO_INT", "K_ROUND", "K_LEN", "K_TRUNC", "K_FRAC", "K_SUBSTRING",
-		"K_TO_UPPER", "K_TO_LOWER", "K_POW", "K_SQRT", "K_COUNT", "K_SUM", "K_AVG",
-		"K_MIN", "K_MAX", "K_GROUP", "K_HAVING", "IDENTIFIER", "SIMPLE_IDENTIFIER",
-		"QUOTED_IDENTIFIER", "NUMERIC_LITERAL", "STRING_LITERAL", "SINGLE_LINE_COMMENT",
-		"MULTILINE_COMMENT", "SPACES", "UNEXPECTED_CHAR",
+		"K_TO_UPPER", "K_TO_LOWER", "K_POW", "K_SQRT", "K_COALESCE", "K_COUNT",
+		"K_SUM", "K_AVG", "K_MIN", "K_MAX", "K_GROUP", "K_HAVING", "IDENTIFIER",
+		"SIMPLE_IDENTIFIER", "QUOTED_IDENTIFIER", "NUMERIC_LITERAL", "STRING_LITERAL",
+		"SINGLE_LINE_COMMENT", "MULTILINE_COMMENT", "SPACES", "UNEXPECTED_CHAR",
 	}
 	staticData.ruleNames = []string{
 		"query", "comparisonOperator", "binaryOperation", "list", "term", "valueExpr",
@@ -62,7 +62,7 @@ func csqlParserInit() {
 	}
 	staticData.predictionContextCache = antlr.NewPredictionContextCache()
 	staticData.serializedATN = []int32{
-		4, 1, 78, 436, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
+		4, 1, 79, 436, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
 		4, 2, 5, 7, 5, 2, 6, 7, 6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7,
 		10, 2, 11, 7, 11, 2, 12, 7, 12, 2, 13, 7, 13, 2, 14, 7, 14, 2, 15, 7, 15,
 		2, 16, 7, 16, 2, 17, 7, 17, 2, 18, 7, 18, 2, 19, 7, 19, 2, 20, 7, 20, 2,
@@ -109,8 +109,8 @@ func csqlParserInit() {
 		45, 3, 45, 432, 8, 45, 1, 46, 1, 46, 1, 46, 0, 3, 10, 12, 52, 47, 0, 2,
 		4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40,
 		42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76,
-		78, 80, 82, 84, 86, 88, 90, 92, 0, 7, 1, 0, 2, 8, 1, 0, 9, 14, 1, 0, 64,
-		67, 2, 0, 11, 11, 70, 70, 1, 0, 9, 10, 1, 0, 47, 48, 1, 0, 51, 62, 448,
+		78, 80, 82, 84, 86, 88, 90, 92, 0, 7, 1, 0, 2, 8, 1, 0, 9, 14, 1, 0, 65,
+		68, 2, 0, 11, 11, 71, 71, 1, 0, 9, 10, 1, 0, 47, 48, 1, 0, 51, 63, 448,
 		0, 94, 1, 0, 0, 0, 2, 100, 1, 0, 0, 0, 4, 102, 1, 0, 0, 0, 6, 104, 1, 0,
 		0, 0, 8, 117, 1, 0, 0, 0, 10, 127, 1, 0, 0, 0, 12, 181, 1, 0, 0, 0, 14,
 		198, 1, 0, 0, 0, 16, 201, 1, 0, 0, 0, 18, 204, 1, 0, 0, 0, 20, 206, 1,
@@ -164,7 +164,7 @@ func csqlParserInit() {
 		1, 0, 0, 0, 193, 187, 1, 0, 0, 0, 193, 190, 1, 0, 0, 0, 194, 197, 1, 0,
 		0, 0, 195, 193, 1, 0, 0, 0, 195, 196, 1, 0, 0, 0, 196, 13, 1, 0, 0, 0,
 		197, 195, 1, 0, 0, 0, 198, 199, 5, 31, 0, 0, 199, 200, 3, 12, 6, 0, 200,
-		15, 1, 0, 0, 0, 201, 202, 5, 69, 0, 0, 202, 203, 3, 12, 6, 0, 203, 17,
+		15, 1, 0, 0, 0, 201, 202, 5, 70, 0, 0, 202, 203, 3, 12, 6, 0, 203, 17,
 		1, 0, 0, 0, 204, 205, 5, 41, 0, 0, 205, 19, 1, 0, 0, 0, 206, 207, 3, 92,
 		46, 0, 207, 208, 5, 15, 0, 0, 208, 213, 3, 10, 5, 0, 209, 210, 5, 16, 0,
 		0, 210, 212, 3, 10, 5, 0, 211, 209, 1, 0, 0, 0, 212, 215, 1, 0, 0, 0, 213,
@@ -172,7 +172,7 @@ func csqlParserInit() {
 		1, 0, 0, 0, 216, 217, 5, 17, 0, 0, 217, 21, 1, 0, 0, 0, 218, 219, 3, 26,
 		13, 0, 219, 220, 5, 15, 0, 0, 220, 221, 3, 10, 5, 0, 221, 222, 5, 17, 0,
 		0, 222, 225, 1, 0, 0, 0, 223, 225, 3, 24, 12, 0, 224, 218, 1, 0, 0, 0,
-		224, 223, 1, 0, 0, 0, 225, 23, 1, 0, 0, 0, 226, 227, 5, 63, 0, 0, 227,
+		224, 223, 1, 0, 0, 0, 225, 23, 1, 0, 0, 0, 226, 227, 5, 64, 0, 0, 227,
 		229, 5, 15, 0, 0, 228, 230, 5, 41, 0, 0, 229, 228, 1, 0, 0, 0, 229, 230,
 		1, 0, 0, 0, 230, 231, 1, 0, 0, 0, 231, 232, 3, 32, 16, 0, 232, 233, 5,
 		17, 0, 0, 233, 25, 1, 0, 0, 0, 234, 235, 7, 2, 0, 0, 235, 27, 1, 0, 0,
@@ -224,26 +224,26 @@ func csqlParserInit() {
 		358, 360, 3, 88, 44, 0, 359, 358, 1, 0, 0, 0, 359, 360, 1, 0, 0, 0, 360,
 		362, 1, 0, 0, 0, 361, 363, 3, 16, 8, 0, 362, 361, 1, 0, 0, 0, 362, 363,
 		1, 0, 0, 0, 363, 59, 1, 0, 0, 0, 364, 366, 7, 4, 0, 0, 365, 364, 1, 0,
-		0, 0, 365, 366, 1, 0, 0, 0, 366, 367, 1, 0, 0, 0, 367, 368, 5, 73, 0, 0,
-		368, 61, 1, 0, 0, 0, 369, 370, 5, 74, 0, 0, 370, 63, 1, 0, 0, 0, 371, 372,
+		0, 0, 365, 366, 1, 0, 0, 0, 366, 367, 1, 0, 0, 0, 367, 368, 5, 74, 0, 0,
+		368, 61, 1, 0, 0, 0, 369, 370, 5, 75, 0, 0, 370, 63, 1, 0, 0, 0, 371, 372,
 		5, 26, 0, 0, 372, 65, 1, 0, 0, 0, 373, 377, 3, 60, 30, 0, 374, 377, 3,
 		62, 31, 0, 375, 377, 3, 64, 32, 0, 376, 373, 1, 0, 0, 0, 376, 374, 1, 0,
-		0, 0, 376, 375, 1, 0, 0, 0, 377, 67, 1, 0, 0, 0, 378, 379, 5, 70, 0, 0,
+		0, 0, 376, 375, 1, 0, 0, 0, 377, 67, 1, 0, 0, 0, 378, 379, 5, 71, 0, 0,
 		379, 69, 1, 0, 0, 0, 380, 382, 3, 74, 37, 0, 381, 383, 3, 68, 34, 0, 382,
 		381, 1, 0, 0, 0, 382, 383, 1, 0, 0, 0, 383, 71, 1, 0, 0, 0, 384, 385, 3,
 		76, 38, 0, 385, 386, 5, 18, 0, 0, 386, 388, 1, 0, 0, 0, 387, 384, 1, 0,
 		0, 0, 387, 388, 1, 0, 0, 0, 388, 389, 1, 0, 0, 0, 389, 390, 3, 74, 37,
-		0, 390, 73, 1, 0, 0, 0, 391, 392, 5, 70, 0, 0, 392, 75, 1, 0, 0, 0, 393,
-		394, 5, 70, 0, 0, 394, 77, 1, 0, 0, 0, 395, 396, 5, 44, 0, 0, 396, 397,
-		3, 80, 40, 0, 397, 79, 1, 0, 0, 0, 398, 399, 5, 73, 0, 0, 399, 81, 1, 0,
+		0, 390, 73, 1, 0, 0, 0, 391, 392, 5, 71, 0, 0, 392, 75, 1, 0, 0, 0, 393,
+		394, 5, 71, 0, 0, 394, 77, 1, 0, 0, 0, 395, 396, 5, 44, 0, 0, 396, 397,
+		3, 80, 40, 0, 397, 79, 1, 0, 0, 0, 398, 399, 5, 74, 0, 0, 399, 81, 1, 0,
 		0, 0, 400, 401, 5, 45, 0, 0, 401, 402, 5, 46, 0, 0, 402, 407, 3, 84, 42,
 		0, 403, 404, 5, 16, 0, 0, 404, 406, 3, 84, 42, 0, 405, 403, 1, 0, 0, 0,
 		406, 409, 1, 0, 0, 0, 407, 405, 1, 0, 0, 0, 407, 408, 1, 0, 0, 0, 408,
 		83, 1, 0, 0, 0, 409, 407, 1, 0, 0, 0, 410, 413, 3, 72, 36, 0, 411, 413,
 		3, 86, 43, 0, 412, 410, 1, 0, 0, 0, 412, 411, 1, 0, 0, 0, 413, 415, 1,
 		0, 0, 0, 414, 416, 7, 5, 0, 0, 415, 414, 1, 0, 0, 0, 415, 416, 1, 0, 0,
-		0, 416, 85, 1, 0, 0, 0, 417, 418, 5, 73, 0, 0, 418, 87, 1, 0, 0, 0, 419,
-		420, 5, 68, 0, 0, 420, 421, 5, 46, 0, 0, 421, 426, 3, 90, 45, 0, 422, 423,
+		0, 416, 85, 1, 0, 0, 0, 417, 418, 5, 74, 0, 0, 418, 87, 1, 0, 0, 0, 419,
+		420, 5, 69, 0, 0, 420, 421, 5, 46, 0, 0, 421, 426, 3, 90, 45, 0, 422, 423,
 		5, 16, 0, 0, 423, 425, 3, 90, 45, 0, 424, 422, 1, 0, 0, 0, 425, 428, 1,
 		0, 0, 0, 426, 424, 1, 0, 0, 0, 426, 427, 1, 0, 0, 0, 427, 89, 1, 0, 0,
 		0, 428, 426, 1, 0, 0, 0, 429, 432, 3, 72, 36, 0, 430, 432, 3, 86, 43, 0,
@@ -352,22 +352,23 @@ const (
 	CsqlParserK_TO_LOWER          = 60
 	CsqlParserK_POW               = 61
 	CsqlParserK_SQRT              = 62
-	CsqlParserK_COUNT             = 63
-	CsqlParserK_SUM               = 64
-	CsqlParserK_AVG               = 65
-	CsqlParserK_MIN               = 66
-	CsqlParserK_MAX               = 67
-	CsqlParserK_GROUP             = 68
-	CsqlParserK_HAVING            = 69
-	CsqlParserIDENTIFIER          = 70
-	CsqlParserSIMPLE_IDENTIFIER   = 71
-	CsqlParserQUOTED_IDENTIFIER   = 72
-	CsqlParserNUMERIC_LITERAL     = 73
-	CsqlParserSTRING_LITERAL      = 74
-	CsqlParserSINGLE_LINE_COMMENT = 75
-	CsqlParserMULTILINE_COMMENT   = 76
-	CsqlParserSPACES              = 77
-	CsqlParserUNEXPECTED_CHAR     = 78
+	CsqlParserK_COALESCE          = 63
+	CsqlParserK_COUNT             = 64
+	CsqlParserK_SUM               = 65
+	CsqlParserK_AVG               = 66
+	CsqlParserK_MIN               = 67
+	CsqlParserK_MAX               = 68
+	CsqlParserK_GROUP             = 69
+	CsqlParserK_HAVING            = 70
+	CsqlParserIDENTIFIER          = 71
+	CsqlParserSIMPLE_IDENTIFIER   = 72
+	CsqlParserQUOTED_IDENTIFIER   = 73
+	CsqlParserNUMERIC_LITERAL     = 74
+	CsqlParserSTRING_LITERAL      = 75
+	CsqlParserSINGLE_LINE_COMMENT = 76
+	CsqlParserMULTILINE_COMMENT   = 77
+	CsqlParserSPACES              = 78
+	CsqlParserUNEXPECTED_CHAR     = 79
 )
 
 // CsqlParser rules.
@@ -1387,7 +1388,7 @@ func (p *CsqlParser) valueExpr(_p int) (localctx IValueExprContext) {
 			p.Term()
 		}
 
-	case CsqlParserK_TO_STRING, CsqlParserK_TO_FLOAT, CsqlParserK_TO_INT, CsqlParserK_ROUND, CsqlParserK_LEN, CsqlParserK_TRUNC, CsqlParserK_FRAC, CsqlParserK_SUBSTRING, CsqlParserK_TO_UPPER, CsqlParserK_TO_LOWER, CsqlParserK_POW, CsqlParserK_SQRT:
+	case CsqlParserK_TO_STRING, CsqlParserK_TO_FLOAT, CsqlParserK_TO_INT, CsqlParserK_ROUND, CsqlParserK_LEN, CsqlParserK_TRUNC, CsqlParserK_FRAC, CsqlParserK_SUBSTRING, CsqlParserK_TO_UPPER, CsqlParserK_TO_LOWER, CsqlParserK_POW, CsqlParserK_SQRT, CsqlParserK_COALESCE:
 		localctx = NewFunctionExprContext(p, localctx)
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
@@ -3472,7 +3473,7 @@ func (p *CsqlParser) AggregateFunc() (localctx IAggregateFuncContext) {
 		p.SetState(234)
 		_la = p.GetTokenStream().LA(1)
 
-		if !((int64((_la-64)) & ^0x3f) == 0 && ((int64(1)<<(_la-64))&15) != 0) {
+		if !((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&15) != 0) {
 			p.GetErrorHandler().RecoverInline(p)
 		} else {
 			p.GetErrorHandler().ReportMatch(p)
@@ -8101,6 +8102,10 @@ func (s *FunctionContext) K_SQRT() antlr.TerminalNode {
 	return s.GetToken(CsqlParserK_SQRT, 0)
 }
 
+func (s *FunctionContext) K_COALESCE() antlr.TerminalNode {
+	return s.GetToken(CsqlParserK_COALESCE, 0)
+}
+
 func (s *FunctionContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
@@ -8148,7 +8153,7 @@ func (p *CsqlParser) Function() (localctx IFunctionContext) {
 		p.SetState(433)
 		_la = p.GetTokenStream().LA(1)
 
-		if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&9221120237041090560) != 0) {
+		if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&-2251799813685248) != 0) {
 			p.GetErrorHandler().RecoverInline(p)
 		} else {
 			p.GetErrorHandler().ReportMatch(p)

@@ -143,6 +143,8 @@ func (ae AstTransformer) TransformExpression(condition Expression) core.Conditio
 		return ae.TransformFunction(cond)
 	case AggregateFunctionCall:
 		return ae.TransformAggregateFunction(cond)
+	case CountFunctionCall:
+		return ae.TransformCountFunction(cond)
 	case AndExpression:
 		return ae.TransformAndExpression(cond)
 	case OrExpression:
@@ -391,6 +393,10 @@ func (ae AstTransformer) TransformFunction(f FunctionCall) core.Evaluator {
 		})...)
 	case "substring":
 		return core.NewSubStringFunc(f.Location, funky.Map(f.args, func(arg Expression) core.Evaluator {
+			return ae.TransformExpression(arg)
+		})...)
+	case "coalesce":
+		return core.NewCoalesceFunction(f.Location, funky.Map(f.args, func(arg Expression) core.Evaluator {
 			return ae.TransformExpression(arg)
 		})...)
 	default:

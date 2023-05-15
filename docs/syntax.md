@@ -94,8 +94,44 @@ Strings are enclosed in single quotes `'`.
 ## Expressions
 
 Supported expressions include literals, columns, binary arithmetic operations on other expressions,
-string concatenation operator `||` and function calls<sup>*</sup>
+string concatenation operator `||` and function calls
 
+Supported operations:
+ - `+` addition
+ - `-` subtraction
+ - `*` multiplication
+ - `/` division
+ - `%` modulo
+ - `||` string concatenation
+
+Supported functions:
+ - Math
+   - [x] ROUND
+   - [x] TRUNC
+   - [x] FRAC
+   - [x] POW
+   - [x] SQRT
+ - Type cast:
+   - [x] TO_STRING
+   - [x] TO_FLOAT
+   - [x] TO_INT
+ - String:
+   - [x] SUBSTRING
+   - [ ] INDEX_OF
+   - [x] LEN
+   - [x] TO_UPPER
+   - [x] TO_LOWER
+ - Others
+   - [x] COALESCE
+                       
+Supported Aggregate functions:
+ - SUM
+ - COUNT
+ - MIN
+ - MAX
+ - AVG
+
+See more details on function syntax in the [Functions](#functions) section.
 
 ## CSV format
 
@@ -107,7 +143,7 @@ Whole file is read into memory at the moment it is declared in the FROM clause.
 Csql supports integers, floating point numbers and strings. Type of each value is determined at the time of reading of
 CSV file. Operations are type-sensitive, i.e., for example, number cannot be added to a string.
 
-Special value `null` is read as NULL value. The string representing null value can be changed using shell command `\null` or
+Special value `null` is read as NULL value. The string representing null value can be changed using shell command `cvs --null="null value"` or
 command line parameter `--null`.
 
 ## Indices
@@ -115,7 +151,6 @@ command line parameter `--null`.
 As CSV files does not have indices, Csql does not support indices. All operations require full table scan and joins have
 M*N time complexity. In short, don't expect fabulous performance, especially on large files.
 
+## Functions
 
----
-
-<sup>*</sup> Functions are not yet supported.
+TBD

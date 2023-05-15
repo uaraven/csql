@@ -12,6 +12,7 @@ csql supports basic<sup>*</sup> `SELECT` statement features, including:
 - BETWEEN conditions
 - IN (...list...) conditions
 - Logical operators `AND`, `OR` and `NOT`
+- Aggregate functions and HAVING expression
 - LIMIT and ORDER BY
 - Table and column aliases (`SELECT t.column as col FROM "Table.csv" T`)
 
@@ -20,12 +21,25 @@ csql automatically converts values to integer and float types and nulls.
 See [this document](docs/syntax.md) for detailed description of Csql syntax.
 
 ---
-<sup>*</sup> IN (select) and aggregations are not supported yet in version 0.1.x
+<sup>*</sup> IN (select) is not supported yet in version 0.1.x
 
 
 ## Usage
 
-TBD
+Currently the only supported usage mode is interactive. Run `csql` command and the CSQL shell will start.
+
+You can type SELECT queries or commands. Queries must start with word `select` and terminate with a semicolon (`;`).
+
+Supported commands are:
+   - help - display help message
+   - clear - clear screen
+   - exit - exit csql shell
+   - ls - list files in the current directory
+   - pwd - show current directory
+   - cd - change directory
+   - csv - set CSV parsing options
+   - inspect - inspect a CSV file - print out column names and data types of the first row
+
 
 ## Building
 

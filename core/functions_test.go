@@ -222,3 +222,14 @@ func TestPowFunc(t *testing.T) {
 	l = NewPowFunction(nil, NewStringValue("New York"), NewFloatValue(1))
 	g.Expect(func() { l.Evaluate(ctx) }).To(Panic())
 }
+
+func TestCoalesceFunc(t *testing.T) {
+	g := NewGomegaWithT(t)
+	ctx := newMapContext()
+
+	l := NewCoalesceFunction(nil, NewNullValue(), NewFloatValue(2.0))
+	g.Expect(l.Evaluate(ctx).Value()).To(BeEquivalentTo(2.0))
+
+	l = NewCoalesceFunction(nil, NewFloatValue(3.0), NewIntValue(3))
+	g.Expect(l.Evaluate(ctx).Value()).To(BeEquivalentTo(3.0))
+}

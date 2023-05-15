@@ -19,11 +19,28 @@
 
 package main
 
-import "github.com/uaraven/csql/cli"
+import (
+	"github.com/jessevdk/go-flags"
+	"github.com/uaraven/csql/cli"
+	"github.com/uaraven/csql/core"
+	"log"
+)
 
-var Version = "0.1.0"
+var Version = "0.2.1"
+
+var opts struct {
+	NullValue *string `long:"null" description:"Sets the string value to be treated as NULL"`
+}
 
 func main() {
+	_, err := flags.Parse(&opts)
+	if err != nil {
+		log.Fatalf("Invalid command line arguments: %v", err)
+	}
+	if opts.NullValue != nil {
+		core.NullValueString = *opts.NullValue
+
+	}
 	shell := cli.NewCsqlShell(Version)
 	shell.Start()
 }

@@ -25,8 +25,8 @@ import (
 	"github.com/uaraven/ansie"
 	"github.com/uaraven/csql/core"
 	"github.com/uaraven/csql/funky"
+	"github.com/uaraven/csql/util"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -135,9 +135,29 @@ func CsvCommand() *Command {
 	return &Command{
 		Name: "csv",
 		Help: "Set or show csv file parameters. Type 'csv help' to view available options",
-		Func: func(s *CsqlShell, args []string) {
-			if args == nil || len(args) == 0 {
+		Func: func(s *CsqlShell, params []string) {
+			if params == nil || len(params) == 0 {
 				s.PrintMessage(s.C.A("Null String=").Attr(ansie.Bold).A(core.NullValueString).Reset().String())
+			} else {
+				var opts struct {
+					Null *string `long:"null"`
+				}
+				args, err := flags.ParseArgs(&opts, params)
+				if err != nil {
+					s.PrintError(fmt.Sprintf("Invalid parameters: %v", params))
+					return
+				}
+				if funky.AnyMatches(args, func(s string) bool {
+					return s == "help"
+				}) {
+					s.PrintMessage("set --null=\"<null string>\", i.e. set --null=\"\" to treat empty strings as null")
+					return
+				}
+				if opts.Null != nil {
+					core.NullValueString = util.Unquote(*opts.Null)
+					s.PrintMessage(s.C.A("Null String=").Attr(ansie.Bold).A(core.NullValueString).Reset().String())
+				}
+
 			}
 		},
 	}
@@ -156,10 +176,7 @@ func InspectCommand() *Command {
 				return
 			}
 			for _, fName := range args {
-				fileName, err := strconv.Unquote(fName)
-				if err != nil {
-					fileName = fName
-				}
+				fileName := util.Unquote(fName)
 				csvFile := core.ExpandCsvFileName(fileName)
 				csvStruct, err := InspectCsv(csvFile)
 				if err != nil {

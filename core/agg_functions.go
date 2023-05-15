@@ -119,7 +119,7 @@ func NewSumFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 			for _, row := range rows {
 				value := arg.Evaluate(row)
 				if !IsNumeric(value) {
-					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for sum: %v", value)))
+					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for sum: %v in row %s", value, row)))
 				}
 				if sum.Type() == TypeFloat || value.Type() == TypeFloat {
 					a := sum.AsFloat().Value().(float64)
@@ -146,7 +146,7 @@ func NewAvgFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 			for _, row := range rows {
 				value := arg.Evaluate(row)
 				if !IsNumeric(value) {
-					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for sum: %v", value)))
+					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for avg: %v in row %s", value, row)))
 				}
 				if sum.Type() == TypeFloat || value.Type() == TypeFloat {
 					a := sum.AsFloat().Value().(float64)
@@ -180,7 +180,7 @@ func NewMinFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 			for _, row := range rows {
 				value := arg.Evaluate(row)
 				if !IsNumeric(value) {
-					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for min: %v", value)))
+					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for min: %v in row %s", value, row)))
 				}
 				if min.Type() == TypeFloat || value.Type() == TypeFloat {
 					a := min.AsFloat().Value().(float64)
@@ -211,7 +211,7 @@ func NewMaxFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 			for _, row := range rows[1:] {
 				value := arg.Evaluate(row)
 				if !IsNumeric(value) {
-					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for max: %v", value)))
+					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for max: %v in row %s", value, row.String())))
 				}
 				if max.Type() == TypeFloat || value.Type() == TypeFloat {
 					a := max.AsFloat().Value().(float64)

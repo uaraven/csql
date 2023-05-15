@@ -478,6 +478,20 @@ func TestAstTransformer_FunctionCall(t *testing.T) {
 	g.Expect(rows[1].GetByIndex(2).Value()).To(Equal("JAMES"))
 }
 
+func TestAstTransformer_CoalesceFunctionCall(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select id, coalesce(property, 'None') from "../test-data/nulls.csv"`).
+		GetRows()
+	g.Expect(rows).To(HaveLen(2))
+
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(int64(1)))
+	g.Expect(rows[0].GetByIndex(2).Value()).To(Equal("Mansion"))
+	g.Expect(rows[1].GetByIndex(1).Value()).To(Equal(int64(2)))
+	g.Expect(rows[1].GetByIndex(2).Value()).To(Equal("None"))
+}
+
 func TestAstTransformer_Count(t *testing.T) {
 	g := NewGomegaWithT(t)
 

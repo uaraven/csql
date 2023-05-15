@@ -25,6 +25,17 @@ func EqualsIgnoreCase(s1, s2 string) bool {
 	return strings.ToLower(s1) == strings.ToLower(s2)
 }
 
+func Unquote(s string) string {
+	if len(s) < 2 {
+		return s
+	}
+	if (s[0] == '"' && s[len(s)-1] == '"') || (s[0] == '\'' && s[len(s)-1] == '\'') {
+		return s[0 : len(s)-1]
+	} else {
+		return s
+	}
+}
+
 func Must[T any](v T, err error) T {
 	if err != nil {
 		panic(err)

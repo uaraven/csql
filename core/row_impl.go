@@ -117,7 +117,14 @@ func (r rowImpl) Id() int {
 }
 
 func (r rowImpl) String() string {
-	return fmt.Sprintf("%v", r.values)
+	var sb strings.Builder
+	for idx, v := range r.values {
+		if idx > 0 {
+			sb.WriteString(", ")
+		}
+		sb.WriteString(v.String())
+	}
+	return sb.String()
 }
 
 func (r rowImpl) Key() string {

@@ -319,7 +319,7 @@ func (n nullValue) AsBool() Value {
 }
 
 func (n nullValue) String() string {
-	return NullValueString
+	return "NULL"
 }
 
 func (n nullValue) Repr() string {

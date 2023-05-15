@@ -157,6 +157,7 @@ function
     | K_TO_LOWER
     | K_POW
     | K_SQRT
+    | K_COALESCE
     ;
 
 K_AND: A N D;
@@ -203,6 +204,7 @@ K_TO_UPPER: T O '_' U P P E R;
 K_TO_LOWER: T O '_' L O W E R;
 K_POW: P O W;
 K_SQRT: S Q R T;
+K_COALESCE: C O A L E S C E;
 K_COUNT: C O U N T;
 K_SUM: S U M;
 K_AVG: A V G;

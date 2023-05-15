@@ -247,3 +247,15 @@ func NewPowFunction(loc *errors.SourceLocation, args ...Evaluator) SqlFunction {
 		return NewFloatValue(math.Pow(base.AsFloat().Value().(float64), pow.AsFloat().Value().(float64)))
 	}, loc, args...)
 }
+
+func NewCoalesceFunction(loc *errors.SourceLocation, args ...Evaluator) SqlFunction {
+	return newSqlFunction("COALESCE", func(ctx EvaluationContext, f SqlFunction) Value {
+		for _, arg := range f.GetArgs() {
+			value := arg.Evaluate(ctx)
+			if value.Type() != TypeNull {
+				return value
+			}
+		}
+		return NewNullValue()
+	}, loc, args...)
+}
