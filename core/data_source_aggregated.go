@@ -86,7 +86,7 @@ func NewAggregationDataSourceHaving(
 	}
 }
 
-func applyAggregates(groups [][]Row, projection []ProjectionColumn, headers DataSourceHeader, aggregates map[int]AggregateFunction, having Evaluator) []Row {
+func applyAggregates(groups [][]Row, projection []ProjectionColumn, headers DataSourceHeader, aggregates map[int]Evaluator, having Evaluator) []Row {
 	result := make([]Row, 0)
 	rowId := 0
 	for _, row := range groups {
@@ -96,7 +96,7 @@ func applyAggregates(groups [][]Row, projection []ProjectionColumn, headers Data
 				projectedRow := projectRow(projection, headers, row[0])
 				values := projectedRow.Values()
 				for index, v := range aggregates {
-					value := v.AggregateEvaluate(aggregateCtx)
+					value := v.Evaluate(aggregateCtx)
 					values[index] = value
 				}
 				nrow := newRowWithId(rowId, headers, values)
@@ -112,7 +112,8 @@ func projectRow(projection []ProjectionColumn, header DataSourceHeader, row Row)
 	resultValues := make([]Value, header.ColumnCount())
 	for idx, prj := range projection {
 		var v Value
-		if _, isAgg := prj.source.(AggregateFunction); isAgg {
+		//if _, isAgg := prj.source.(AggregateFunction); isAgg {
+		if expressionContainsAggregate(prj.source) {
 			v = nullV
 		} else {
 			v = prj.source.Evaluate(row)
@@ -137,15 +138,31 @@ func foldGroupNoAggregates(rowGroups [][]Row, having Evaluator) []Row {
 	return result
 }
 
-func filterAggregateFunctions(projection []ProjectionColumn) map[int]AggregateFunction {
-	result := make(map[int]AggregateFunction)
+func filterAggregateFunctions(projection []ProjectionColumn) map[int]Evaluator {
+	result := make(map[int]Evaluator)
 	for idx, column := range projection {
-		if aggF, ok := column.source.(AggregateFunction); ok {
-			result[idx] = aggF
+		if expressionContainsAggregate(column.source) {
+			result[idx] = column.source
 		}
-		// TODO: Handle aggregate functions in
 	}
 	return result
+}
+
+func expressionContainsAggregate(e Evaluator) bool {
+	switch v := e.(type) {
+	case AggregateFunction:
+		return true
+	case SqlFunction:
+		return funky.AnyMatches(v.GetArgs(), func(evaluator Evaluator) bool {
+			ok := expressionContainsAggregate(evaluator)
+			return ok
+		})
+	case *binaryExpression:
+		return expressionContainsAggregate(v.left) || expressionContainsAggregate(v.right)
+	case binaryExpression:
+		return expressionContainsAggregate(v.left) || expressionContainsAggregate(v.right)
+	}
+	return false
 }
 
 func groupRows(ds DataSource, by []GroupByColumn) [][]Row {

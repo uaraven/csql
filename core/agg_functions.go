@@ -102,7 +102,7 @@ func newAggFunction(name string, implementor AggregateFunctionImplementor, loc *
 }
 
 type countFunction struct {
-	AggregateFunction
+	aggFunctionImpl
 	arg         Evaluator
 	distinct    bool
 	loc         *errors.SourceLocation
@@ -110,7 +110,7 @@ type countFunction struct {
 }
 
 func NewSumFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
-	return aggFunctionImpl{
+	return &aggFunctionImpl{
 		arg:  arg,
 		name: "SUM",
 		loc:  loc,
@@ -137,7 +137,7 @@ func NewSumFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 }
 
 func NewAvgFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
-	return aggFunctionImpl{
+	return &aggFunctionImpl{
 		arg:  arg,
 		name: "AVG",
 		loc:  loc,
@@ -171,7 +171,7 @@ func NewAvgFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 }
 
 func NewMinFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
-	return aggFunctionImpl{
+	return &aggFunctionImpl{
 		arg:  arg,
 		name: "MIN",
 		loc:  loc,
@@ -202,7 +202,7 @@ func NewMinFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 }
 
 func NewMaxFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
-	return aggFunctionImpl{
+	return &aggFunctionImpl{
 		arg:  arg,
 		name: "MAX",
 		loc:  loc,
@@ -276,6 +276,13 @@ func (cf countFunction) Location() *errors.SourceLocation {
 
 func (cf countFunction) AggregateEvaluate(ctx AggregateContext) Value {
 	return cf.implementor(ctx.RowSet(), cf)
+}
+
+func (cf countFunction) Evaluate(ctx EvaluationContext) Value {
+	if aggCtx, isAgg := ctx.(AggregateContext); isAgg {
+		return cf.AggregateEvaluate(aggCtx)
+	}
+	panic(errors.NewError(cf.loc, "COUNT function cannot be used as a scalar"))
 }
 
 func (cf countFunction) String() string {
