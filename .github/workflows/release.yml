@@ -25,8 +25,8 @@ jobs:
 
     - name: Commit version.txt
       uses: actions-js/push@master
-      message: "Incremented version"
       with:
+        message: "Incremented version"
         github_token: ${{ secrets.GITHUB_TOKEN }}
       #run: git add version.txt && git commit -m "Increment version to v$(cat version.txt)" && git push
 
