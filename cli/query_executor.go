@@ -31,7 +31,7 @@ import (
 	"time"
 )
 
-func ExecuteQuery(query string) {
+func RunQuery(query string) (result core.DataSource) {
 	defer func() {
 		if err := recover(); err != nil {
 			switch sqle := err.(type) {
@@ -40,11 +40,20 @@ func ExecuteQuery(query string) {
 			default:
 				fmt.Println(Ansi.Attr(Bold).S("%v", err).Reset().String())
 			}
+			result = nil
 		}
 	}()
+	result = sql.ExecuteSql(query)
+	return
+}
+
+func ExecuteQuery(query string) {
 	start := time.Now()
-	ds := sql.ExecuteSql(query)
+	ds := RunQuery(query)
 	completed := time.Now().Sub(start)
+	if ds == nil {
+		return
+	}
 	table := InitTable(ds, -1)
 	fmt.Println(table.PrintHeader())
 	fmt.Println(table.PrintData(ds.GetRows()))
@@ -52,18 +61,11 @@ func ExecuteQuery(query string) {
 }
 
 func ExecuteToCsv(query string, outputFile string) {
-	defer func() {
-		if err := recover(); err != nil {
-			switch sqle := err.(type) {
-			case *errors.CsqlError:
-				fmt.Println(Ansi.S("[%d:%d] ", sqle.Location.Line, sqle.Location.Column+1).Attr(Bold).A(sqle.Message).Reset().String())
-			default:
-				fmt.Println(Ansi.Attr(Bold).S("%v", err).Reset().String())
-			}
-		}
-	}()
 	start := time.Now()
-	ds := sql.ExecuteSql(query)
+	ds := RunQuery(query)
+	if ds == nil {
+		return
+	}
 	completed := time.Now().Sub(start)
 	file, err := os.Create(outputFile)
 	if err != nil {

@@ -23,8 +23,6 @@ import (
 	"fmt"
 	"github.com/peterh/liner"
 	"github.com/uaraven/ansie"
-	"github.com/uaraven/csql/errors"
-	"github.com/uaraven/csql/sql"
 	"golang.org/x/term"
 	"io"
 	"log"
@@ -169,20 +167,12 @@ func (s *CsqlShell) IsCommand(input string) bool {
 }
 
 func (s *CsqlShell) ExecuteQuery(query string) {
-	defer func() {
-		if err := recover(); err != nil {
-			switch sqle := err.(type) {
-			case *errors.CsqlError:
-				s.PrintError(s.C.S("[%d:%d] ", sqle.Location.Line, sqle.Location.Column+1).
-					Attr(ansie.Bold).A(sqle.Message).Reset().String())
-			default:
-				s.PrintError(s.C.Attr(ansie.Bold).S("%v", err).Reset().String())
-			}
-		}
-	}()
 	start := time.Now()
-	ds := sql.ExecuteSql(query)
+	ds := RunQuery(query)
 	completed := time.Now().Sub(start)
+	if ds == nil {
+		return
+	}
 	table := InitTable(ds, -1)
 	s.PrintMessage(table.PrintHeader())
 	s.PrintMessage(table.PrintData(ds.GetRows()))
