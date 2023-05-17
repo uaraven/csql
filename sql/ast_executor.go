@@ -82,10 +82,11 @@ func (ae AstTransformer) TransformSelect(ast Select) core.DataSource {
 		if ast.Having != nil {
 			panic(errors.NewError(nil, "HAVING clause in non-aggregate query"))
 		}
+		ds = core.NewProjectionDataSource(ds, projection, ast.Projection.Distinct)
 		if ast.Limit > 0 || len(orderBy) > 0 {
 			ds = core.NewOrderedDatasource(ds, orderBy, int(ast.Limit))
 		}
-		return core.NewProjectionDataSource(ds, projection, ast.Projection.Distinct)
+		return ds
 	}
 }
 

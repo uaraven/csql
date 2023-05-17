@@ -59,7 +59,6 @@ func NewAggregationDataSourceHaving(
 	projection []ProjectionColumn,
 	groupBy []GroupByColumn,
 	having Evaluator) DataSource {
-	rowGroups := groupRows(source, groupBy)
 
 	aggregateFunctions := filterAggregateFunctions(projection)
 
@@ -73,15 +72,17 @@ func NewAggregationDataSourceHaving(
 	// original projection should be modified to include column references in place of aggregate functions
 	// and then applied to the resulting rows (using ProjectionDatasource)
 
+	expandedProjection := ExpandProjection(projection, source.Header())
 	var result []Row
 	if len(aggregateFunctions) == 0 {
+		rowGroups := groupRows(source, groupBy, expandedProjection)
 		result = foldGroupNoAggregates(rowGroups, having)
 		intermediate := NewMemDataSource(source.GetName(), source.Header().ColumnsMetadata(), result)
 		return NewProjectionDataSource(intermediate, projection, false)
 	} else {
-		projection = ExpandProjection(projection, source.Header())
-		newHeader := NewHeaderWithProjection(source, projection)
-		result = applyAggregates(rowGroups, projection, newHeader, aggregateFunctions, having)
+		rowGroups := groupRows(source, groupBy, expandedProjection)
+		newHeader := NewHeaderWithProjection(source, expandedProjection)
+		result = applyAggregates(rowGroups, expandedProjection, newHeader, aggregateFunctions, having)
 		return NewMemDataSource(source.GetName(), newHeader.ColumnsMetadata(), result)
 	}
 }
@@ -165,12 +166,12 @@ func expressionContainsAggregate(e Evaluator) bool {
 	return false
 }
 
-func groupRows(ds DataSource, by []GroupByColumn) [][]Row {
+func groupRows(ds DataSource, by []GroupByColumn, projection []ProjectionColumn) [][]Row {
 	groupings := make(map[string][]Row)
 	for _, row := range ds.GetRows() {
 		vals := make([]Value, len(by))
 		for idx, groupColumn := range by {
-			vals[idx] = getByGroupColumn(row, groupColumn)
+			vals[idx] = getByGroupColumn(row, groupColumn, projection)
 		}
 		key := strings.Join(funky.Map(vals, func(v Value) string {
 			return v.String()
@@ -186,14 +187,20 @@ func groupRows(ds DataSource, by []GroupByColumn) [][]Row {
 	return results
 }
 
-func getByGroupColumn(row Row, column GroupByColumn) Value {
+func getByGroupColumn(row Row, column GroupByColumn, projectionColumn ProjectionColumns) Value {
 	if column.name != "" {
-		optValue := row.Get(column.name)
+		projection := projectionColumn.FindByName(column.name)
+		var optValue = funky.NoneOf[Value]()
+		if projection == nil {
+			optValue = row.Get(column.name) // group by column name
+		} else {
+			optValue = funky.SomeOf(projection.source.Evaluate(row)) // group by aliased
+		}
 		if optValue.IsEmpty() {
 			panic(errors.NewError(column.loc, fmt.Sprintf("Unknown column: \"%s\"", column.name)))
 		}
 		return optValue.Value()
 	} else {
-		return row.GetByIndex(column.index)
+		return projectionColumn[column.index-1].source.Evaluate(row)
 	}
 }
