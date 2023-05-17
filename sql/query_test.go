@@ -31,6 +31,33 @@ func TestOrderByCalculatedColumn(t *testing.T) {
 	))
 }
 
+func TestOrderByCalculatedColumnWithAlias(t *testing.T) {
+	g := NewGomegaWithT(t)
+	rows := ExecuteSql(`
+			select city || ',' || country as city, population/10000 as bucket 
+ 			from "../test-data/cities" order by bucket desc,city`).
+		GetRows()
+
+	columns := []string{"city", "bucket"}
+	g.Expect(core.RowsToSlice(rows, columns...)).To(ContainElements(
+		[]interface{}{"London,UK", int64(879)},
+		[]interface{}{"Warsaw,Poland", int64(305)},
+		[]interface{}{"Odesa,Ukraine", int64(101)},
+		[]interface{}{"London,Canada", int64(42)},
+		[]interface{}{"Waterloo,Canada", int64(12)},
+		[]interface{}{"Dubrovnik,Croatia", int64(4)},
+		[]interface{}{"Waterloo,Belgium", int64(3)},
+		[]interface{}{"London,USA", int64(1)},
+		[]interface{}{"Odessa,Canada", int64(1)},
+		[]interface{}{"Waterloo,Australia", int64(1)},
+		[]interface{}{"London,USA", int64(0)},
+		[]interface{}{"London,USA", int64(0)},
+		[]interface{}{"Odessa,USA", int64(0)},
+		[]interface{}{"Warsaw,USA", int64(0)},
+		[]interface{}{"Waterloo,USA", int64(0)},
+	))
+}
+
 func TestGroupByCalculatedColumn(t *testing.T) {
 	g := NewGomegaWithT(t)
 	rows := ExecuteSql(
