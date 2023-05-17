@@ -32,7 +32,7 @@ func isAsterisk(pc ProjectionColumn) bool {
 	return false
 }
 
-func ExpandProjection(projection []ProjectionColumn, headers DataSourceHeader) []ProjectionColumn {
+func ExpandProjection(projection ProjectionColumns, headers DataSourceHeader) ProjectionColumns {
 	if funky.NoneMatches(projection, isAsterisk) {
 		return projection
 	}

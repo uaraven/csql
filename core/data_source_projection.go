@@ -23,6 +23,7 @@ import (
 	"fmt"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/uaraven/csql/errors"
+	"github.com/uaraven/csql/util"
 )
 
 const AllColumns = "*"
@@ -31,6 +32,23 @@ type ProjectionColumn struct {
 	source Evaluator
 	loc    *errors.SourceLocation
 	alias  string
+}
+
+type ProjectionColumns []ProjectionColumn
+
+func (pc ProjectionColumns) FindByName(alias string) *ProjectionColumn {
+	for idx, column := range pc {
+		if column.alias != "" && util.EqualsIgnoreCase(column.alias, alias) {
+			return &pc[idx]
+		} else {
+			if id, ok := column.source.(Identifiable); ok {
+				if util.EqualsIgnoreCase(id.Identifier(), alias) {
+					return &pc[idx]
+				}
+			}
+		}
+	}
+	return nil
 }
 
 func NewColumn(name string) ProjectionColumn {

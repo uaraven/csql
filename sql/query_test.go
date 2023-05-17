@@ -33,7 +33,34 @@ func TestOrderByCalculatedColumn(t *testing.T) {
 
 func TestGroupByCalculatedColumn(t *testing.T) {
 	g := NewGomegaWithT(t)
-	rows := ExecuteSql(`select count(*) as cnt, population/10000 as bucket from "../test-data/cities" order by 2, 1 group by 2`).
+	rows := ExecuteSql(
+		`select count(*) as cnt, population/10000 as bucket 
+				from "../test-data/cities" 
+				order by 2, 1 
+				group by 2`).
+		GetRows()
+
+	columns := []string{"cnt", "bucket"}
+	g.Expect(core.RowsToSlice(rows, columns...)).To(ContainElements(
+		[]interface{}{int64(5), int64(0)},
+		[]interface{}{int64(3), int64(1)},
+		[]interface{}{int64(1), int64(3)},
+		[]interface{}{int64(1), int64(4)},
+		[]interface{}{int64(1), int64(12)},
+		[]interface{}{int64(1), int64(42)},
+		[]interface{}{int64(1), int64(101)},
+		[]interface{}{int64(1), int64(305)},
+		[]interface{}{int64(1), int64(879)},
+	))
+}
+
+func TestGroupByCalculatedColumnWithAlias(t *testing.T) {
+	g := NewGomegaWithT(t)
+	rows := ExecuteSql(
+		`select count(*) as cnt, population/10000 as bucket 
+				from "../test-data/cities" 
+				order by 2, 1 
+				group by bucket`).
 		GetRows()
 
 	columns := []string{"cnt", "bucket"}
