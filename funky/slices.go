@@ -22,6 +22,9 @@ package funky
 import (
 	"fmt"
 	"golang.org/x/exp/constraints"
+	"golang.org/x/sync/errgroup"
+	"runtime"
+	"sync"
 )
 
 func Map[T any, R any](data []T, transformer func(T) R) []R {
@@ -32,11 +35,41 @@ func Map[T any, R any](data []T, transformer func(T) R) []R {
 	return result
 }
 
+func ParallelMap[T any, R any](data []T, transformer func(T) R) []R {
+	result := make([]R, len(data))
+	var wg sync.WaitGroup
+	for idx := range data {
+		i := idx
+		wg.Add(1)
+		go func() {
+			result[i] = transformer(data[i])
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+	return result
+}
+
 func MapWithIndex[T any, R any](data []T, transformer func(int, T) R) []R {
 	result := make([]R, len(data))
 	for idx, elem := range data {
 		result[idx] = transformer(idx, elem)
 	}
+	return result
+}
+
+func ParallelMapWithIndex[T any, R any](data []T, transformer func(int, T) R) []R {
+	result := make([]R, len(data))
+	var wg sync.WaitGroup
+	for idx := range data {
+		i := idx
+		wg.Add(1)
+		go func() {
+			result[i] = transformer(i, data[i])
+			wg.Done()
+		}()
+	}
+	wg.Wait()
 	return result
 }
 
@@ -68,6 +101,58 @@ func Filter[T any](data []T, matcher func(T) bool) []T {
 		if matcher(elem) {
 			result = append(result, data[idx])
 		}
+	}
+	return result
+}
+
+func ParallelFilter[T any](data []T, matcher func(T) bool) []T {
+	size := len(data)
+	cpuCount := runtime.NumCPU()
+	if size <= 4*cpuCount {
+		return Filter(data, matcher)
+	}
+	chunkSize := size / cpuCount
+	count := cpuCount
+	if size%cpuCount != 0 {
+		count++
+	}
+	eg := new(errgroup.Group)
+	start := 0
+	resultChunks := make([][]T, count)
+	for i := 0; i < count; i++ {
+		l := start + chunkSize
+		if l > len(data) {
+			l = len(data)
+		}
+		iter := i
+		if start < l {
+			dt := data[start:l]
+			eg.Go(func() (err error) {
+				defer func() {
+					fail := recover()
+					if fail != nil {
+						if ferr, ok := fail.(error); ok {
+							err = ferr
+							return
+						} else {
+							err = fmt.Errorf("%v", fail)
+							return
+						}
+					}
+				}()
+				resultChunks[iter] = Filter(dt, matcher)
+				return
+			})
+		}
+		start = l
+	}
+	err := eg.Wait()
+	if err != nil {
+		panic(err)
+	}
+	result := make([]T, 0)
+	for _, d := range resultChunks {
+		result = append(result, d...)
 	}
 	return result
 }

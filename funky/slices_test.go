@@ -21,6 +21,7 @@ package funky
 
 import (
 	. "github.com/onsi/gomega"
+	"strconv"
 	"testing"
 )
 
@@ -31,6 +32,30 @@ func TestFilter(t *testing.T) {
 	result := Filter(list, func(i int) bool { return (i % 2) == 0 })
 
 	g.Expect(result).To(ContainElements(2, 4, 6))
+}
+
+func TestParallelFilter(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	dt := genData(105)
+
+	res := ParallelFilter(dt, func(i int) bool {
+		return i%6 == 0
+	})
+
+	g.Expect(res).ToNot(BeEmpty())
+}
+
+func TestParallelFilter2(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	dt := genData(100)
+
+	res := ParallelFilter(dt, func(i int) bool {
+		return i%6 == 0
+	})
+
+	g.Expect(res).ToNot(BeEmpty())
 }
 
 func TestFind_Success(t *testing.T) {
@@ -87,4 +112,46 @@ func TestNoneMatches(t *testing.T) {
 
 	result = NoneMatches(list, func(i int) bool { return i == -1 })
 	g.Expect(result).To(BeTrue())
+}
+
+var data = genData(10111)
+
+func genData(n int) []int {
+	data := make([]int, n)
+	for i := range data {
+		data[i] = i
+	}
+	return data
+}
+
+func BenchmarkFilter(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		Filter(data, func(i int) bool {
+			return i%6 == 0
+		})
+	}
+}
+
+func BenchmarkParallelFilter(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ParallelFilter(data, func(i int) bool {
+			return i%6 == 0
+		})
+	}
+}
+
+func BenchmarkMap(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		Map(data, func(t int) string {
+			return strconv.Itoa(t)
+		})
+	}
+}
+
+func BenchmarkParallelMap(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ParallelMap(data, func(t int) string {
+			return strconv.Itoa(t)
+		})
+	}
 }
