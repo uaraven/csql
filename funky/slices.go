@@ -156,7 +156,6 @@ func ParallelFilter[T any](data []T, matcher func(T) bool) []T {
 	}
 	return result
 }
-
 func Fold[T any](data []T, zero T, folding func(T, T) T) T {
 	result := zero
 	for _, elem := range data {

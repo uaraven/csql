@@ -27,7 +27,7 @@ import (
 	"strings"
 )
 
-var Version = "local v0.2.1 series"
+var Version = "local v0.2.1(p) series"
 
 var opts struct {
 	NullValue *string `short:"n" long:"null" description:"Sets the string value to be treated as NULL"`
