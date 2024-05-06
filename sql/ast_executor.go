@@ -258,9 +258,9 @@ func (ae AstTransformer) TransformNamedProjectionField(field *CompoundName, alia
 	}
 	sb.WriteString(string(field.Name))
 	if alias != nil {
-		return core.NewColumnWithAlias(sb.String(), string(*alias))
+		return core.NewColumnWithAliasL(sb.String(), string(*alias), field.Location)
 	} else {
-		return core.NewColumn(sb.String())
+		return core.NewColumnL(sb.String(), field.Location)
 	}
 }
 

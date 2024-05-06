@@ -36,7 +36,11 @@ func RunQuery(query string) (result core.DataSource) {
 		if err := recover(); err != nil {
 			switch sqle := err.(type) {
 			case *errors.CsqlError:
-				fmt.Println(Ansi.S("[%d:%d] ", sqle.Location.Line, sqle.Location.Column+1).Attr(Bold).A(sqle.Message).Reset().String())
+				if sqle.Location == nil {
+					fmt.Println(Ansi.A("[unknown location] ").Attr(Bold).A(sqle.Message).Reset().String())
+				} else {
+					fmt.Println(Ansi.S("[%d:%d] ", sqle.Location.Line, sqle.Location.Column+1).Attr(Bold).A(sqle.Message).Reset().String())
+				}
 			default:
 				fmt.Println(Ansi.Attr(Bold).S("%v", err).Reset().String())
 			}

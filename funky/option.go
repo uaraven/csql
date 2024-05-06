@@ -86,7 +86,7 @@ func (n None[T]) OrPanic(err error) T {
 }
 
 func (n None[T]) IfPresent(_ func(v T)) {
-
+	// do nothing
 }
 
 func (n None[T]) String() string {
