@@ -28,6 +28,7 @@ import (
 	"github.com/uaraven/csql/util"
 	"os"
 	"strings"
+	"time"
 )
 
 type CommandFunc func(shell *CsqlShell, parameters []string)
@@ -206,6 +207,40 @@ func InspectCommand() *Command {
 				}
 				shell.PrintMessage("")
 			}
+		},
+	}
+}
+
+func StatusCommand() *Command {
+	return &Command{
+		Name: "status",
+		Help: "Show current CSQL status - number of datasets and rows in memory",
+		Func: func(shell *CsqlShell, parameters []string) {
+			titleWidth := 0
+			for k := range core.TableCache {
+				if len(k) > titleWidth {
+					titleWidth = len(k)
+				}
+			}
+			shell.PrintMessage(fmt.Sprintf("%*s %10s Age", titleWidth, "Dataset", "Size"))
+			for k, v := range core.TableCache {
+				diff := time.Now().Sub(v.AccessTime)
+				shell.PrintMessage(shell.C.Fg(ansie.Blue).S("%*s ", titleWidth, k).
+					Fg(ansie.Green).S("%15d", len(v.DataSource.GetRows())).Reset().A(" rows ").
+					Fg(ansie.Yellow).S("%s", util.FormatDuration(diff)).
+					String())
+			}
+		},
+	}
+}
+
+func PurgeCommand() *Command {
+	return &Command{
+		Name: "purge",
+		Help: "Clears CSQL dataset cache - removes all datasets from memory",
+		Func: func(shell *CsqlShell, parameters []string) {
+			datasets, rows := core.TableCache.ClearCache()
+			shell.PrintMessage(shell.C.A("Removed ").Fg(ansie.Blue).S("%d", datasets).Reset().A(" datasets and ").Fg(ansie.Blue).S("%d", rows).Reset().A(" rows from memory").String())
 		},
 	}
 }

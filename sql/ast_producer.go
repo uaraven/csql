@@ -21,7 +21,7 @@ package sql
 
 import (
 	"fmt"
-	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
+	"github.com/antlr4-go/antlr/v4"
 	. "github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/parser"
 	"strconv"
@@ -39,6 +39,8 @@ type Errors struct {
 	errors []ParsingError
 }
 
+var _ antlr.ErrorListener = &Errors{}
+
 func newErrors() *Errors {
 	return &Errors{
 		errors: make([]ParsingError, 0),
@@ -53,11 +55,11 @@ func (e *Errors) SyntaxError(_ antlr.Recognizer, _ interface{}, line, column int
 	})
 }
 
-func (e *Errors) ReportAmbiguity(_ antlr.Parser, _ *antlr.DFA, _, _ int, _ bool, _ *antlr.BitSet, _ antlr.ATNConfigSet) {
+func (e *Errors) ReportAmbiguity(_ antlr.Parser, _ *antlr.DFA, _, _ int, _ bool, _ *antlr.BitSet, _ *antlr.ATNConfigSet) {
 }
-func (e *Errors) ReportAttemptingFullContext(_ antlr.Parser, _ *antlr.DFA, _, _ int, _ *antlr.BitSet, _ antlr.ATNConfigSet) {
+func (e *Errors) ReportAttemptingFullContext(_ antlr.Parser, _ *antlr.DFA, _, _ int, _ *antlr.BitSet, _ *antlr.ATNConfigSet) {
 }
-func (e *Errors) ReportContextSensitivity(_ antlr.Parser, _ *antlr.DFA, _, _, _ int, _ antlr.ATNConfigSet) {
+func (e *Errors) ReportContextSensitivity(_ antlr.Parser, _ *antlr.DFA, _, _, _ int, _ *antlr.ATNConfigSet) {
 }
 
 // ParseSQL reads the sql statement and converts it into an AST

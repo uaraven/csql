@@ -1,4 +1,4 @@
-// Code generated from java-escape by ANTLR 4.11.1. DO NOT EDIT.
+// Code generated from Csql.g4 by ANTLR 4.13.2. DO NOT EDIT.
 
 package parser // Csql
 
@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/antlr/antlr4/runtime/Go/antlr/v4"
+	"github.com/antlr4-go/antlr/v4"
 )
 
 // Suppress unused import errors
@@ -19,24 +19,24 @@ type CsqlParser struct {
 	*antlr.BaseParser
 }
 
-var csqlParserStaticData struct {
+var CsqlParserStaticData struct {
 	once                   sync.Once
 	serializedATN          []int32
-	literalNames           []string
-	symbolicNames          []string
-	ruleNames              []string
-	predictionContextCache *antlr.PredictionContextCache
+	LiteralNames           []string
+	SymbolicNames          []string
+	RuleNames              []string
+	PredictionContextCache *antlr.PredictionContextCache
 	atn                    *antlr.ATN
 	decisionToDFA          []*antlr.DFA
 }
 
 func csqlParserInit() {
-	staticData := &csqlParserStaticData
-	staticData.literalNames = []string{
+	staticData := &CsqlParserStaticData
+	staticData.LiteralNames = []string{
 		"", "';'", "'<'", "'<='", "'>'", "'>='", "'='", "'!='", "'<>'", "'+'",
 		"'-'", "'*'", "'/'", "'%'", "'||'", "'('", "','", "')'", "'.'",
 	}
-	staticData.symbolicNames = []string{
+	staticData.SymbolicNames = []string{
 		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
 		"", "", "K_AND", "K_AS", "K_BETWEEN", "K_FROM", "K_IN", "K_IS", "K_NOT",
 		"K_NULL", "K_OR", "K_REGEX", "K_SELECT", "K_MATCH", "K_WHERE", "K_TRUE",
@@ -49,7 +49,7 @@ func csqlParserInit() {
 		"SIMPLE_IDENTIFIER", "QUOTED_IDENTIFIER", "NUMERIC_LITERAL", "STRING_LITERAL",
 		"SINGLE_LINE_COMMENT", "MULTILINE_COMMENT", "SPACES", "UNEXPECTED_CHAR",
 	}
-	staticData.ruleNames = []string{
+	staticData.RuleNames = []string{
 		"query", "comparisonOperator", "binaryOperation", "list", "term", "valueExpr",
 		"whereExpr", "where", "having", "distinct", "funCall", "aggregateFunCall",
 		"countFunc", "aggregateFunc", "projection", "projectionField", "projectionFieldName",
@@ -60,7 +60,7 @@ func csqlParserInit() {
 		"name", "qualifier", "limit", "limitValue", "orderBy", "orderByField",
 		"fieldIndex", "groupBy", "groupByField", "function",
 	}
-	staticData.predictionContextCache = antlr.NewPredictionContextCache()
+	staticData.PredictionContextCache = antlr.NewPredictionContextCache()
 	staticData.serializedATN = []int32{
 		4, 1, 79, 436, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
 		4, 2, 5, 7, 5, 2, 6, 7, 6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7,
@@ -268,7 +268,7 @@ func csqlParserInit() {
 // NewCsqlParser(). You can call this function if you wish to initialize the static state ahead
 // of time.
 func CsqlParserInit() {
-	staticData := &csqlParserStaticData
+	staticData := &CsqlParserStaticData
 	staticData.once.Do(csqlParserInit)
 }
 
@@ -277,12 +277,12 @@ func NewCsqlParser(input antlr.TokenStream) *CsqlParser {
 	CsqlParserInit()
 	this := new(CsqlParser)
 	this.BaseParser = antlr.NewBaseParser(input)
-	staticData := &csqlParserStaticData
-	this.Interpreter = antlr.NewParserATNSimulator(this, staticData.atn, staticData.decisionToDFA, staticData.predictionContextCache)
-	this.RuleNames = staticData.ruleNames
-	this.LiteralNames = staticData.literalNames
-	this.SymbolicNames = staticData.symbolicNames
-	this.GrammarFileName = "java-escape"
+	staticData := &CsqlParserStaticData
+	this.Interpreter = antlr.NewParserATNSimulator(this, staticData.atn, staticData.decisionToDFA, staticData.PredictionContextCache)
+	this.RuleNames = staticData.RuleNames
+	this.LiteralNames = staticData.LiteralNames
+	this.SymbolicNames = staticData.SymbolicNames
+	this.GrammarFileName = "Csql.g4"
 
 	return this
 }
@@ -429,20 +429,29 @@ type IQueryContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	UnionSelects() IUnionSelectsContext
+	EOF() antlr.TerminalNode
+
 	// IsQueryContext differentiates from other interfaces.
 	IsQueryContext()
 }
 
 type QueryContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyQueryContext() *QueryContext {
 	var p = new(QueryContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_query
 	return p
+}
+
+func InitEmptyQueryContext(p *QueryContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_query
 }
 
 func (*QueryContext) IsQueryContext() {}
@@ -450,7 +459,7 @@ func (*QueryContext) IsQueryContext() {}
 func NewQueryContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *QueryContext {
 	var p = new(QueryContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_query
@@ -499,28 +508,9 @@ func (s *QueryContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) Query() (localctx IQueryContext) {
-	this := p
-	_ = this
-
 	localctx = NewQueryContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 0, CsqlParserRULE_query)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
@@ -529,21 +519,42 @@ func (p *CsqlParser) Query() (localctx IQueryContext) {
 	}
 	p.SetState(96)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserT__0 {
 		{
 			p.SetState(95)
 			p.Match(CsqlParserT__0)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 
 	}
 	{
 		p.SetState(98)
 		p.Match(CsqlParserEOF)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IComparisonOperatorContext is an interface to support dynamic dispatch.
@@ -552,21 +563,25 @@ type IComparisonOperatorContext interface {
 
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
-
 	// IsComparisonOperatorContext differentiates from other interfaces.
 	IsComparisonOperatorContext()
 }
 
 type ComparisonOperatorContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyComparisonOperatorContext() *ComparisonOperatorContext {
 	var p = new(ComparisonOperatorContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_comparisonOperator
 	return p
+}
+
+func InitEmptyComparisonOperatorContext(p *ComparisonOperatorContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_comparisonOperator
 }
 
 func (*ComparisonOperatorContext) IsComparisonOperatorContext() {}
@@ -574,7 +589,7 @@ func (*ComparisonOperatorContext) IsComparisonOperatorContext() {}
 func NewComparisonOperatorContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *ComparisonOperatorContext {
 	var p = new(ComparisonOperatorContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_comparisonOperator
@@ -602,28 +617,9 @@ func (s *ComparisonOperatorContext) Accept(visitor antlr.ParseTreeVisitor) inter
 }
 
 func (p *CsqlParser) ComparisonOperator() (localctx IComparisonOperatorContext) {
-	this := p
-	_ = this
-
 	localctx = NewComparisonOperatorContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 2, CsqlParserRULE_comparisonOperator)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
@@ -638,7 +634,17 @@ func (p *CsqlParser) ComparisonOperator() (localctx IComparisonOperatorContext) 
 		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IBinaryOperationContext is an interface to support dynamic dispatch.
@@ -647,21 +653,25 @@ type IBinaryOperationContext interface {
 
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
-
 	// IsBinaryOperationContext differentiates from other interfaces.
 	IsBinaryOperationContext()
 }
 
 type BinaryOperationContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyBinaryOperationContext() *BinaryOperationContext {
 	var p = new(BinaryOperationContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_binaryOperation
 	return p
+}
+
+func InitEmptyBinaryOperationContext(p *BinaryOperationContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_binaryOperation
 }
 
 func (*BinaryOperationContext) IsBinaryOperationContext() {}
@@ -669,7 +679,7 @@ func (*BinaryOperationContext) IsBinaryOperationContext() {}
 func NewBinaryOperationContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *BinaryOperationContext {
 	var p = new(BinaryOperationContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_binaryOperation
@@ -697,28 +707,9 @@ func (s *BinaryOperationContext) Accept(visitor antlr.ParseTreeVisitor) interfac
 }
 
 func (p *CsqlParser) BinaryOperation() (localctx IBinaryOperationContext) {
-	this := p
-	_ = this
-
 	localctx = NewBinaryOperationContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 4, CsqlParserRULE_binaryOperation)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
@@ -733,7 +724,17 @@ func (p *CsqlParser) BinaryOperation() (localctx IBinaryOperationContext) {
 		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IListContext is an interface to support dynamic dispatch.
@@ -743,20 +744,29 @@ type IListContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	AllValueExpr() []IValueExprContext
+	ValueExpr(i int) IValueExprContext
+
 	// IsListContext differentiates from other interfaces.
 	IsListContext()
 }
 
 type ListContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyListContext() *ListContext {
 	var p = new(ListContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_list
 	return p
+}
+
+func InitEmptyListContext(p *ListContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_list
 }
 
 func (*ListContext) IsListContext() {}
@@ -764,7 +774,7 @@ func (*ListContext) IsListContext() {}
 func NewListContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *ListContext {
 	var p = new(ListContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_list
@@ -834,33 +844,18 @@ func (s *ListContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) List() (localctx IListContext) {
-	this := p
-	_ = this
-
 	localctx = NewListContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 6, CsqlParserRULE_list)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(104)
 		p.Match(CsqlParserT__14)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	{
 		p.SetState(105)
@@ -868,12 +863,19 @@ func (p *CsqlParser) List() (localctx IListContext) {
 	}
 	p.SetState(110)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	for _la == CsqlParserT__15 {
 		{
 			p.SetState(106)
 			p.Match(CsqlParserT__15)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(107)
@@ -882,14 +884,31 @@ func (p *CsqlParser) List() (localctx IListContext) {
 
 		p.SetState(112)
 		p.GetErrorHandler().Sync(p)
+		if p.HasError() {
+			goto errorExit
+		}
 		_la = p.GetTokenStream().LA(1)
 	}
 	{
 		p.SetState(113)
 		p.Match(CsqlParserT__16)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // ITermContext is an interface to support dynamic dispatch.
@@ -899,20 +918,29 @@ type ITermContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	CompoundName() ICompoundNameContext
+	LiteralValue() ILiteralValueContext
+
 	// IsTermContext differentiates from other interfaces.
 	IsTermContext()
 }
 
 type TermContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyTermContext() *TermContext {
 	var p = new(TermContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_term
 	return p
+}
+
+func InitEmptyTermContext(p *TermContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_term
 }
 
 func (*TermContext) IsTermContext() {}
@@ -920,7 +948,7 @@ func (*TermContext) IsTermContext() {}
 func NewTermContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *TermContext {
 	var p = new(TermContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_term
@@ -981,30 +1009,13 @@ func (s *TermContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) Term() (localctx ITermContext) {
-	this := p
-	_ = this
-
 	localctx = NewTermContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 8, CsqlParserRULE_term)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.SetState(117)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 
 	switch p.GetTokenStream().LA(1) {
 	case CsqlParserIDENTIFIER:
@@ -1022,10 +1033,21 @@ func (p *CsqlParser) Term() (localctx ITermContext) {
 		}
 
 	default:
-		panic(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		goto errorExit
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IValueExprContext is an interface to support dynamic dispatch.
@@ -1034,21 +1056,25 @@ type IValueExprContext interface {
 
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
-
 	// IsValueExprContext differentiates from other interfaces.
 	IsValueExprContext()
 }
 
 type ValueExprContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyValueExprContext() *ValueExprContext {
 	var p = new(ValueExprContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_valueExpr
 	return p
+}
+
+func InitEmptyValueExprContext(p *ValueExprContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_valueExpr
 }
 
 func (*ValueExprContext) IsValueExprContext() {}
@@ -1056,7 +1082,7 @@ func (*ValueExprContext) IsValueExprContext() {}
 func NewValueExprContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *ValueExprContext {
 	var p = new(ValueExprContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_valueExpr
@@ -1066,8 +1092,8 @@ func NewValueExprContext(parser antlr.Parser, parent antlr.ParserRuleContext, in
 
 func (s *ValueExprContext) GetParser() antlr.Parser { return s.parser }
 
-func (s *ValueExprContext) CopyFrom(ctx *ValueExprContext) {
-	s.BaseParserRuleContext.CopyFrom(ctx.BaseParserRuleContext)
+func (s *ValueExprContext) CopyAll(ctx *ValueExprContext) {
+	s.CopyFrom(&ctx.BaseParserRuleContext)
 }
 
 func (s *ValueExprContext) GetRuleContext() antlr.RuleContext {
@@ -1079,15 +1105,15 @@ func (s *ValueExprContext) ToStringTree(ruleNames []string, recog antlr.Recogniz
 }
 
 type ValueTermContext struct {
-	*ValueExprContext
+	ValueExprContext
 }
 
 func NewValueTermContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *ValueTermContext {
 	var p = new(ValueTermContext)
 
-	p.ValueExprContext = NewEmptyValueExprContext()
+	InitEmptyValueExprContext(&p.ValueExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*ValueExprContext))
+	p.CopyAll(ctx.(*ValueExprContext))
 
 	return p
 }
@@ -1123,15 +1149,15 @@ func (s *ValueTermContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 type ValueBinaryExprContext struct {
-	*ValueExprContext
+	ValueExprContext
 }
 
 func NewValueBinaryExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *ValueBinaryExprContext {
 	var p = new(ValueBinaryExprContext)
 
-	p.ValueExprContext = NewEmptyValueExprContext()
+	InitEmptyValueExprContext(&p.ValueExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*ValueExprContext))
+	p.CopyAll(ctx.(*ValueExprContext))
 
 	return p
 }
@@ -1208,15 +1234,15 @@ func (s *ValueBinaryExprContext) Accept(visitor antlr.ParseTreeVisitor) interfac
 }
 
 type ValueParensExprContext struct {
-	*ValueExprContext
+	ValueExprContext
 }
 
 func NewValueParensExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *ValueParensExprContext {
 	var p = new(ValueParensExprContext)
 
-	p.ValueExprContext = NewEmptyValueExprContext()
+	InitEmptyValueExprContext(&p.ValueExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*ValueExprContext))
+	p.CopyAll(ctx.(*ValueExprContext))
 
 	return p
 }
@@ -1252,15 +1278,15 @@ func (s *ValueParensExprContext) Accept(visitor antlr.ParseTreeVisitor) interfac
 }
 
 type FunctionExprContext struct {
-	*ValueExprContext
+	ValueExprContext
 }
 
 func NewFunctionExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *FunctionExprContext {
 	var p = new(FunctionExprContext)
 
-	p.ValueExprContext = NewEmptyValueExprContext()
+	InitEmptyValueExprContext(&p.ValueExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*ValueExprContext))
+	p.CopyAll(ctx.(*ValueExprContext))
 
 	return p
 }
@@ -1296,15 +1322,15 @@ func (s *FunctionExprContext) Accept(visitor antlr.ParseTreeVisitor) interface{}
 }
 
 type AggregateFuncExprContext struct {
-	*ValueExprContext
+	ValueExprContext
 }
 
 func NewAggregateFuncExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *AggregateFuncExprContext {
 	var p = new(AggregateFuncExprContext)
 
-	p.ValueExprContext = NewEmptyValueExprContext()
+	InitEmptyValueExprContext(&p.ValueExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*ValueExprContext))
+	p.CopyAll(ctx.(*ValueExprContext))
 
 	return p
 }
@@ -1344,38 +1370,22 @@ func (p *CsqlParser) ValueExpr() (localctx IValueExprContext) {
 }
 
 func (p *CsqlParser) valueExpr(_p int) (localctx IValueExprContext) {
-	this := p
-	_ = this
-
 	var _parentctx antlr.ParserRuleContext = p.GetParserRuleContext()
+
 	_parentState := p.GetState()
 	localctx = NewValueExprContext(p, p.GetParserRuleContext(), _parentState)
 	var _prevctx IValueExprContext = localctx
 	var _ antlr.ParserRuleContext = _prevctx // TODO: To prevent unused variable warning.
 	_startState := 10
 	p.EnterRecursionRule(localctx, 10, CsqlParserRULE_valueExpr, _p)
-
-	defer func() {
-		p.UnrollRecursionContexts(_parentctx)
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	var _alt int
 
 	p.EnterOuterAlt(localctx, 1)
 	p.SetState(127)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 
 	switch p.GetTokenStream().LA(1) {
 	case CsqlParserT__8, CsqlParserT__9, CsqlParserK_NULL, CsqlParserIDENTIFIER, CsqlParserNUMERIC_LITERAL, CsqlParserSTRING_LITERAL:
@@ -1413,6 +1423,10 @@ func (p *CsqlParser) valueExpr(_p int) (localctx IValueExprContext) {
 		{
 			p.SetState(123)
 			p.Match(CsqlParserT__14)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(124)
@@ -1421,16 +1435,26 @@ func (p *CsqlParser) valueExpr(_p int) (localctx IValueExprContext) {
 		{
 			p.SetState(125)
 			p.Match(CsqlParserT__16)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 
 	default:
-		panic(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		goto errorExit
 	}
 	p.GetParserRuleContext().SetStop(p.GetTokenStream().LT(-1))
 	p.SetState(135)
 	p.GetErrorHandler().Sync(p)
-	_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 4, p.GetParserRuleContext())
-
+	if p.HasError() {
+		goto errorExit
+	}
+	_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 4, p.GetParserRuleContext())
+	if p.HasError() {
+		goto errorExit
+	}
 	for _alt != 2 && _alt != antlr.ATNInvalidAltNumber {
 		if _alt == 1 {
 			if p.GetParseListeners() != nil {
@@ -1442,7 +1466,8 @@ func (p *CsqlParser) valueExpr(_p int) (localctx IValueExprContext) {
 			p.SetState(129)
 
 			if !(p.Precpred(p.GetParserRuleContext(), 5)) {
-				panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 5)", ""))
+				p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 5)", ""))
+				goto errorExit
 			}
 			{
 				p.SetState(130)
@@ -1456,10 +1481,26 @@ func (p *CsqlParser) valueExpr(_p int) (localctx IValueExprContext) {
 		}
 		p.SetState(137)
 		p.GetErrorHandler().Sync(p)
-		_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 4, p.GetParserRuleContext())
+		if p.HasError() {
+			goto errorExit
+		}
+		_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 4, p.GetParserRuleContext())
+		if p.HasError() {
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.UnrollRecursionContexts(_parentctx)
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IWhereExprContext is an interface to support dynamic dispatch.
@@ -1468,21 +1509,25 @@ type IWhereExprContext interface {
 
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
-
 	// IsWhereExprContext differentiates from other interfaces.
 	IsWhereExprContext()
 }
 
 type WhereExprContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyWhereExprContext() *WhereExprContext {
 	var p = new(WhereExprContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_whereExpr
 	return p
+}
+
+func InitEmptyWhereExprContext(p *WhereExprContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_whereExpr
 }
 
 func (*WhereExprContext) IsWhereExprContext() {}
@@ -1490,7 +1535,7 @@ func (*WhereExprContext) IsWhereExprContext() {}
 func NewWhereExprContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *WhereExprContext {
 	var p = new(WhereExprContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_whereExpr
@@ -1500,8 +1545,8 @@ func NewWhereExprContext(parser antlr.Parser, parent antlr.ParserRuleContext, in
 
 func (s *WhereExprContext) GetParser() antlr.Parser { return s.parser }
 
-func (s *WhereExprContext) CopyFrom(ctx *WhereExprContext) {
-	s.BaseParserRuleContext.CopyFrom(ctx.BaseParserRuleContext)
+func (s *WhereExprContext) CopyAll(ctx *WhereExprContext) {
+	s.CopyFrom(&ctx.BaseParserRuleContext)
 }
 
 func (s *WhereExprContext) GetRuleContext() antlr.RuleContext {
@@ -1513,15 +1558,15 @@ func (s *WhereExprContext) ToStringTree(ruleNames []string, recog antlr.Recogniz
 }
 
 type ConditionContext struct {
-	*WhereExprContext
+	WhereExprContext
 }
 
 func NewConditionContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *ConditionContext {
 	var p = new(ConditionContext)
 
-	p.WhereExprContext = NewEmptyWhereExprContext()
+	InitEmptyWhereExprContext(&p.WhereExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*WhereExprContext))
+	p.CopyAll(ctx.(*WhereExprContext))
 
 	return p
 }
@@ -1598,15 +1643,15 @@ func (s *ConditionContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 type NotExprContext struct {
-	*WhereExprContext
+	WhereExprContext
 }
 
 func NewNotExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *NotExprContext {
 	var p = new(NotExprContext)
 
-	p.WhereExprContext = NewEmptyWhereExprContext()
+	InitEmptyWhereExprContext(&p.WhereExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*WhereExprContext))
+	p.CopyAll(ctx.(*WhereExprContext))
 
 	return p
 }
@@ -1646,15 +1691,15 @@ func (s *NotExprContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 type TermItemContext struct {
-	*WhereExprContext
+	WhereExprContext
 }
 
 func NewTermItemContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *TermItemContext {
 	var p = new(TermItemContext)
 
-	p.WhereExprContext = NewEmptyWhereExprContext()
+	InitEmptyWhereExprContext(&p.WhereExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*WhereExprContext))
+	p.CopyAll(ctx.(*WhereExprContext))
 
 	return p
 }
@@ -1690,15 +1735,15 @@ func (s *TermItemContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 type InExprContext struct {
-	*WhereExprContext
+	WhereExprContext
 }
 
 func NewInExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *InExprContext {
 	var p = new(InExprContext)
 
-	p.WhereExprContext = NewEmptyWhereExprContext()
+	InitEmptyWhereExprContext(&p.WhereExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*WhereExprContext))
+	p.CopyAll(ctx.(*WhereExprContext))
 
 	return p
 }
@@ -1758,15 +1803,15 @@ func (s *InExprContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 type IsNullExprContext struct {
-	*WhereExprContext
+	WhereExprContext
 }
 
 func NewIsNullExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *IsNullExprContext {
 	var p = new(IsNullExprContext)
 
-	p.WhereExprContext = NewEmptyWhereExprContext()
+	InitEmptyWhereExprContext(&p.WhereExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*WhereExprContext))
+	p.CopyAll(ctx.(*WhereExprContext))
 
 	return p
 }
@@ -1814,15 +1859,15 @@ func (s *IsNullExprContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 type LikeExprContext struct {
-	*WhereExprContext
+	WhereExprContext
 }
 
 func NewLikeExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *LikeExprContext {
 	var p = new(LikeExprContext)
 
-	p.WhereExprContext = NewEmptyWhereExprContext()
+	InitEmptyWhereExprContext(&p.WhereExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*WhereExprContext))
+	p.CopyAll(ctx.(*WhereExprContext))
 
 	return p
 }
@@ -1891,15 +1936,15 @@ func (s *LikeExprContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 type MatchExprContext struct {
-	*WhereExprContext
+	WhereExprContext
 }
 
 func NewMatchExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *MatchExprContext {
 	var p = new(MatchExprContext)
 
-	p.WhereExprContext = NewEmptyWhereExprContext()
+	InitEmptyWhereExprContext(&p.WhereExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*WhereExprContext))
+	p.CopyAll(ctx.(*WhereExprContext))
 
 	return p
 }
@@ -1968,15 +2013,15 @@ func (s *MatchExprContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 type OrExprContext struct {
-	*WhereExprContext
+	WhereExprContext
 }
 
 func NewOrExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *OrExprContext {
 	var p = new(OrExprContext)
 
-	p.WhereExprContext = NewEmptyWhereExprContext()
+	InitEmptyWhereExprContext(&p.WhereExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*WhereExprContext))
+	p.CopyAll(ctx.(*WhereExprContext))
 
 	return p
 }
@@ -2041,15 +2086,15 @@ func (s *OrExprContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 type ParensExprContext struct {
-	*WhereExprContext
+	WhereExprContext
 }
 
 func NewParensExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *ParensExprContext {
 	var p = new(ParensExprContext)
 
-	p.WhereExprContext = NewEmptyWhereExprContext()
+	InitEmptyWhereExprContext(&p.WhereExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*WhereExprContext))
+	p.CopyAll(ctx.(*WhereExprContext))
 
 	return p
 }
@@ -2085,15 +2130,15 @@ func (s *ParensExprContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 type ValueExprItemContext struct {
-	*WhereExprContext
+	WhereExprContext
 }
 
 func NewValueExprItemContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *ValueExprItemContext {
 	var p = new(ValueExprItemContext)
 
-	p.WhereExprContext = NewEmptyWhereExprContext()
+	InitEmptyWhereExprContext(&p.WhereExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*WhereExprContext))
+	p.CopyAll(ctx.(*WhereExprContext))
 
 	return p
 }
@@ -2129,15 +2174,15 @@ func (s *ValueExprItemContext) Accept(visitor antlr.ParseTreeVisitor) interface{
 }
 
 type BetweenExprContext struct {
-	*WhereExprContext
+	WhereExprContext
 }
 
 func NewBetweenExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *BetweenExprContext {
 	var p = new(BetweenExprContext)
 
-	p.WhereExprContext = NewEmptyWhereExprContext()
+	InitEmptyWhereExprContext(&p.WhereExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*WhereExprContext))
+	p.CopyAll(ctx.(*WhereExprContext))
 
 	return p
 }
@@ -2206,15 +2251,15 @@ func (s *BetweenExprContext) Accept(visitor antlr.ParseTreeVisitor) interface{} 
 }
 
 type AndExprContext struct {
-	*WhereExprContext
+	WhereExprContext
 }
 
 func NewAndExprContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *AndExprContext {
 	var p = new(AndExprContext)
 
-	p.WhereExprContext = NewEmptyWhereExprContext()
+	InitEmptyWhereExprContext(&p.WhereExprContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*WhereExprContext))
+	p.CopyAll(ctx.(*WhereExprContext))
 
 	return p
 }
@@ -2283,10 +2328,8 @@ func (p *CsqlParser) WhereExpr() (localctx IWhereExprContext) {
 }
 
 func (p *CsqlParser) whereExpr(_p int) (localctx IWhereExprContext) {
-	this := p
-	_ = this
-
 	var _parentctx antlr.ParserRuleContext = p.GetParserRuleContext()
+
 	_parentState := p.GetState()
 	localctx = NewWhereExprContext(p, p.GetParserRuleContext(), _parentState)
 	var _prevctx IWhereExprContext = localctx
@@ -2295,28 +2338,16 @@ func (p *CsqlParser) whereExpr(_p int) (localctx IWhereExprContext) {
 	p.EnterRecursionRule(localctx, 12, CsqlParserRULE_whereExpr, _p)
 	var _la int
 
-	defer func() {
-		p.UnrollRecursionContexts(_parentctx)
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	var _alt int
 
 	p.EnterOuterAlt(localctx, 1)
 	p.SetState(181)
 	p.GetErrorHandler().Sync(p)
-	switch p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 9, p.GetParserRuleContext()) {
+	if p.HasError() {
+		goto errorExit
+	}
+
+	switch p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 9, p.GetParserRuleContext()) {
 	case 1:
 		localctx = NewTermItemContext(p, localctx)
 		p.SetParserRuleContext(localctx)
@@ -2343,6 +2374,10 @@ func (p *CsqlParser) whereExpr(_p int) (localctx IWhereExprContext) {
 		{
 			p.SetState(141)
 			p.Match(CsqlParserK_NOT)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(142)
@@ -2360,6 +2395,10 @@ func (p *CsqlParser) whereExpr(_p int) (localctx IWhereExprContext) {
 		{
 			p.SetState(144)
 			p.Match(CsqlParserK_BETWEEN)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(145)
@@ -2368,6 +2407,10 @@ func (p *CsqlParser) whereExpr(_p int) (localctx IWhereExprContext) {
 		{
 			p.SetState(146)
 			p.Match(CsqlParserK_AND)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(147)
@@ -2384,18 +2427,29 @@ func (p *CsqlParser) whereExpr(_p int) (localctx IWhereExprContext) {
 		}
 		p.SetState(151)
 		p.GetErrorHandler().Sync(p)
+		if p.HasError() {
+			goto errorExit
+		}
 		_la = p.GetTokenStream().LA(1)
 
 		if _la == CsqlParserK_NOT {
 			{
 				p.SetState(150)
 				p.Match(CsqlParserK_NOT)
+				if p.HasError() {
+					// Recognition error - abort rule
+					goto errorExit
+				}
 			}
 
 		}
 		{
 			p.SetState(153)
 			p.Match(CsqlParserK_LIKE)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(154)
@@ -2412,18 +2466,29 @@ func (p *CsqlParser) whereExpr(_p int) (localctx IWhereExprContext) {
 		}
 		p.SetState(158)
 		p.GetErrorHandler().Sync(p)
+		if p.HasError() {
+			goto errorExit
+		}
 		_la = p.GetTokenStream().LA(1)
 
 		if _la == CsqlParserK_NOT {
 			{
 				p.SetState(157)
 				p.Match(CsqlParserK_NOT)
+				if p.HasError() {
+					// Recognition error - abort rule
+					goto errorExit
+				}
 			}
 
 		}
 		{
 			p.SetState(160)
 			p.Match(CsqlParserK_MATCH)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(161)
@@ -2440,18 +2505,29 @@ func (p *CsqlParser) whereExpr(_p int) (localctx IWhereExprContext) {
 		}
 		p.SetState(165)
 		p.GetErrorHandler().Sync(p)
+		if p.HasError() {
+			goto errorExit
+		}
 		_la = p.GetTokenStream().LA(1)
 
 		if _la == CsqlParserK_NOT {
 			{
 				p.SetState(164)
 				p.Match(CsqlParserK_NOT)
+				if p.HasError() {
+					// Recognition error - abort rule
+					goto errorExit
+				}
 			}
 
 		}
 		{
 			p.SetState(167)
 			p.Match(CsqlParserK_IN)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(168)
@@ -2469,21 +2545,36 @@ func (p *CsqlParser) whereExpr(_p int) (localctx IWhereExprContext) {
 		{
 			p.SetState(171)
 			p.Match(CsqlParserK_IS)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		p.SetState(173)
 		p.GetErrorHandler().Sync(p)
+		if p.HasError() {
+			goto errorExit
+		}
 		_la = p.GetTokenStream().LA(1)
 
 		if _la == CsqlParserK_NOT {
 			{
 				p.SetState(172)
 				p.Match(CsqlParserK_NOT)
+				if p.HasError() {
+					// Recognition error - abort rule
+					goto errorExit
+				}
 			}
 
 		}
 		{
 			p.SetState(175)
 			p.Match(CsqlParserK_NULL)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 
 	case 9:
@@ -2493,6 +2584,10 @@ func (p *CsqlParser) whereExpr(_p int) (localctx IWhereExprContext) {
 		{
 			p.SetState(177)
 			p.Match(CsqlParserT__14)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(178)
@@ -2501,14 +2596,25 @@ func (p *CsqlParser) whereExpr(_p int) (localctx IWhereExprContext) {
 		{
 			p.SetState(179)
 			p.Match(CsqlParserT__16)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 
+	case antlr.ATNInvalidAltNumber:
+		goto errorExit
 	}
 	p.GetParserRuleContext().SetStop(p.GetTokenStream().LT(-1))
 	p.SetState(195)
 	p.GetErrorHandler().Sync(p)
-	_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 11, p.GetParserRuleContext())
-
+	if p.HasError() {
+		goto errorExit
+	}
+	_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 11, p.GetParserRuleContext())
+	if p.HasError() {
+		goto errorExit
+	}
 	for _alt != 2 && _alt != antlr.ATNInvalidAltNumber {
 		if _alt == 1 {
 			if p.GetParseListeners() != nil {
@@ -2517,14 +2623,19 @@ func (p *CsqlParser) whereExpr(_p int) (localctx IWhereExprContext) {
 			_prevctx = localctx
 			p.SetState(193)
 			p.GetErrorHandler().Sync(p)
-			switch p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 10, p.GetParserRuleContext()) {
+			if p.HasError() {
+				goto errorExit
+			}
+
+			switch p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 10, p.GetParserRuleContext()) {
 			case 1:
 				localctx = NewConditionContext(p, NewWhereExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, CsqlParserRULE_whereExpr)
 				p.SetState(183)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 10)) {
-					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 10)", ""))
+					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 10)", ""))
+					goto errorExit
 				}
 				{
 					p.SetState(184)
@@ -2541,11 +2652,16 @@ func (p *CsqlParser) whereExpr(_p int) (localctx IWhereExprContext) {
 				p.SetState(187)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 9)) {
-					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 9)", ""))
+					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 9)", ""))
+					goto errorExit
 				}
 				{
 					p.SetState(188)
 					p.Match(CsqlParserK_AND)
+					if p.HasError() {
+						// Recognition error - abort rule
+						goto errorExit
+					}
 				}
 				{
 					p.SetState(189)
@@ -2558,26 +2674,49 @@ func (p *CsqlParser) whereExpr(_p int) (localctx IWhereExprContext) {
 				p.SetState(190)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 8)) {
-					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 8)", ""))
+					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 8)", ""))
+					goto errorExit
 				}
 				{
 					p.SetState(191)
 					p.Match(CsqlParserK_OR)
+					if p.HasError() {
+						// Recognition error - abort rule
+						goto errorExit
+					}
 				}
 				{
 					p.SetState(192)
 					p.whereExpr(9)
 				}
 
+			case antlr.ATNInvalidAltNumber:
+				goto errorExit
 			}
 
 		}
 		p.SetState(197)
 		p.GetErrorHandler().Sync(p)
-		_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 11, p.GetParserRuleContext())
+		if p.HasError() {
+			goto errorExit
+		}
+		_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 11, p.GetParserRuleContext())
+		if p.HasError() {
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.UnrollRecursionContexts(_parentctx)
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IWhereContext is an interface to support dynamic dispatch.
@@ -2587,20 +2726,29 @@ type IWhereContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_WHERE() antlr.TerminalNode
+	WhereExpr() IWhereExprContext
+
 	// IsWhereContext differentiates from other interfaces.
 	IsWhereContext()
 }
 
 type WhereContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyWhereContext() *WhereContext {
 	var p = new(WhereContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_where
 	return p
+}
+
+func InitEmptyWhereContext(p *WhereContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_where
 }
 
 func (*WhereContext) IsWhereContext() {}
@@ -2608,7 +2756,7 @@ func (*WhereContext) IsWhereContext() {}
 func NewWhereContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *WhereContext {
 	var p = new(WhereContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_where
@@ -2657,39 +2805,33 @@ func (s *WhereContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) Where() (localctx IWhereContext) {
-	this := p
-	_ = this
-
 	localctx = NewWhereContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 14, CsqlParserRULE_where)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(198)
 		p.Match(CsqlParserK_WHERE)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	{
 		p.SetState(199)
 		p.whereExpr(0)
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IHavingContext is an interface to support dynamic dispatch.
@@ -2699,20 +2841,29 @@ type IHavingContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_HAVING() antlr.TerminalNode
+	WhereExpr() IWhereExprContext
+
 	// IsHavingContext differentiates from other interfaces.
 	IsHavingContext()
 }
 
 type HavingContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyHavingContext() *HavingContext {
 	var p = new(HavingContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_having
 	return p
+}
+
+func InitEmptyHavingContext(p *HavingContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_having
 }
 
 func (*HavingContext) IsHavingContext() {}
@@ -2720,7 +2871,7 @@ func (*HavingContext) IsHavingContext() {}
 func NewHavingContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *HavingContext {
 	var p = new(HavingContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_having
@@ -2769,39 +2920,33 @@ func (s *HavingContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) Having() (localctx IHavingContext) {
-	this := p
-	_ = this
-
 	localctx = NewHavingContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 16, CsqlParserRULE_having)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(201)
 		p.Match(CsqlParserK_HAVING)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	{
 		p.SetState(202)
 		p.whereExpr(0)
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IDistinctContext is an interface to support dynamic dispatch.
@@ -2811,20 +2956,28 @@ type IDistinctContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_DISTINCT() antlr.TerminalNode
+
 	// IsDistinctContext differentiates from other interfaces.
 	IsDistinctContext()
 }
 
 type DistinctContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyDistinctContext() *DistinctContext {
 	var p = new(DistinctContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_distinct
 	return p
+}
+
+func InitEmptyDistinctContext(p *DistinctContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_distinct
 }
 
 func (*DistinctContext) IsDistinctContext() {}
@@ -2832,7 +2985,7 @@ func (*DistinctContext) IsDistinctContext() {}
 func NewDistinctContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *DistinctContext {
 	var p = new(DistinctContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_distinct
@@ -2865,35 +3018,29 @@ func (s *DistinctContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) Distinct() (localctx IDistinctContext) {
-	this := p
-	_ = this
-
 	localctx = NewDistinctContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 18, CsqlParserRULE_distinct)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(204)
 		p.Match(CsqlParserK_DISTINCT)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IFunCallContext is an interface to support dynamic dispatch.
@@ -2903,20 +3050,30 @@ type IFunCallContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	Function() IFunctionContext
+	AllValueExpr() []IValueExprContext
+	ValueExpr(i int) IValueExprContext
+
 	// IsFunCallContext differentiates from other interfaces.
 	IsFunCallContext()
 }
 
 type FunCallContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyFunCallContext() *FunCallContext {
 	var p = new(FunCallContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_funCall
 	return p
+}
+
+func InitEmptyFunCallContext(p *FunCallContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_funCall
 }
 
 func (*FunCallContext) IsFunCallContext() {}
@@ -2924,7 +3081,7 @@ func (*FunCallContext) IsFunCallContext() {}
 func NewFunCallContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *FunCallContext {
 	var p = new(FunCallContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_funCall
@@ -3010,28 +3167,9 @@ func (s *FunCallContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) FunCall() (localctx IFunCallContext) {
-	this := p
-	_ = this
-
 	localctx = NewFunCallContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 20, CsqlParserRULE_funCall)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
@@ -3041,6 +3179,10 @@ func (p *CsqlParser) FunCall() (localctx IFunCallContext) {
 	{
 		p.SetState(207)
 		p.Match(CsqlParserT__14)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	{
 		p.SetState(208)
@@ -3048,12 +3190,19 @@ func (p *CsqlParser) FunCall() (localctx IFunCallContext) {
 	}
 	p.SetState(213)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	for _la == CsqlParserT__15 {
 		{
 			p.SetState(209)
 			p.Match(CsqlParserT__15)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(210)
@@ -3062,14 +3211,31 @@ func (p *CsqlParser) FunCall() (localctx IFunCallContext) {
 
 		p.SetState(215)
 		p.GetErrorHandler().Sync(p)
+		if p.HasError() {
+			goto errorExit
+		}
 		_la = p.GetTokenStream().LA(1)
 	}
 	{
 		p.SetState(216)
 		p.Match(CsqlParserT__16)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IAggregateFunCallContext is an interface to support dynamic dispatch.
@@ -3079,20 +3245,30 @@ type IAggregateFunCallContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	AggregateFunc() IAggregateFuncContext
+	ValueExpr() IValueExprContext
+	CountFunc() ICountFuncContext
+
 	// IsAggregateFunCallContext differentiates from other interfaces.
 	IsAggregateFunCallContext()
 }
 
 type AggregateFunCallContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyAggregateFunCallContext() *AggregateFunCallContext {
 	var p = new(AggregateFunCallContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_aggregateFunCall
 	return p
+}
+
+func InitEmptyAggregateFunCallContext(p *AggregateFunCallContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_aggregateFunCall
 }
 
 func (*AggregateFunCallContext) IsAggregateFunCallContext() {}
@@ -3100,7 +3276,7 @@ func (*AggregateFunCallContext) IsAggregateFunCallContext() {}
 func NewAggregateFunCallContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *AggregateFunCallContext {
 	var p = new(AggregateFunCallContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_aggregateFunCall
@@ -3177,30 +3353,13 @@ func (s *AggregateFunCallContext) Accept(visitor antlr.ParseTreeVisitor) interfa
 }
 
 func (p *CsqlParser) AggregateFunCall() (localctx IAggregateFunCallContext) {
-	this := p
-	_ = this
-
 	localctx = NewAggregateFunCallContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 22, CsqlParserRULE_aggregateFunCall)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.SetState(224)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 
 	switch p.GetTokenStream().LA(1) {
 	case CsqlParserK_SUM, CsqlParserK_AVG, CsqlParserK_MIN, CsqlParserK_MAX:
@@ -3212,6 +3371,10 @@ func (p *CsqlParser) AggregateFunCall() (localctx IAggregateFunCallContext) {
 		{
 			p.SetState(219)
 			p.Match(CsqlParserT__14)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(220)
@@ -3220,6 +3383,10 @@ func (p *CsqlParser) AggregateFunCall() (localctx IAggregateFunCallContext) {
 		{
 			p.SetState(221)
 			p.Match(CsqlParserT__16)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 
 	case CsqlParserK_COUNT:
@@ -3230,10 +3397,21 @@ func (p *CsqlParser) AggregateFunCall() (localctx IAggregateFunCallContext) {
 		}
 
 	default:
-		panic(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		goto errorExit
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // ICountFuncContext is an interface to support dynamic dispatch.
@@ -3243,20 +3421,30 @@ type ICountFuncContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_COUNT() antlr.TerminalNode
+	ProjectionFieldName() IProjectionFieldNameContext
+	K_DISTINCT() antlr.TerminalNode
+
 	// IsCountFuncContext differentiates from other interfaces.
 	IsCountFuncContext()
 }
 
 type CountFuncContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyCountFuncContext() *CountFuncContext {
 	var p = new(CountFuncContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_countFunc
 	return p
+}
+
+func InitEmptyCountFuncContext(p *CountFuncContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_countFunc
 }
 
 func (*CountFuncContext) IsCountFuncContext() {}
@@ -3264,7 +3452,7 @@ func (*CountFuncContext) IsCountFuncContext() {}
 func NewCountFuncContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *CountFuncContext {
 	var p = new(CountFuncContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_countFunc
@@ -3317,46 +3505,42 @@ func (s *CountFuncContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) CountFunc() (localctx ICountFuncContext) {
-	this := p
-	_ = this
-
 	localctx = NewCountFuncContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 24, CsqlParserRULE_countFunc)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(226)
 		p.Match(CsqlParserK_COUNT)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	{
 		p.SetState(227)
 		p.Match(CsqlParserT__14)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	p.SetState(229)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserK_DISTINCT {
 		{
 			p.SetState(228)
 			p.Match(CsqlParserK_DISTINCT)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 
 	}
@@ -3367,9 +3551,23 @@ func (p *CsqlParser) CountFunc() (localctx ICountFuncContext) {
 	{
 		p.SetState(232)
 		p.Match(CsqlParserT__16)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IAggregateFuncContext is an interface to support dynamic dispatch.
@@ -3379,20 +3577,31 @@ type IAggregateFuncContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_SUM() antlr.TerminalNode
+	K_AVG() antlr.TerminalNode
+	K_MIN() antlr.TerminalNode
+	K_MAX() antlr.TerminalNode
+
 	// IsAggregateFuncContext differentiates from other interfaces.
 	IsAggregateFuncContext()
 }
 
 type AggregateFuncContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyAggregateFuncContext() *AggregateFuncContext {
 	var p = new(AggregateFuncContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_aggregateFunc
 	return p
+}
+
+func InitEmptyAggregateFuncContext(p *AggregateFuncContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_aggregateFunc
 }
 
 func (*AggregateFuncContext) IsAggregateFuncContext() {}
@@ -3400,7 +3609,7 @@ func (*AggregateFuncContext) IsAggregateFuncContext() {}
 func NewAggregateFuncContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *AggregateFuncContext {
 	var p = new(AggregateFuncContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_aggregateFunc
@@ -3445,28 +3654,9 @@ func (s *AggregateFuncContext) Accept(visitor antlr.ParseTreeVisitor) interface{
 }
 
 func (p *CsqlParser) AggregateFunc() (localctx IAggregateFuncContext) {
-	this := p
-	_ = this
-
 	localctx = NewAggregateFuncContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 26, CsqlParserRULE_aggregateFunc)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
@@ -3481,7 +3671,17 @@ func (p *CsqlParser) AggregateFunc() (localctx IAggregateFuncContext) {
 		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IProjectionContext is an interface to support dynamic dispatch.
@@ -3491,20 +3691,30 @@ type IProjectionContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	AllProjectionField() []IProjectionFieldContext
+	ProjectionField(i int) IProjectionFieldContext
+	Distinct() IDistinctContext
+
 	// IsProjectionContext differentiates from other interfaces.
 	IsProjectionContext()
 }
 
 type ProjectionContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyProjectionContext() *ProjectionContext {
 	var p = new(ProjectionContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_projection
 	return p
+}
+
+func InitEmptyProjectionContext(p *ProjectionContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_projection
 }
 
 func (*ProjectionContext) IsProjectionContext() {}
@@ -3512,7 +3722,7 @@ func (*ProjectionContext) IsProjectionContext() {}
 func NewProjectionContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *ProjectionContext {
 	var p = new(ProjectionContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_projection
@@ -3598,32 +3808,16 @@ func (s *ProjectionContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) Projection() (localctx IProjectionContext) {
-	this := p
-	_ = this
-
 	localctx = NewProjectionContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 28, CsqlParserRULE_projection)
 	var _la int
 
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	p.SetState(237)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserK_DISTINCT {
@@ -3639,12 +3833,19 @@ func (p *CsqlParser) Projection() (localctx IProjectionContext) {
 	}
 	p.SetState(244)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	for _la == CsqlParserT__15 {
 		{
 			p.SetState(240)
 			p.Match(CsqlParserT__15)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(241)
@@ -3653,10 +3854,23 @@ func (p *CsqlParser) Projection() (localctx IProjectionContext) {
 
 		p.SetState(246)
 		p.GetErrorHandler().Sync(p)
+		if p.HasError() {
+			goto errorExit
+		}
 		_la = p.GetTokenStream().LA(1)
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IProjectionFieldContext is an interface to support dynamic dispatch.
@@ -3666,20 +3880,32 @@ type IProjectionFieldContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	ProjectionFieldName() IProjectionFieldNameContext
+	ValueExpr() IValueExprContext
+	AggregateFunCall() IAggregateFunCallContext
+	Alias() IAliasContext
+	K_AS() antlr.TerminalNode
+
 	// IsProjectionFieldContext differentiates from other interfaces.
 	IsProjectionFieldContext()
 }
 
 type ProjectionFieldContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyProjectionFieldContext() *ProjectionFieldContext {
 	var p = new(ProjectionFieldContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_projectionField
 	return p
+}
+
+func InitEmptyProjectionFieldContext(p *ProjectionFieldContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_projectionField
 }
 
 func (*ProjectionFieldContext) IsProjectionFieldContext() {}
@@ -3687,7 +3913,7 @@ func (*ProjectionFieldContext) IsProjectionFieldContext() {}
 func NewProjectionFieldContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *ProjectionFieldContext {
 	var p = new(ProjectionFieldContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_projectionField
@@ -3784,33 +4010,18 @@ func (s *ProjectionFieldContext) Accept(visitor antlr.ParseTreeVisitor) interfac
 }
 
 func (p *CsqlParser) ProjectionField() (localctx IProjectionFieldContext) {
-	this := p
-	_ = this
-
 	localctx = NewProjectionFieldContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 30, CsqlParserRULE_projectionField)
 	var _la int
 
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	p.SetState(250)
 	p.GetErrorHandler().Sync(p)
-	switch p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 17, p.GetParserRuleContext()) {
+	if p.HasError() {
+		goto errorExit
+	}
+
+	switch p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 17, p.GetParserRuleContext()) {
 	case 1:
 		{
 			p.SetState(247)
@@ -3829,20 +4040,32 @@ func (p *CsqlParser) ProjectionField() (localctx IProjectionFieldContext) {
 			p.AggregateFunCall()
 		}
 
+	case antlr.ATNInvalidAltNumber:
+		goto errorExit
 	}
 	p.SetState(256)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserK_AS || _la == CsqlParserIDENTIFIER {
 		p.SetState(253)
 		p.GetErrorHandler().Sync(p)
+		if p.HasError() {
+			goto errorExit
+		}
 		_la = p.GetTokenStream().LA(1)
 
 		if _la == CsqlParserK_AS {
 			{
 				p.SetState(252)
 				p.Match(CsqlParserK_AS)
+				if p.HasError() {
+					// Recognition error - abort rule
+					goto errorExit
+				}
 			}
 
 		}
@@ -3853,7 +4076,17 @@ func (p *CsqlParser) ProjectionField() (localctx IProjectionFieldContext) {
 
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IProjectionFieldNameContext is an interface to support dynamic dispatch.
@@ -3863,20 +4096,29 @@ type IProjectionFieldNameContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	FieldName() IFieldNameContext
+	Qualifier() IQualifierContext
+
 	// IsProjectionFieldNameContext differentiates from other interfaces.
 	IsProjectionFieldNameContext()
 }
 
 type ProjectionFieldNameContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyProjectionFieldNameContext() *ProjectionFieldNameContext {
 	var p = new(ProjectionFieldNameContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_projectionFieldName
 	return p
+}
+
+func InitEmptyProjectionFieldNameContext(p *ProjectionFieldNameContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_projectionFieldName
 }
 
 func (*ProjectionFieldNameContext) IsProjectionFieldNameContext() {}
@@ -3884,7 +4126,7 @@ func (*ProjectionFieldNameContext) IsProjectionFieldNameContext() {}
 func NewProjectionFieldNameContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *ProjectionFieldNameContext {
 	var p = new(ProjectionFieldNameContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_projectionFieldName
@@ -3945,33 +4187,13 @@ func (s *ProjectionFieldNameContext) Accept(visitor antlr.ParseTreeVisitor) inte
 }
 
 func (p *CsqlParser) ProjectionFieldName() (localctx IProjectionFieldNameContext) {
-	this := p
-	_ = this
-
 	localctx = NewProjectionFieldNameContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 32, CsqlParserRULE_projectionFieldName)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	p.SetState(261)
 	p.GetErrorHandler().Sync(p)
 
-	if p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 20, p.GetParserRuleContext()) == 1 {
+	if p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 20, p.GetParserRuleContext()) == 1 {
 		{
 			p.SetState(258)
 			p.Qualifier()
@@ -3979,15 +4201,31 @@ func (p *CsqlParser) ProjectionFieldName() (localctx IProjectionFieldNameContext
 		{
 			p.SetState(259)
 			p.Match(CsqlParserT__17)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 
+	} else if p.HasError() { // JIM
+		goto errorExit
 	}
 	{
 		p.SetState(263)
 		p.FieldName()
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IFieldNameContext is an interface to support dynamic dispatch.
@@ -3997,20 +4235,28 @@ type IFieldNameContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	IDENTIFIER() antlr.TerminalNode
+
 	// IsFieldNameContext differentiates from other interfaces.
 	IsFieldNameContext()
 }
 
 type FieldNameContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyFieldNameContext() *FieldNameContext {
 	var p = new(FieldNameContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_fieldName
 	return p
+}
+
+func InitEmptyFieldNameContext(p *FieldNameContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_fieldName
 }
 
 func (*FieldNameContext) IsFieldNameContext() {}
@@ -4018,7 +4264,7 @@ func (*FieldNameContext) IsFieldNameContext() {}
 func NewFieldNameContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *FieldNameContext {
 	var p = new(FieldNameContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_fieldName
@@ -4051,28 +4297,9 @@ func (s *FieldNameContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) FieldName() (localctx IFieldNameContext) {
-	this := p
-	_ = this
-
 	localctx = NewFieldNameContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 34, CsqlParserRULE_fieldName)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
@@ -4087,7 +4314,17 @@ func (p *CsqlParser) FieldName() (localctx IFieldNameContext) {
 		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IInnerJoinContext is an interface to support dynamic dispatch.
@@ -4097,20 +4334,29 @@ type IInnerJoinContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_JOIN() antlr.TerminalNode
+	K_INNER() antlr.TerminalNode
+
 	// IsInnerJoinContext differentiates from other interfaces.
 	IsInnerJoinContext()
 }
 
 type InnerJoinContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyInnerJoinContext() *InnerJoinContext {
 	var p = new(InnerJoinContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_innerJoin
 	return p
+}
+
+func InitEmptyInnerJoinContext(p *InnerJoinContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_innerJoin
 }
 
 func (*InnerJoinContext) IsInnerJoinContext() {}
@@ -4118,7 +4364,7 @@ func (*InnerJoinContext) IsInnerJoinContext() {}
 func NewInnerJoinContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *InnerJoinContext {
 	var p = new(InnerJoinContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_innerJoin
@@ -4155,47 +4401,49 @@ func (s *InnerJoinContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) InnerJoin() (localctx IInnerJoinContext) {
-	this := p
-	_ = this
-
 	localctx = NewInnerJoinContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 36, CsqlParserRULE_innerJoin)
 	var _la int
 
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	p.SetState(268)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserK_INNER {
 		{
 			p.SetState(267)
 			p.Match(CsqlParserK_INNER)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 
 	}
 	{
 		p.SetState(270)
 		p.Match(CsqlParserK_JOIN)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // ILeftJoinContext is an interface to support dynamic dispatch.
@@ -4205,20 +4453,30 @@ type ILeftJoinContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_LEFT() antlr.TerminalNode
+	K_JOIN() antlr.TerminalNode
+	K_OUTER() antlr.TerminalNode
+
 	// IsLeftJoinContext differentiates from other interfaces.
 	IsLeftJoinContext()
 }
 
 type LeftJoinContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyLeftJoinContext() *LeftJoinContext {
 	var p = new(LeftJoinContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_leftJoin
 	return p
+}
+
+func InitEmptyLeftJoinContext(p *LeftJoinContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_leftJoin
 }
 
 func (*LeftJoinContext) IsLeftJoinContext() {}
@@ -4226,7 +4484,7 @@ func (*LeftJoinContext) IsLeftJoinContext() {}
 func NewLeftJoinContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *LeftJoinContext {
 	var p = new(LeftJoinContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_leftJoin
@@ -4267,51 +4525,57 @@ func (s *LeftJoinContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) LeftJoin() (localctx ILeftJoinContext) {
-	this := p
-	_ = this
-
 	localctx = NewLeftJoinContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 38, CsqlParserRULE_leftJoin)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(272)
 		p.Match(CsqlParserK_LEFT)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	p.SetState(274)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserK_OUTER {
 		{
 			p.SetState(273)
 			p.Match(CsqlParserK_OUTER)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 
 	}
 	{
 		p.SetState(276)
 		p.Match(CsqlParserK_JOIN)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IRightJoinContext is an interface to support dynamic dispatch.
@@ -4321,20 +4585,30 @@ type IRightJoinContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_RIGHT() antlr.TerminalNode
+	K_JOIN() antlr.TerminalNode
+	K_OUTER() antlr.TerminalNode
+
 	// IsRightJoinContext differentiates from other interfaces.
 	IsRightJoinContext()
 }
 
 type RightJoinContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyRightJoinContext() *RightJoinContext {
 	var p = new(RightJoinContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_rightJoin
 	return p
+}
+
+func InitEmptyRightJoinContext(p *RightJoinContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_rightJoin
 }
 
 func (*RightJoinContext) IsRightJoinContext() {}
@@ -4342,7 +4616,7 @@ func (*RightJoinContext) IsRightJoinContext() {}
 func NewRightJoinContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *RightJoinContext {
 	var p = new(RightJoinContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_rightJoin
@@ -4383,51 +4657,57 @@ func (s *RightJoinContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) RightJoin() (localctx IRightJoinContext) {
-	this := p
-	_ = this
-
 	localctx = NewRightJoinContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 40, CsqlParserRULE_rightJoin)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(278)
 		p.Match(CsqlParserK_RIGHT)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	p.SetState(280)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserK_OUTER {
 		{
 			p.SetState(279)
 			p.Match(CsqlParserK_OUTER)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 
 	}
 	{
 		p.SetState(282)
 		p.Match(CsqlParserK_JOIN)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IFullJoinContext is an interface to support dynamic dispatch.
@@ -4437,20 +4717,30 @@ type IFullJoinContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_FULL() antlr.TerminalNode
+	K_JOIN() antlr.TerminalNode
+	K_OUTER() antlr.TerminalNode
+
 	// IsFullJoinContext differentiates from other interfaces.
 	IsFullJoinContext()
 }
 
 type FullJoinContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyFullJoinContext() *FullJoinContext {
 	var p = new(FullJoinContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_fullJoin
 	return p
+}
+
+func InitEmptyFullJoinContext(p *FullJoinContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_fullJoin
 }
 
 func (*FullJoinContext) IsFullJoinContext() {}
@@ -4458,7 +4748,7 @@ func (*FullJoinContext) IsFullJoinContext() {}
 func NewFullJoinContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *FullJoinContext {
 	var p = new(FullJoinContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_fullJoin
@@ -4499,51 +4789,57 @@ func (s *FullJoinContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) FullJoin() (localctx IFullJoinContext) {
-	this := p
-	_ = this
-
 	localctx = NewFullJoinContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 42, CsqlParserRULE_fullJoin)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(284)
 		p.Match(CsqlParserK_FULL)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	p.SetState(286)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserK_OUTER {
 		{
 			p.SetState(285)
 			p.Match(CsqlParserK_OUTER)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 
 	}
 	{
 		p.SetState(288)
 		p.Match(CsqlParserK_JOIN)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // ICrossJoinContext is an interface to support dynamic dispatch.
@@ -4553,20 +4849,29 @@ type ICrossJoinContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_CROSS() antlr.TerminalNode
+	K_JOIN() antlr.TerminalNode
+
 	// IsCrossJoinContext differentiates from other interfaces.
 	IsCrossJoinContext()
 }
 
 type CrossJoinContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyCrossJoinContext() *CrossJoinContext {
 	var p = new(CrossJoinContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_crossJoin
 	return p
+}
+
+func InitEmptyCrossJoinContext(p *CrossJoinContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_crossJoin
 }
 
 func (*CrossJoinContext) IsCrossJoinContext() {}
@@ -4574,7 +4879,7 @@ func (*CrossJoinContext) IsCrossJoinContext() {}
 func NewCrossJoinContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *CrossJoinContext {
 	var p = new(CrossJoinContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_crossJoin
@@ -4611,39 +4916,37 @@ func (s *CrossJoinContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) CrossJoin() (localctx ICrossJoinContext) {
-	this := p
-	_ = this
-
 	localctx = NewCrossJoinContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 44, CsqlParserRULE_crossJoin)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(290)
 		p.Match(CsqlParserK_CROSS)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	{
 		p.SetState(291)
 		p.Match(CsqlParserK_JOIN)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IConditionalJoinTypeContext is an interface to support dynamic dispatch.
@@ -4653,20 +4956,31 @@ type IConditionalJoinTypeContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	InnerJoin() IInnerJoinContext
+	LeftJoin() ILeftJoinContext
+	RightJoin() IRightJoinContext
+	FullJoin() IFullJoinContext
+
 	// IsConditionalJoinTypeContext differentiates from other interfaces.
 	IsConditionalJoinTypeContext()
 }
 
 type ConditionalJoinTypeContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyConditionalJoinTypeContext() *ConditionalJoinTypeContext {
 	var p = new(ConditionalJoinTypeContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_conditionalJoinType
 	return p
+}
+
+func InitEmptyConditionalJoinTypeContext(p *ConditionalJoinTypeContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_conditionalJoinType
 }
 
 func (*ConditionalJoinTypeContext) IsConditionalJoinTypeContext() {}
@@ -4674,7 +4988,7 @@ func (*ConditionalJoinTypeContext) IsConditionalJoinTypeContext() {}
 func NewConditionalJoinTypeContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *ConditionalJoinTypeContext {
 	var p = new(ConditionalJoinTypeContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_conditionalJoinType
@@ -4767,30 +5081,13 @@ func (s *ConditionalJoinTypeContext) Accept(visitor antlr.ParseTreeVisitor) inte
 }
 
 func (p *CsqlParser) ConditionalJoinType() (localctx IConditionalJoinTypeContext) {
-	this := p
-	_ = this
-
 	localctx = NewConditionalJoinTypeContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 46, CsqlParserRULE_conditionalJoinType)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.SetState(297)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 
 	switch p.GetTokenStream().LA(1) {
 	case CsqlParserK_JOIN, CsqlParserK_INNER:
@@ -4822,10 +5119,21 @@ func (p *CsqlParser) ConditionalJoinType() (localctx IConditionalJoinTypeContext
 		}
 
 	default:
-		panic(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		goto errorExit
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IConditionalJoinTargetContext is an interface to support dynamic dispatch.
@@ -4835,20 +5143,30 @@ type IConditionalJoinTargetContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	DataSource() IDataSourceContext
+	K_ON() antlr.TerminalNode
+	WhereExpr() IWhereExprContext
+
 	// IsConditionalJoinTargetContext differentiates from other interfaces.
 	IsConditionalJoinTargetContext()
 }
 
 type ConditionalJoinTargetContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyConditionalJoinTargetContext() *ConditionalJoinTargetContext {
 	var p = new(ConditionalJoinTargetContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_conditionalJoinTarget
 	return p
+}
+
+func InitEmptyConditionalJoinTargetContext(p *ConditionalJoinTargetContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_conditionalJoinTarget
 }
 
 func (*ConditionalJoinTargetContext) IsConditionalJoinTargetContext() {}
@@ -4856,7 +5174,7 @@ func (*ConditionalJoinTargetContext) IsConditionalJoinTargetContext() {}
 func NewConditionalJoinTargetContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *ConditionalJoinTargetContext {
 	var p = new(ConditionalJoinTargetContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_conditionalJoinTarget
@@ -4921,28 +5239,8 @@ func (s *ConditionalJoinTargetContext) Accept(visitor antlr.ParseTreeVisitor) in
 }
 
 func (p *CsqlParser) ConditionalJoinTarget() (localctx IConditionalJoinTargetContext) {
-	this := p
-	_ = this
-
 	localctx = NewConditionalJoinTargetContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 48, CsqlParserRULE_conditionalJoinTarget)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(299)
@@ -4951,13 +5249,27 @@ func (p *CsqlParser) ConditionalJoinTarget() (localctx IConditionalJoinTargetCon
 	{
 		p.SetState(300)
 		p.Match(CsqlParserK_ON)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	{
 		p.SetState(301)
 		p.whereExpr(0)
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IUnconditionalJoinTargetContext is an interface to support dynamic dispatch.
@@ -4967,20 +5279,28 @@ type IUnconditionalJoinTargetContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	DataSource() IDataSourceContext
+
 	// IsUnconditionalJoinTargetContext differentiates from other interfaces.
 	IsUnconditionalJoinTargetContext()
 }
 
 type UnconditionalJoinTargetContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyUnconditionalJoinTargetContext() *UnconditionalJoinTargetContext {
 	var p = new(UnconditionalJoinTargetContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_unconditionalJoinTarget
 	return p
+}
+
+func InitEmptyUnconditionalJoinTargetContext(p *UnconditionalJoinTargetContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_unconditionalJoinTarget
 }
 
 func (*UnconditionalJoinTargetContext) IsUnconditionalJoinTargetContext() {}
@@ -4988,7 +5308,7 @@ func (*UnconditionalJoinTargetContext) IsUnconditionalJoinTargetContext() {}
 func NewUnconditionalJoinTargetContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *UnconditionalJoinTargetContext {
 	var p = new(UnconditionalJoinTargetContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_unconditionalJoinTarget
@@ -5033,35 +5353,25 @@ func (s *UnconditionalJoinTargetContext) Accept(visitor antlr.ParseTreeVisitor) 
 }
 
 func (p *CsqlParser) UnconditionalJoinTarget() (localctx IUnconditionalJoinTargetContext) {
-	this := p
-	_ = this
-
 	localctx = NewUnconditionalJoinTargetContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 50, CsqlParserRULE_unconditionalJoinTarget)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(303)
 		p.dataSource(0)
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IDataSourceContext is an interface to support dynamic dispatch.
@@ -5070,21 +5380,25 @@ type IDataSourceContext interface {
 
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
-
 	// IsDataSourceContext differentiates from other interfaces.
 	IsDataSourceContext()
 }
 
 type DataSourceContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyDataSourceContext() *DataSourceContext {
 	var p = new(DataSourceContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_dataSource
 	return p
+}
+
+func InitEmptyDataSourceContext(p *DataSourceContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_dataSource
 }
 
 func (*DataSourceContext) IsDataSourceContext() {}
@@ -5092,7 +5406,7 @@ func (*DataSourceContext) IsDataSourceContext() {}
 func NewDataSourceContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *DataSourceContext {
 	var p = new(DataSourceContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_dataSource
@@ -5102,8 +5416,8 @@ func NewDataSourceContext(parser antlr.Parser, parent antlr.ParserRuleContext, i
 
 func (s *DataSourceContext) GetParser() antlr.Parser { return s.parser }
 
-func (s *DataSourceContext) CopyFrom(ctx *DataSourceContext) {
-	s.BaseParserRuleContext.CopyFrom(ctx.BaseParserRuleContext)
+func (s *DataSourceContext) CopyAll(ctx *DataSourceContext) {
+	s.CopyFrom(&ctx.BaseParserRuleContext)
 }
 
 func (s *DataSourceContext) GetRuleContext() antlr.RuleContext {
@@ -5115,15 +5429,15 @@ func (s *DataSourceContext) ToStringTree(ruleNames []string, recog antlr.Recogni
 }
 
 type DataSourceConditionalJoinContext struct {
-	*DataSourceContext
+	DataSourceContext
 }
 
 func NewDataSourceConditionalJoinContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *DataSourceConditionalJoinContext {
 	var p = new(DataSourceConditionalJoinContext)
 
-	p.DataSourceContext = NewEmptyDataSourceContext()
+	InitEmptyDataSourceContext(&p.DataSourceContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*DataSourceContext))
+	p.CopyAll(ctx.(*DataSourceContext))
 
 	return p
 }
@@ -5191,15 +5505,15 @@ func (s *DataSourceConditionalJoinContext) Accept(visitor antlr.ParseTreeVisitor
 }
 
 type DataSourceItemContext struct {
-	*DataSourceContext
+	DataSourceContext
 }
 
 func NewDataSourceItemContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *DataSourceItemContext {
 	var p = new(DataSourceItemContext)
 
-	p.DataSourceContext = NewEmptyDataSourceContext()
+	InitEmptyDataSourceContext(&p.DataSourceContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*DataSourceContext))
+	p.CopyAll(ctx.(*DataSourceContext))
 
 	return p
 }
@@ -5235,15 +5549,15 @@ func (s *DataSourceItemContext) Accept(visitor antlr.ParseTreeVisitor) interface
 }
 
 type DataSourceCrossJoinContext struct {
-	*DataSourceContext
+	DataSourceContext
 }
 
 func NewDataSourceCrossJoinContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *DataSourceCrossJoinContext {
 	var p = new(DataSourceCrossJoinContext)
 
-	p.DataSourceContext = NewEmptyDataSourceContext()
+	InitEmptyDataSourceContext(&p.DataSourceContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*DataSourceContext))
+	p.CopyAll(ctx.(*DataSourceContext))
 
 	return p
 }
@@ -5311,15 +5625,15 @@ func (s *DataSourceCrossJoinContext) Accept(visitor antlr.ParseTreeVisitor) inte
 }
 
 type DataSourceNamedContext struct {
-	*DataSourceContext
+	DataSourceContext
 }
 
 func NewDataSourceNamedContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *DataSourceNamedContext {
 	var p = new(DataSourceNamedContext)
 
-	p.DataSourceContext = NewEmptyDataSourceContext()
+	InitEmptyDataSourceContext(&p.DataSourceContext)
 	p.parser = parser
-	p.CopyFrom(ctx.(*DataSourceContext))
+	p.CopyAll(ctx.(*DataSourceContext))
 
 	return p
 }
@@ -5359,38 +5673,22 @@ func (p *CsqlParser) DataSource() (localctx IDataSourceContext) {
 }
 
 func (p *CsqlParser) dataSource(_p int) (localctx IDataSourceContext) {
-	this := p
-	_ = this
-
 	var _parentctx antlr.ParserRuleContext = p.GetParserRuleContext()
+
 	_parentState := p.GetState()
 	localctx = NewDataSourceContext(p, p.GetParserRuleContext(), _parentState)
 	var _prevctx IDataSourceContext = localctx
 	var _ antlr.ParserRuleContext = _prevctx // TODO: To prevent unused variable warning.
 	_startState := 52
 	p.EnterRecursionRule(localctx, 52, CsqlParserRULE_dataSource, _p)
-
-	defer func() {
-		p.UnrollRecursionContexts(_parentctx)
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	var _alt int
 
 	p.EnterOuterAlt(localctx, 1)
 	p.SetState(311)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 
 	switch p.GetTokenStream().LA(1) {
 	case CsqlParserIDENTIFIER:
@@ -5410,6 +5708,10 @@ func (p *CsqlParser) dataSource(_p int) (localctx IDataSourceContext) {
 		{
 			p.SetState(307)
 			p.Match(CsqlParserT__14)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(308)
@@ -5418,16 +5720,26 @@ func (p *CsqlParser) dataSource(_p int) (localctx IDataSourceContext) {
 		{
 			p.SetState(309)
 			p.Match(CsqlParserT__16)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 
 	default:
-		panic(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		goto errorExit
 	}
 	p.GetParserRuleContext().SetStop(p.GetTokenStream().LT(-1))
 	p.SetState(323)
 	p.GetErrorHandler().Sync(p)
-	_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 28, p.GetParserRuleContext())
-
+	if p.HasError() {
+		goto errorExit
+	}
+	_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 28, p.GetParserRuleContext())
+	if p.HasError() {
+		goto errorExit
+	}
 	for _alt != 2 && _alt != antlr.ATNInvalidAltNumber {
 		if _alt == 1 {
 			if p.GetParseListeners() != nil {
@@ -5436,14 +5748,19 @@ func (p *CsqlParser) dataSource(_p int) (localctx IDataSourceContext) {
 			_prevctx = localctx
 			p.SetState(321)
 			p.GetErrorHandler().Sync(p)
-			switch p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 27, p.GetParserRuleContext()) {
+			if p.HasError() {
+				goto errorExit
+			}
+
+			switch p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 27, p.GetParserRuleContext()) {
 			case 1:
 				localctx = NewDataSourceConditionalJoinContext(p, NewDataSourceContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, CsqlParserRULE_dataSource)
 				p.SetState(313)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 3)) {
-					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 3)", ""))
+					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 3)", ""))
+					goto errorExit
 				}
 				{
 					p.SetState(314)
@@ -5460,7 +5777,8 @@ func (p *CsqlParser) dataSource(_p int) (localctx IDataSourceContext) {
 				p.SetState(317)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 2)) {
-					panic(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 2)", ""))
+					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 2)", ""))
+					goto errorExit
 				}
 				{
 					p.SetState(318)
@@ -5471,15 +5789,33 @@ func (p *CsqlParser) dataSource(_p int) (localctx IDataSourceContext) {
 					p.UnconditionalJoinTarget()
 				}
 
+			case antlr.ATNInvalidAltNumber:
+				goto errorExit
 			}
 
 		}
 		p.SetState(325)
 		p.GetErrorHandler().Sync(p)
-		_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 28, p.GetParserRuleContext())
+		if p.HasError() {
+			goto errorExit
+		}
+		_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 28, p.GetParserRuleContext())
+		if p.HasError() {
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.UnrollRecursionContexts(_parentctx)
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // ISourcesContext is an interface to support dynamic dispatch.
@@ -5489,20 +5825,29 @@ type ISourcesContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	AllDataSource() []IDataSourceContext
+	DataSource(i int) IDataSourceContext
+
 	// IsSourcesContext differentiates from other interfaces.
 	IsSourcesContext()
 }
 
 type SourcesContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptySourcesContext() *SourcesContext {
 	var p = new(SourcesContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_sources
 	return p
+}
+
+func InitEmptySourcesContext(p *SourcesContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_sources
 }
 
 func (*SourcesContext) IsSourcesContext() {}
@@ -5510,7 +5855,7 @@ func (*SourcesContext) IsSourcesContext() {}
 func NewSourcesContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *SourcesContext {
 	var p = new(SourcesContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_sources
@@ -5580,28 +5925,9 @@ func (s *SourcesContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) Sources() (localctx ISourcesContext) {
-	this := p
-	_ = this
-
 	localctx = NewSourcesContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 54, CsqlParserRULE_sources)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
@@ -5610,12 +5936,19 @@ func (p *CsqlParser) Sources() (localctx ISourcesContext) {
 	}
 	p.SetState(331)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	for _la == CsqlParserT__15 {
 		{
 			p.SetState(327)
 			p.Match(CsqlParserT__15)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(328)
@@ -5624,10 +5957,23 @@ func (p *CsqlParser) Sources() (localctx ISourcesContext) {
 
 		p.SetState(333)
 		p.GetErrorHandler().Sync(p)
+		if p.HasError() {
+			goto errorExit
+		}
 		_la = p.GetTokenStream().LA(1)
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IUnionSelectsContext is an interface to support dynamic dispatch.
@@ -5637,20 +5983,34 @@ type IUnionSelectsContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	SelectStatement() ISelectStatementContext
+	AllK_UNION() []antlr.TerminalNode
+	K_UNION(i int) antlr.TerminalNode
+	AllUnionSelects() []IUnionSelectsContext
+	UnionSelects(i int) IUnionSelectsContext
+	AllK_ALL() []antlr.TerminalNode
+	K_ALL(i int) antlr.TerminalNode
+
 	// IsUnionSelectsContext differentiates from other interfaces.
 	IsUnionSelectsContext()
 }
 
 type UnionSelectsContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyUnionSelectsContext() *UnionSelectsContext {
 	var p = new(UnionSelectsContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_unionSelects
 	return p
+}
+
+func InitEmptyUnionSelectsContext(p *UnionSelectsContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_unionSelects
 }
 
 func (*UnionSelectsContext) IsUnionSelectsContext() {}
@@ -5658,7 +6018,7 @@ func (*UnionSelectsContext) IsUnionSelectsContext() {}
 func NewUnionSelectsContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *UnionSelectsContext {
 	var p = new(UnionSelectsContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_unionSelects
@@ -5760,28 +6120,9 @@ func (s *UnionSelectsContext) Accept(visitor antlr.ParseTreeVisitor) interface{}
 }
 
 func (p *CsqlParser) UnionSelects() (localctx IUnionSelectsContext) {
-	this := p
-	_ = this
-
 	localctx = NewUnionSelectsContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 56, CsqlParserRULE_unionSelects)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	var _alt int
 
@@ -5792,22 +6133,38 @@ func (p *CsqlParser) UnionSelects() (localctx IUnionSelectsContext) {
 	}
 	p.SetState(342)
 	p.GetErrorHandler().Sync(p)
-	_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 31, p.GetParserRuleContext())
-
+	if p.HasError() {
+		goto errorExit
+	}
+	_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 31, p.GetParserRuleContext())
+	if p.HasError() {
+		goto errorExit
+	}
 	for _alt != 2 && _alt != antlr.ATNInvalidAltNumber {
 		if _alt == 1 {
 			{
 				p.SetState(335)
 				p.Match(CsqlParserK_UNION)
+				if p.HasError() {
+					// Recognition error - abort rule
+					goto errorExit
+				}
 			}
 			p.SetState(337)
 			p.GetErrorHandler().Sync(p)
+			if p.HasError() {
+				goto errorExit
+			}
 			_la = p.GetTokenStream().LA(1)
 
 			if _la == CsqlParserK_ALL {
 				{
 					p.SetState(336)
 					p.Match(CsqlParserK_ALL)
+					if p.HasError() {
+						// Recognition error - abort rule
+						goto errorExit
+					}
 				}
 
 			}
@@ -5819,10 +6176,26 @@ func (p *CsqlParser) UnionSelects() (localctx IUnionSelectsContext) {
 		}
 		p.SetState(344)
 		p.GetErrorHandler().Sync(p)
-		_alt = p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 31, p.GetParserRuleContext())
+		if p.HasError() {
+			goto errorExit
+		}
+		_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 31, p.GetParserRuleContext())
+		if p.HasError() {
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // ISelectStatementContext is an interface to support dynamic dispatch.
@@ -5832,20 +6205,36 @@ type ISelectStatementContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_SELECT() antlr.TerminalNode
+	Projection() IProjectionContext
+	K_FROM() antlr.TerminalNode
+	Sources() ISourcesContext
+	Where() IWhereContext
+	OrderBy() IOrderByContext
+	Limit() ILimitContext
+	GroupBy() IGroupByContext
+	Having() IHavingContext
+
 	// IsSelectStatementContext differentiates from other interfaces.
 	IsSelectStatementContext()
 }
 
 type SelectStatementContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptySelectStatementContext() *SelectStatementContext {
 	var p = new(SelectStatementContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_selectStatement
 	return p
+}
+
+func InitEmptySelectStatementContext(p *SelectStatementContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_selectStatement
 }
 
 func (*SelectStatementContext) IsSelectStatementContext() {}
@@ -5853,7 +6242,7 @@ func (*SelectStatementContext) IsSelectStatementContext() {}
 func NewSelectStatementContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *SelectStatementContext {
 	var p = new(SelectStatementContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_selectStatement
@@ -6002,33 +6391,18 @@ func (s *SelectStatementContext) Accept(visitor antlr.ParseTreeVisitor) interfac
 }
 
 func (p *CsqlParser) SelectStatement() (localctx ISelectStatementContext) {
-	this := p
-	_ = this
-
 	localctx = NewSelectStatementContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 58, CsqlParserRULE_selectStatement)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(345)
 		p.Match(CsqlParserK_SELECT)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	{
 		p.SetState(346)
@@ -6037,6 +6411,10 @@ func (p *CsqlParser) SelectStatement() (localctx ISelectStatementContext) {
 	{
 		p.SetState(347)
 		p.Match(CsqlParserK_FROM)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	{
 		p.SetState(348)
@@ -6044,6 +6422,9 @@ func (p *CsqlParser) SelectStatement() (localctx ISelectStatementContext) {
 	}
 	p.SetState(350)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserK_WHERE {
@@ -6055,6 +6436,9 @@ func (p *CsqlParser) SelectStatement() (localctx ISelectStatementContext) {
 	}
 	p.SetState(353)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserK_ORDER {
@@ -6066,6 +6450,9 @@ func (p *CsqlParser) SelectStatement() (localctx ISelectStatementContext) {
 	}
 	p.SetState(356)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserK_LIMIT {
@@ -6077,6 +6464,9 @@ func (p *CsqlParser) SelectStatement() (localctx ISelectStatementContext) {
 	}
 	p.SetState(359)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserK_GROUP {
@@ -6088,6 +6478,9 @@ func (p *CsqlParser) SelectStatement() (localctx ISelectStatementContext) {
 	}
 	p.SetState(362)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserK_HAVING {
@@ -6098,7 +6491,17 @@ func (p *CsqlParser) SelectStatement() (localctx ISelectStatementContext) {
 
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // ISignedNumberContext is an interface to support dynamic dispatch.
@@ -6108,20 +6511,28 @@ type ISignedNumberContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	NUMERIC_LITERAL() antlr.TerminalNode
+
 	// IsSignedNumberContext differentiates from other interfaces.
 	IsSignedNumberContext()
 }
 
 type SignedNumberContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptySignedNumberContext() *SignedNumberContext {
 	var p = new(SignedNumberContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_signedNumber
 	return p
+}
+
+func InitEmptySignedNumberContext(p *SignedNumberContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_signedNumber
 }
 
 func (*SignedNumberContext) IsSignedNumberContext() {}
@@ -6129,7 +6540,7 @@ func (*SignedNumberContext) IsSignedNumberContext() {}
 func NewSignedNumberContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *SignedNumberContext {
 	var p = new(SignedNumberContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_signedNumber
@@ -6162,32 +6573,16 @@ func (s *SignedNumberContext) Accept(visitor antlr.ParseTreeVisitor) interface{}
 }
 
 func (p *CsqlParser) SignedNumber() (localctx ISignedNumberContext) {
-	this := p
-	_ = this
-
 	localctx = NewSignedNumberContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 60, CsqlParserRULE_signedNumber)
 	var _la int
 
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	p.SetState(365)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserT__8 || _la == CsqlParserT__9 {
@@ -6207,9 +6602,23 @@ func (p *CsqlParser) SignedNumber() (localctx ISignedNumberContext) {
 	{
 		p.SetState(367)
 		p.Match(CsqlParserNUMERIC_LITERAL)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IStringValueContext is an interface to support dynamic dispatch.
@@ -6219,20 +6628,28 @@ type IStringValueContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	STRING_LITERAL() antlr.TerminalNode
+
 	// IsStringValueContext differentiates from other interfaces.
 	IsStringValueContext()
 }
 
 type StringValueContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyStringValueContext() *StringValueContext {
 	var p = new(StringValueContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_stringValue
 	return p
+}
+
+func InitEmptyStringValueContext(p *StringValueContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_stringValue
 }
 
 func (*StringValueContext) IsStringValueContext() {}
@@ -6240,7 +6657,7 @@ func (*StringValueContext) IsStringValueContext() {}
 func NewStringValueContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *StringValueContext {
 	var p = new(StringValueContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_stringValue
@@ -6273,35 +6690,29 @@ func (s *StringValueContext) Accept(visitor antlr.ParseTreeVisitor) interface{} 
 }
 
 func (p *CsqlParser) StringValue() (localctx IStringValueContext) {
-	this := p
-	_ = this
-
 	localctx = NewStringValueContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 62, CsqlParserRULE_stringValue)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(369)
 		p.Match(CsqlParserSTRING_LITERAL)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // INullValueContext is an interface to support dynamic dispatch.
@@ -6311,20 +6722,28 @@ type INullValueContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_NULL() antlr.TerminalNode
+
 	// IsNullValueContext differentiates from other interfaces.
 	IsNullValueContext()
 }
 
 type NullValueContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyNullValueContext() *NullValueContext {
 	var p = new(NullValueContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_nullValue
 	return p
+}
+
+func InitEmptyNullValueContext(p *NullValueContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_nullValue
 }
 
 func (*NullValueContext) IsNullValueContext() {}
@@ -6332,7 +6751,7 @@ func (*NullValueContext) IsNullValueContext() {}
 func NewNullValueContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *NullValueContext {
 	var p = new(NullValueContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_nullValue
@@ -6365,35 +6784,29 @@ func (s *NullValueContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) NullValue() (localctx INullValueContext) {
-	this := p
-	_ = this
-
 	localctx = NewNullValueContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 64, CsqlParserRULE_nullValue)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(371)
 		p.Match(CsqlParserK_NULL)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // ILiteralValueContext is an interface to support dynamic dispatch.
@@ -6403,20 +6816,30 @@ type ILiteralValueContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	SignedNumber() ISignedNumberContext
+	StringValue() IStringValueContext
+	NullValue() INullValueContext
+
 	// IsLiteralValueContext differentiates from other interfaces.
 	IsLiteralValueContext()
 }
 
 type LiteralValueContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyLiteralValueContext() *LiteralValueContext {
 	var p = new(LiteralValueContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_literalValue
 	return p
+}
+
+func InitEmptyLiteralValueContext(p *LiteralValueContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_literalValue
 }
 
 func (*LiteralValueContext) IsLiteralValueContext() {}
@@ -6424,7 +6847,7 @@ func (*LiteralValueContext) IsLiteralValueContext() {}
 func NewLiteralValueContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *LiteralValueContext {
 	var p = new(LiteralValueContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_literalValue
@@ -6501,30 +6924,13 @@ func (s *LiteralValueContext) Accept(visitor antlr.ParseTreeVisitor) interface{}
 }
 
 func (p *CsqlParser) LiteralValue() (localctx ILiteralValueContext) {
-	this := p
-	_ = this
-
 	localctx = NewLiteralValueContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 66, CsqlParserRULE_literalValue)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.SetState(376)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 
 	switch p.GetTokenStream().LA(1) {
 	case CsqlParserT__8, CsqlParserT__9, CsqlParserNUMERIC_LITERAL:
@@ -6549,10 +6955,21 @@ func (p *CsqlParser) LiteralValue() (localctx ILiteralValueContext) {
 		}
 
 	default:
-		panic(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		goto errorExit
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IAliasContext is an interface to support dynamic dispatch.
@@ -6562,20 +6979,28 @@ type IAliasContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	IDENTIFIER() antlr.TerminalNode
+
 	// IsAliasContext differentiates from other interfaces.
 	IsAliasContext()
 }
 
 type AliasContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyAliasContext() *AliasContext {
 	var p = new(AliasContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_alias
 	return p
+}
+
+func InitEmptyAliasContext(p *AliasContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_alias
 }
 
 func (*AliasContext) IsAliasContext() {}
@@ -6583,7 +7008,7 @@ func (*AliasContext) IsAliasContext() {}
 func NewAliasContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *AliasContext {
 	var p = new(AliasContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_alias
@@ -6616,35 +7041,29 @@ func (s *AliasContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) Alias() (localctx IAliasContext) {
-	this := p
-	_ = this
-
 	localctx = NewAliasContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 68, CsqlParserRULE_alias)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(378)
 		p.Match(CsqlParserIDENTIFIER)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // ISourceNameContext is an interface to support dynamic dispatch.
@@ -6654,20 +7073,29 @@ type ISourceNameContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	Name() INameContext
+	Alias() IAliasContext
+
 	// IsSourceNameContext differentiates from other interfaces.
 	IsSourceNameContext()
 }
 
 type SourceNameContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptySourceNameContext() *SourceNameContext {
 	var p = new(SourceNameContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_sourceName
 	return p
+}
+
+func InitEmptySourceNameContext(p *SourceNameContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_sourceName
 }
 
 func (*SourceNameContext) IsSourceNameContext() {}
@@ -6675,7 +7103,7 @@ func (*SourceNameContext) IsSourceNameContext() {}
 func NewSourceNameContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *SourceNameContext {
 	var p = new(SourceNameContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_sourceName
@@ -6736,28 +7164,8 @@ func (s *SourceNameContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) SourceName() (localctx ISourceNameContext) {
-	this := p
-	_ = this
-
 	localctx = NewSourceNameContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 70, CsqlParserRULE_sourceName)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(380)
@@ -6766,15 +7174,27 @@ func (p *CsqlParser) SourceName() (localctx ISourceNameContext) {
 	p.SetState(382)
 	p.GetErrorHandler().Sync(p)
 
-	if p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 39, p.GetParserRuleContext()) == 1 {
+	if p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 39, p.GetParserRuleContext()) == 1 {
 		{
 			p.SetState(381)
 			p.Alias()
 		}
 
+	} else if p.HasError() { // JIM
+		goto errorExit
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // ICompoundNameContext is an interface to support dynamic dispatch.
@@ -6784,20 +7204,29 @@ type ICompoundNameContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	Name() INameContext
+	Qualifier() IQualifierContext
+
 	// IsCompoundNameContext differentiates from other interfaces.
 	IsCompoundNameContext()
 }
 
 type CompoundNameContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyCompoundNameContext() *CompoundNameContext {
 	var p = new(CompoundNameContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_compoundName
 	return p
+}
+
+func InitEmptyCompoundNameContext(p *CompoundNameContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_compoundName
 }
 
 func (*CompoundNameContext) IsCompoundNameContext() {}
@@ -6805,7 +7234,7 @@ func (*CompoundNameContext) IsCompoundNameContext() {}
 func NewCompoundNameContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *CompoundNameContext {
 	var p = new(CompoundNameContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_compoundName
@@ -6866,33 +7295,13 @@ func (s *CompoundNameContext) Accept(visitor antlr.ParseTreeVisitor) interface{}
 }
 
 func (p *CsqlParser) CompoundName() (localctx ICompoundNameContext) {
-	this := p
-	_ = this
-
 	localctx = NewCompoundNameContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 72, CsqlParserRULE_compoundName)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	p.SetState(387)
 	p.GetErrorHandler().Sync(p)
 
-	if p.GetInterpreter().AdaptivePredict(p.GetTokenStream(), 40, p.GetParserRuleContext()) == 1 {
+	if p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 40, p.GetParserRuleContext()) == 1 {
 		{
 			p.SetState(384)
 			p.Qualifier()
@@ -6900,15 +7309,31 @@ func (p *CsqlParser) CompoundName() (localctx ICompoundNameContext) {
 		{
 			p.SetState(385)
 			p.Match(CsqlParserT__17)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 
+	} else if p.HasError() { // JIM
+		goto errorExit
 	}
 	{
 		p.SetState(389)
 		p.Name()
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // INameContext is an interface to support dynamic dispatch.
@@ -6918,20 +7343,28 @@ type INameContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	IDENTIFIER() antlr.TerminalNode
+
 	// IsNameContext differentiates from other interfaces.
 	IsNameContext()
 }
 
 type NameContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyNameContext() *NameContext {
 	var p = new(NameContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_name
 	return p
+}
+
+func InitEmptyNameContext(p *NameContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_name
 }
 
 func (*NameContext) IsNameContext() {}
@@ -6939,7 +7372,7 @@ func (*NameContext) IsNameContext() {}
 func NewNameContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *NameContext {
 	var p = new(NameContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_name
@@ -6972,35 +7405,29 @@ func (s *NameContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) Name() (localctx INameContext) {
-	this := p
-	_ = this
-
 	localctx = NewNameContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 74, CsqlParserRULE_name)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(391)
 		p.Match(CsqlParserIDENTIFIER)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IQualifierContext is an interface to support dynamic dispatch.
@@ -7010,20 +7437,28 @@ type IQualifierContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	IDENTIFIER() antlr.TerminalNode
+
 	// IsQualifierContext differentiates from other interfaces.
 	IsQualifierContext()
 }
 
 type QualifierContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyQualifierContext() *QualifierContext {
 	var p = new(QualifierContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_qualifier
 	return p
+}
+
+func InitEmptyQualifierContext(p *QualifierContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_qualifier
 }
 
 func (*QualifierContext) IsQualifierContext() {}
@@ -7031,7 +7466,7 @@ func (*QualifierContext) IsQualifierContext() {}
 func NewQualifierContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *QualifierContext {
 	var p = new(QualifierContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_qualifier
@@ -7064,35 +7499,29 @@ func (s *QualifierContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) Qualifier() (localctx IQualifierContext) {
-	this := p
-	_ = this
-
 	localctx = NewQualifierContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 76, CsqlParserRULE_qualifier)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(393)
 		p.Match(CsqlParserIDENTIFIER)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // ILimitContext is an interface to support dynamic dispatch.
@@ -7102,20 +7531,29 @@ type ILimitContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_LIMIT() antlr.TerminalNode
+	LimitValue() ILimitValueContext
+
 	// IsLimitContext differentiates from other interfaces.
 	IsLimitContext()
 }
 
 type LimitContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyLimitContext() *LimitContext {
 	var p = new(LimitContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_limit
 	return p
+}
+
+func InitEmptyLimitContext(p *LimitContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_limit
 }
 
 func (*LimitContext) IsLimitContext() {}
@@ -7123,7 +7561,7 @@ func (*LimitContext) IsLimitContext() {}
 func NewLimitContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *LimitContext {
 	var p = new(LimitContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_limit
@@ -7172,39 +7610,33 @@ func (s *LimitContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) Limit() (localctx ILimitContext) {
-	this := p
-	_ = this
-
 	localctx = NewLimitContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 78, CsqlParserRULE_limit)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(395)
 		p.Match(CsqlParserK_LIMIT)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	{
 		p.SetState(396)
 		p.LimitValue()
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // ILimitValueContext is an interface to support dynamic dispatch.
@@ -7214,20 +7646,28 @@ type ILimitValueContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	NUMERIC_LITERAL() antlr.TerminalNode
+
 	// IsLimitValueContext differentiates from other interfaces.
 	IsLimitValueContext()
 }
 
 type LimitValueContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyLimitValueContext() *LimitValueContext {
 	var p = new(LimitValueContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_limitValue
 	return p
+}
+
+func InitEmptyLimitValueContext(p *LimitValueContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_limitValue
 }
 
 func (*LimitValueContext) IsLimitValueContext() {}
@@ -7235,7 +7675,7 @@ func (*LimitValueContext) IsLimitValueContext() {}
 func NewLimitValueContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *LimitValueContext {
 	var p = new(LimitValueContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_limitValue
@@ -7268,35 +7708,29 @@ func (s *LimitValueContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) LimitValue() (localctx ILimitValueContext) {
-	this := p
-	_ = this
-
 	localctx = NewLimitValueContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 80, CsqlParserRULE_limitValue)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(398)
 		p.Match(CsqlParserNUMERIC_LITERAL)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IOrderByContext is an interface to support dynamic dispatch.
@@ -7306,20 +7740,31 @@ type IOrderByContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_ORDER() antlr.TerminalNode
+	K_BY() antlr.TerminalNode
+	AllOrderByField() []IOrderByFieldContext
+	OrderByField(i int) IOrderByFieldContext
+
 	// IsOrderByContext differentiates from other interfaces.
 	IsOrderByContext()
 }
 
 type OrderByContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyOrderByContext() *OrderByContext {
 	var p = new(OrderByContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_orderBy
 	return p
+}
+
+func InitEmptyOrderByContext(p *OrderByContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_orderBy
 }
 
 func (*OrderByContext) IsOrderByContext() {}
@@ -7327,7 +7772,7 @@ func (*OrderByContext) IsOrderByContext() {}
 func NewOrderByContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *OrderByContext {
 	var p = new(OrderByContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_orderBy
@@ -7405,37 +7850,26 @@ func (s *OrderByContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) OrderBy() (localctx IOrderByContext) {
-	this := p
-	_ = this
-
 	localctx = NewOrderByContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 82, CsqlParserRULE_orderBy)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(400)
 		p.Match(CsqlParserK_ORDER)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	{
 		p.SetState(401)
 		p.Match(CsqlParserK_BY)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	{
 		p.SetState(402)
@@ -7443,12 +7877,19 @@ func (p *CsqlParser) OrderBy() (localctx IOrderByContext) {
 	}
 	p.SetState(407)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	for _la == CsqlParserT__15 {
 		{
 			p.SetState(403)
 			p.Match(CsqlParserT__15)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(404)
@@ -7457,10 +7898,23 @@ func (p *CsqlParser) OrderBy() (localctx IOrderByContext) {
 
 		p.SetState(409)
 		p.GetErrorHandler().Sync(p)
+		if p.HasError() {
+			goto errorExit
+		}
 		_la = p.GetTokenStream().LA(1)
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IOrderByFieldContext is an interface to support dynamic dispatch.
@@ -7470,20 +7924,31 @@ type IOrderByFieldContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	CompoundName() ICompoundNameContext
+	FieldIndex() IFieldIndexContext
+	K_ASC() antlr.TerminalNode
+	K_DESC() antlr.TerminalNode
+
 	// IsOrderByFieldContext differentiates from other interfaces.
 	IsOrderByFieldContext()
 }
 
 type OrderByFieldContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyOrderByFieldContext() *OrderByFieldContext {
 	var p = new(OrderByFieldContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_orderByField
 	return p
+}
+
+func InitEmptyOrderByFieldContext(p *OrderByFieldContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_orderByField
 }
 
 func (*OrderByFieldContext) IsOrderByFieldContext() {}
@@ -7491,7 +7956,7 @@ func (*OrderByFieldContext) IsOrderByFieldContext() {}
 func NewOrderByFieldContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *OrderByFieldContext {
 	var p = new(OrderByFieldContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_orderByField
@@ -7560,32 +8025,16 @@ func (s *OrderByFieldContext) Accept(visitor antlr.ParseTreeVisitor) interface{}
 }
 
 func (p *CsqlParser) OrderByField() (localctx IOrderByFieldContext) {
-	this := p
-	_ = this
-
 	localctx = NewOrderByFieldContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 84, CsqlParserRULE_orderByField)
 	var _la int
 
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	p.SetState(412)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 
 	switch p.GetTokenStream().LA(1) {
 	case CsqlParserIDENTIFIER:
@@ -7601,10 +8050,14 @@ func (p *CsqlParser) OrderByField() (localctx IOrderByFieldContext) {
 		}
 
 	default:
-		panic(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		goto errorExit
 	}
 	p.SetState(415)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	if _la == CsqlParserK_ASC || _la == CsqlParserK_DESC {
@@ -7622,7 +8075,17 @@ func (p *CsqlParser) OrderByField() (localctx IOrderByFieldContext) {
 
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IFieldIndexContext is an interface to support dynamic dispatch.
@@ -7632,20 +8095,28 @@ type IFieldIndexContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	NUMERIC_LITERAL() antlr.TerminalNode
+
 	// IsFieldIndexContext differentiates from other interfaces.
 	IsFieldIndexContext()
 }
 
 type FieldIndexContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyFieldIndexContext() *FieldIndexContext {
 	var p = new(FieldIndexContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_fieldIndex
 	return p
+}
+
+func InitEmptyFieldIndexContext(p *FieldIndexContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_fieldIndex
 }
 
 func (*FieldIndexContext) IsFieldIndexContext() {}
@@ -7653,7 +8124,7 @@ func (*FieldIndexContext) IsFieldIndexContext() {}
 func NewFieldIndexContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *FieldIndexContext {
 	var p = new(FieldIndexContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_fieldIndex
@@ -7686,35 +8157,29 @@ func (s *FieldIndexContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) FieldIndex() (localctx IFieldIndexContext) {
-	this := p
-	_ = this
-
 	localctx = NewFieldIndexContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 86, CsqlParserRULE_fieldIndex)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(417)
 		p.Match(CsqlParserNUMERIC_LITERAL)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IGroupByContext is an interface to support dynamic dispatch.
@@ -7724,20 +8189,31 @@ type IGroupByContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_GROUP() antlr.TerminalNode
+	K_BY() antlr.TerminalNode
+	AllGroupByField() []IGroupByFieldContext
+	GroupByField(i int) IGroupByFieldContext
+
 	// IsGroupByContext differentiates from other interfaces.
 	IsGroupByContext()
 }
 
 type GroupByContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyGroupByContext() *GroupByContext {
 	var p = new(GroupByContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_groupBy
 	return p
+}
+
+func InitEmptyGroupByContext(p *GroupByContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_groupBy
 }
 
 func (*GroupByContext) IsGroupByContext() {}
@@ -7745,7 +8221,7 @@ func (*GroupByContext) IsGroupByContext() {}
 func NewGroupByContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *GroupByContext {
 	var p = new(GroupByContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_groupBy
@@ -7823,37 +8299,26 @@ func (s *GroupByContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) GroupBy() (localctx IGroupByContext) {
-	this := p
-	_ = this
-
 	localctx = NewGroupByContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 88, CsqlParserRULE_groupBy)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(419)
 		p.Match(CsqlParserK_GROUP)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	{
 		p.SetState(420)
 		p.Match(CsqlParserK_BY)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 	{
 		p.SetState(421)
@@ -7861,12 +8326,19 @@ func (p *CsqlParser) GroupBy() (localctx IGroupByContext) {
 	}
 	p.SetState(426)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 	_la = p.GetTokenStream().LA(1)
 
 	for _la == CsqlParserT__15 {
 		{
 			p.SetState(422)
 			p.Match(CsqlParserT__15)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
 		}
 		{
 			p.SetState(423)
@@ -7875,10 +8347,23 @@ func (p *CsqlParser) GroupBy() (localctx IGroupByContext) {
 
 		p.SetState(428)
 		p.GetErrorHandler().Sync(p)
+		if p.HasError() {
+			goto errorExit
+		}
 		_la = p.GetTokenStream().LA(1)
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IGroupByFieldContext is an interface to support dynamic dispatch.
@@ -7888,20 +8373,29 @@ type IGroupByFieldContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	CompoundName() ICompoundNameContext
+	FieldIndex() IFieldIndexContext
+
 	// IsGroupByFieldContext differentiates from other interfaces.
 	IsGroupByFieldContext()
 }
 
 type GroupByFieldContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyGroupByFieldContext() *GroupByFieldContext {
 	var p = new(GroupByFieldContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_groupByField
 	return p
+}
+
+func InitEmptyGroupByFieldContext(p *GroupByFieldContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_groupByField
 }
 
 func (*GroupByFieldContext) IsGroupByFieldContext() {}
@@ -7909,7 +8403,7 @@ func (*GroupByFieldContext) IsGroupByFieldContext() {}
 func NewGroupByFieldContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *GroupByFieldContext {
 	var p = new(GroupByFieldContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_groupByField
@@ -7970,31 +8464,14 @@ func (s *GroupByFieldContext) Accept(visitor antlr.ParseTreeVisitor) interface{}
 }
 
 func (p *CsqlParser) GroupByField() (localctx IGroupByFieldContext) {
-	this := p
-	_ = this
-
 	localctx = NewGroupByFieldContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 90, CsqlParserRULE_groupByField)
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
-
 	p.EnterOuterAlt(localctx, 1)
 	p.SetState(431)
 	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
 
 	switch p.GetTokenStream().LA(1) {
 	case CsqlParserIDENTIFIER:
@@ -8010,10 +8487,21 @@ func (p *CsqlParser) GroupByField() (localctx IGroupByFieldContext) {
 		}
 
 	default:
-		panic(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		goto errorExit
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 // IFunctionContext is an interface to support dynamic dispatch.
@@ -8023,20 +8511,40 @@ type IFunctionContext interface {
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
+	// Getter signatures
+	K_ROUND() antlr.TerminalNode
+	K_LEN() antlr.TerminalNode
+	K_TRUNC() antlr.TerminalNode
+	K_FRAC() antlr.TerminalNode
+	K_TO_STRING() antlr.TerminalNode
+	K_TO_FLOAT() antlr.TerminalNode
+	K_TO_INT() antlr.TerminalNode
+	K_SUBSTRING() antlr.TerminalNode
+	K_TO_UPPER() antlr.TerminalNode
+	K_TO_LOWER() antlr.TerminalNode
+	K_POW() antlr.TerminalNode
+	K_SQRT() antlr.TerminalNode
+	K_COALESCE() antlr.TerminalNode
+
 	// IsFunctionContext differentiates from other interfaces.
 	IsFunctionContext()
 }
 
 type FunctionContext struct {
-	*antlr.BaseParserRuleContext
+	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
 func NewEmptyFunctionContext() *FunctionContext {
 	var p = new(FunctionContext)
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(nil, -1)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
 	p.RuleIndex = CsqlParserRULE_function
 	return p
+}
+
+func InitEmptyFunctionContext(p *FunctionContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = CsqlParserRULE_function
 }
 
 func (*FunctionContext) IsFunctionContext() {}
@@ -8044,7 +8552,7 @@ func (*FunctionContext) IsFunctionContext() {}
 func NewFunctionContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *FunctionContext {
 	var p = new(FunctionContext)
 
-	p.BaseParserRuleContext = antlr.NewBaseParserRuleContext(parent, invokingState)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
 	p.RuleIndex = CsqlParserRULE_function
@@ -8125,28 +8633,9 @@ func (s *FunctionContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 }
 
 func (p *CsqlParser) Function() (localctx IFunctionContext) {
-	this := p
-	_ = this
-
 	localctx = NewFunctionContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 92, CsqlParserRULE_function)
 	var _la int
-
-	defer func() {
-		p.ExitRule()
-	}()
-
-	defer func() {
-		if err := recover(); err != nil {
-			if v, ok := err.(antlr.RecognitionException); ok {
-				localctx.SetException(v)
-				p.GetErrorHandler().ReportError(p, v)
-				p.GetErrorHandler().Recover(p, v)
-			} else {
-				panic(err)
-			}
-		}
-	}()
 
 	p.EnterOuterAlt(localctx, 1)
 	{
@@ -8161,7 +8650,17 @@ func (p *CsqlParser) Function() (localctx IFunctionContext) {
 		}
 	}
 
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
 	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
 func (p *CsqlParser) Sempred(localctx antlr.RuleContext, ruleIndex, predIndex int) bool {
@@ -8193,9 +8692,6 @@ func (p *CsqlParser) Sempred(localctx antlr.RuleContext, ruleIndex, predIndex in
 }
 
 func (p *CsqlParser) ValueExpr_Sempred(localctx antlr.RuleContext, predIndex int) bool {
-	this := p
-	_ = this
-
 	switch predIndex {
 	case 0:
 		return p.Precpred(p.GetParserRuleContext(), 5)
@@ -8206,9 +8702,6 @@ func (p *CsqlParser) ValueExpr_Sempred(localctx antlr.RuleContext, predIndex int
 }
 
 func (p *CsqlParser) WhereExpr_Sempred(localctx antlr.RuleContext, predIndex int) bool {
-	this := p
-	_ = this
-
 	switch predIndex {
 	case 1:
 		return p.Precpred(p.GetParserRuleContext(), 10)
@@ -8225,9 +8718,6 @@ func (p *CsqlParser) WhereExpr_Sempred(localctx antlr.RuleContext, predIndex int
 }
 
 func (p *CsqlParser) DataSource_Sempred(localctx antlr.RuleContext, predIndex int) bool {
-	this := p
-	_ = this
-
 	switch predIndex {
 	case 4:
 		return p.Precpred(p.GetParserRuleContext(), 3)

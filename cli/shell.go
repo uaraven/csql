@@ -20,6 +20,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"github.com/peterh/liner"
 	"github.com/uaraven/ansie"
@@ -58,6 +59,8 @@ func NewCsqlShell(version string) *CsqlShell {
 		"cd":      CdCmd(),
 		"csv":     CsvCommand(),
 		"inspect": InspectCommand(),
+		"status":  StatusCommand(),
+		"purge":   PurgeCommand(),
 	}
 
 	csql.line.SetCtrlCAborts(true)
@@ -121,7 +124,7 @@ func (s *CsqlShell) Start() {
 			s.Terminate()
 			break
 		}
-		if err == liner.ErrPromptAborted {
+		if errors.Is(err, liner.ErrPromptAborted) {
 			if inMultiline {
 				buffer.Reset()
 				continue

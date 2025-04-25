@@ -59,6 +59,23 @@ func NewCsvDataSourceWithAlias(csvFile string, alias string) DataSource {
 	} else {
 		justName = strings.TrimSuffix(nameExt, filepath.Ext(nameExt))
 	}
+	stat, err := os.Stat(csvFile)
+	if cached, ok := TableCache[justName]; ok {
+		if err != nil {
+			// there was an error reading stat from the file, delete the cache entry
+			delete(TableCache, justName)
+		} else {
+			if stat.ModTime() != cached.ModTime {
+				// if the file on dist was changed, delete the cache entry
+				delete(TableCache, justName)
+			} else {
+				// update last access time
+				TableCache.Touch(justName)
+				return cached.DataSource
+			}
+		}
+	}
+
 	file, err := os.Open(csvFile)
 	if err != nil {
 		panic(err)
@@ -80,6 +97,7 @@ func NewCsvDataSourceWithAlias(csvFile string, alias string) DataSource {
 	if err != nil {
 		panic(err)
 	}
+	TableCache.AddToCache(justName, cds, stat.ModTime())
 	return cds
 }
 
