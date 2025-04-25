@@ -10,8 +10,8 @@ require (
 	github.com/peterh/liner v1.2.2
 	github.com/uaraven/ansie v0.3.3
 	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842
+	golang.org/x/sync v0.12.0
 	golang.org/x/term v0.30.0
-	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 )
 
 require (
