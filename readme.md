@@ -21,12 +21,12 @@ csql automatically converts values to integer and float types and nulls.
 See [this document](docs/syntax.md) for detailed description of Csql syntax.
 
 ---
-<sup>*</sup> IN (select) is not supported yet in version 0.1.x
+<sup>*</sup> IN (select) is not supported yet in version 0.2.x
 
 
 ## Usage
 
-Currently the only supported usage mode is interactive. Run `csql` command and the CSQL shell will start.
+For interactive mode run `csql` command and the CSQL shell will start.
 
 You can type SELECT queries or commands. Queries must start with word `select` and terminate with a semicolon (`;`).
 
@@ -39,7 +39,10 @@ Supported commands are:
    - cd - change directory
    - csv - set CSV parsing options
    - inspect - inspect a CSV file - print out column names and data types of the first row
+                    
+CSQL can also execute queries passed from the command line
 
+    $ csql -c "SELECT * FROM file.csv WHERE column = 'value'" -o result.csv
 
 ## Building
 

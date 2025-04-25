@@ -2,22 +2,33 @@ package core
 
 import "time"
 
+// DatasetCacheEntry contains data for a datasource in memory
 type DatasetCacheEntry struct {
-	AddedTime  time.Time
-	Size       int
-	ModTime    time.Time
+	// AccessTime contains the time when the dataset was last accessed
+	AccessTime time.Time
+	// Size contains the size of datasource (currently in rows)
+	Size int
+	// ModTime contains the time when the source file was modified
+	ModTime time.Time
+	// DataSource contains the actual data source
 	DataSource DataSource
 }
 
-const MaxSize = 1_000_000
+// maxCacheSize is the maximum size of the cache in rows
+const maxCacheSize = 1_000_000
+
+var CacheEnabled = false
 
 type DatasetCache map[string]*DatasetCacheEntry
 
 var TableCache = make(DatasetCache)
 
 func (ds DatasetCache) AddToCache(name string, dsEntry DataSource, modTime time.Time) {
+	if !CacheEnabled {
+		return
+	}
 	entry := &DatasetCacheEntry{
-		AddedTime:  time.Now(),
+		AccessTime: time.Now(),
 		Size:       len(dsEntry.GetRows()),
 		ModTime:    modTime,
 		DataSource: dsEntry,
@@ -27,12 +38,12 @@ func (ds DatasetCache) AddToCache(name string, dsEntry DataSource, modTime time.
 		totalSize += v.Size
 	}
 
-	for totalSize+entry.Size > MaxSize {
+	for totalSize+entry.Size > maxCacheSize {
 		oldest := ""
 		oldestTime := time.Now()
 		for k, v := range ds {
-			if v.AddedTime.Before(oldestTime) {
-				oldestTime = v.AddedTime
+			if v.AccessTime.Before(oldestTime) {
+				oldestTime = v.AccessTime
 				oldest = k
 			}
 		}
@@ -52,6 +63,6 @@ func (ds DatasetCache) ClearCache() (datasets int, rows int) {
 
 func (ds DatasetCache) Touch(name string) {
 	if v, ok := ds[name]; ok {
-		v.AddedTime = time.Now()
+		v.AccessTime = time.Now()
 	}
 }

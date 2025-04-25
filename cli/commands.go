@@ -224,7 +224,7 @@ func StatusCommand() *Command {
 			}
 			shell.PrintMessage(fmt.Sprintf("%*s %10s Age", titleWidth, "Dataset", "Size"))
 			for k, v := range core.TableCache {
-				diff := time.Now().Sub(v.AddedTime)
+				diff := time.Now().Sub(v.AccessTime)
 				shell.PrintMessage(shell.C.Fg(ansie.Blue).S("%*s ", titleWidth, k).
 					Fg(ansie.Green).S("%15d", len(v.DataSource.GetRows())).Reset().A(" rows ").
 					Fg(ansie.Yellow).S("%s", util.FormatDuration(diff)).

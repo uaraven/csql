@@ -34,6 +34,7 @@ var opts struct {
 	RunQuery  bool    `short:"c" long:"command" description:"Runs the query passed as command line arguments"`
 	Separator *string `short:"s" long:"separator" description:"CSV separator character"`
 	Output    *string `short:"o" long:"output" description:"Output results into a file"`
+	NoCache   bool    `long:"no-cache" description:"Disable datasource caching"`
 }
 
 func main() {
@@ -50,6 +51,7 @@ func main() {
 			log.Fatalf("Failed to set CSV separator %v", err)
 		}
 	}
+	core.CacheEnabled = !(opts.RunQuery || opts.NoCache)
 	if opts.RunQuery {
 		query := strings.Join(args, " ")
 		if opts.Output == nil {

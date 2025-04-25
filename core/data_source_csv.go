@@ -62,11 +62,14 @@ func NewCsvDataSourceWithAlias(csvFile string, alias string) DataSource {
 	stat, err := os.Stat(csvFile)
 	if cached, ok := TableCache[justName]; ok {
 		if err != nil {
+			// there was an error reading stat from the file, delete the cache entry
 			delete(TableCache, justName)
 		} else {
 			if stat.ModTime() != cached.ModTime {
+				// if the file on dist was changed, delete the cache entry
 				delete(TableCache, justName)
 			} else {
+				// update last access time
 				TableCache.Touch(justName)
 				return cached.DataSource
 			}
