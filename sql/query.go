@@ -305,10 +305,6 @@ type Literal struct {
 	StringValue  *string
 }
 
-func IntLiteral(i string) Literal {
-	return Literal{NumericValue: &i}
-}
-
 func (lit Literal) String() string {
 	if lit.IsNull {
 		return "NULL"
@@ -526,6 +522,7 @@ func (cfc CountFunctionCall) String() string {
 
 type IntoClause struct {
 	Destination Identifier
+	TempTable   bool
 }
 
 func (ic IntoClause) String() string {

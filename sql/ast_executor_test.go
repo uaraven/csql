@@ -625,3 +625,16 @@ func TestAstTransformer_SelectInto(t *testing.T) {
 	_, err := os.Stat(outFile)
 	g.Expect(err).ToNot(HaveOccurred())
 }
+
+func TestAstTransformer_SelectIntoTemp(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select * from "../test-data/cities.csv" into temp ttt`).
+		GetRows()
+	g.Expect(rows).To(HaveLen(0))
+	_, err := os.Stat("ttt")
+	g.Expect(err).To(HaveOccurred())
+	g.Expect(core.TableCache).To(HaveKey("ttt"))
+	g.Expect(core.TableCache["ttt"].TempTable).To(BeTrue())
+}

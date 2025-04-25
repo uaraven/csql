@@ -145,7 +145,7 @@ groupByField
     ;
 
 intoClause
-    : K_INTO name
+    : K_INTO K_TEMP? name
     ;
 
 function
@@ -217,10 +217,13 @@ K_MAX: M A X;
 K_GROUP: G R O U P;
 K_HAVING: H A V I N G;
 K_INTO: I N T O;
+K_TEMP: T E M P;
+K_DROP: D R O P;
+K_TABLE: T A B L E;
 
 IDENTIFIER: SIMPLE_IDENTIFIER | QUOTED_IDENTIFIER;
 
-SIMPLE_IDENTIFIER: [a-zA-Z] [a-zA-Z_0-9]*;
+SIMPLE_IDENTIFIER: [a-zA-Z_] [a-zA-Z_0-9]*;
 
 QUOTED_IDENTIFIER: '"' ( ~'"' | '""')* '"';
 

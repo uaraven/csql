@@ -140,12 +140,10 @@ func (c CsqlVisitorImpl) Visit(tree antlr.ParseTree) interface{} {
 // VisitQuery visits a parse tree produced by CsqlParser#query.
 func (c CsqlVisitorImpl) VisitQuery(ctx *parser.QueryContext) interface{} {
 	unionSource := ctx.UnionSelects().Accept(c).(*UnionSource)
-	var ic *IntoClause
 	if ctx.IntoClause() != nil {
-		ic = ctx.IntoClause().Accept(c).(*IntoClause)
+		ic := ctx.IntoClause().Accept(c).(*IntoClause)
+		unionSource.Into = ic
 	}
-	unionSource.Into = ic
-
 	return unionSource
 }
 
@@ -178,10 +176,11 @@ func (c CsqlVisitorImpl) VisitSelectStatement(ctx *parser.SelectStatementContext
 
 func (c CsqlVisitorImpl) VisitIntoClause(ctx *parser.IntoClauseContext) interface{} {
 	name := string(ctx.Name().Accept(c).(Identifier))
-	if !strings.HasSuffix(name, ".csv") {
+	temp := ctx.K_TEMP() != nil
+	if !strings.HasSuffix(name, ".csv") && !temp {
 		name = name + ".csv"
 	}
-	return &IntoClause{Destination: Identifier(name)}
+	return &IntoClause{Destination: Identifier(name), TempTable: temp}
 }
 
 func (c CsqlVisitorImpl) VisitUnionSelects(ctx *parser.UnionSelectsContext) interface{} {
@@ -205,7 +204,7 @@ func (c CsqlVisitorImpl) VisitLimitValue(ctx *parser.LimitValueContext) interfac
 
 func (c CsqlVisitorImpl) VisitOrderBy(ctx *parser.OrderByContext) interface{} {
 	obe := OrderByExpression{OrderFields: []OrderByField{}, Location: SLFromToken(ctx.GetStart())}
-	for idx, _ := range ctx.AllOrderByField() {
+	for idx := range ctx.AllOrderByField() {
 		obe.OrderFields = append(obe.OrderFields, ctx.OrderByField(idx).Accept(c).(OrderByField))
 	}
 	return obe

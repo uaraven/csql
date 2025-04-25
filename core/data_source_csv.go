@@ -23,12 +23,13 @@ import (
 	"bufio"
 	"encoding/csv"
 	"fmt"
-	"github.com/uaraven/csql/util"
 	"io"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/uaraven/csql/util"
 )
 
 var CSVSeparator = ','
@@ -59,6 +60,14 @@ func NewCsvDataSourceWithAlias(csvFile string, alias string) DataSource {
 	} else {
 		justName = strings.TrimSuffix(nameExt, filepath.Ext(nameExt))
 	}
+
+	if tempTable, ok := TableCache[justName]; ok {
+		if tempTable.TempTable {
+			TableCache.Touch(justName)
+			return tempTable.DataSource
+		}
+	}
+
 	stat, err := os.Stat(csvFile)
 	if cached, ok := TableCache[justName]; ok {
 		if err != nil {
@@ -97,7 +106,7 @@ func NewCsvDataSourceWithAlias(csvFile string, alias string) DataSource {
 	if err != nil {
 		panic(err)
 	}
-	TableCache.AddToCache(justName, cds, stat.ModTime())
+	TableCache.AddToCache(justName, cds, stat.ModTime(), false)
 	return cds
 }
 

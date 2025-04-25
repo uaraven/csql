@@ -22,6 +22,7 @@ package sql
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/uaraven/csql/core"
 	"github.com/uaraven/csql/errors"
@@ -55,11 +56,18 @@ func (ae AstTransformer) TransformUnion(u UnionSource) core.DataSource {
 		}
 	}
 	if u.Into != nil {
-		err := core.WriteDataSourceToFile(dsResult, string(u.Into.Destination))
-		if err != nil {
-			panic(fmt.Errorf("failed to save to file '%s': %v", u.Into.Destination, err))
+		if u.Into.TempTable {
+			core.TableCache.AddToCache(string(u.Into.Destination), dsResult, time.Now(), true)
+		} else {
+			core.TableCache.AddToCache("$1", dsResult, time.Now(), true)
+			err := core.WriteDataSourceToFile(dsResult, string(u.Into.Destination))
+			if err != nil {
+				panic(fmt.Errorf("failed to save to file '%s': %v", u.Into.Destination, err))
+			}
 		}
 		return core.NewMemDataSource(dsResult.GetName(), dsResult.Header().ColumnsMetadata(), []core.Row{})
+	} else {
+		core.TableCache.AddToCache("$1", dsResult, time.Now(), true)
 	}
 	return dsResult
 }
@@ -130,9 +138,9 @@ func (ae AstTransformer) TransformJoinedSource(ctx *JoinedSource) core.DataSourc
 		return core.NewRightOuterJoin(left, right, ae.TransformExpression(ctx.Condition))
 	case FullJoin:
 		return core.NewFullJoin(left, right, ae.TransformExpression(ctx.Condition))
+	default:
+		panic("Unsupported join type")
 	}
-	// todo: Implement a proper panic
-	panic("Unsupported join type")
 }
 
 func (ae AstTransformer) TransformDataSource(ctx *DataSource) core.DataSource {
