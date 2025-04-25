@@ -19,7 +19,11 @@
 
 package util
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+	"time"
+)
 
 func EqualsIgnoreCase(s1, s2 string) bool {
 	return strings.ToLower(s1) == strings.ToLower(s2)
@@ -41,4 +45,11 @@ func Must[T any](v T, err error) T {
 		panic(err)
 	}
 	return v
+}
+
+func FormatDuration(d time.Duration) string {
+	hour := int(d.Hours())
+	minute := int(d.Minutes()) % 60
+	second := int(d.Seconds()) % 60
+	return fmt.Sprintf("%02d:%02d:%02d", hour, minute, second) //
 }

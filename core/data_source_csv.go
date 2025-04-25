@@ -59,6 +59,20 @@ func NewCsvDataSourceWithAlias(csvFile string, alias string) DataSource {
 	} else {
 		justName = strings.TrimSuffix(nameExt, filepath.Ext(nameExt))
 	}
+	stat, err := os.Stat(csvFile)
+	if cached, ok := TableCache[justName]; ok {
+		if err != nil {
+			delete(TableCache, justName)
+		} else {
+			if stat.ModTime() != cached.ModTime {
+				delete(TableCache, justName)
+			} else {
+				TableCache.Touch(justName)
+				return cached.DataSource
+			}
+		}
+	}
+
 	file, err := os.Open(csvFile)
 	if err != nil {
 		panic(err)
@@ -80,6 +94,7 @@ func NewCsvDataSourceWithAlias(csvFile string, alias string) DataSource {
 	if err != nil {
 		panic(err)
 	}
+	TableCache.AddToCache(justName, cds, stat.ModTime())
 	return cds
 }
 
