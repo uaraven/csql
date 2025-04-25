@@ -200,6 +200,9 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#groupByField.
 	VisitGroupByField(ctx *GroupByFieldContext) interface{}
 
+	// Visit a parse tree produced by CsqlParser#intoClause.
+	VisitIntoClause(ctx *IntoClauseContext) interface{}
+
 	// Visit a parse tree produced by CsqlParser#function.
 	VisitFunction(ctx *FunctionContext) interface{}
 }

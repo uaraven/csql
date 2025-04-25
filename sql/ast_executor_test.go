@@ -20,10 +20,12 @@
 package sql
 
 import (
+	"os"
+	"testing"
+
 	. "github.com/onsi/gomega"
 	"github.com/uaraven/csql/core"
 	"github.com/uaraven/csql/funky"
-	"testing"
 )
 
 func TestAstExecutor_Select(t *testing.T) {
@@ -607,4 +609,19 @@ func TestAstTransformer_AggregateFunctionInProjectionInExpression(t *testing.T) 
 	g.Expect(sl[0]).To(ContainElements(
 		[]interface{}{int64(451604)},
 	))
+}
+
+func TestAstTransformer_SelectInto(t *testing.T) {
+	outFile := "/tmp/tmp_cities.csv"
+	g := NewGomegaWithT(t)
+	defer func() {
+		_ = os.Remove(outFile)
+	}()
+
+	rows := ExecuteSql(`
+		select * from "../test-data/cities.csv" into "/tmp/tmp_cities.csv"`).
+		GetRows()
+	g.Expect(rows).To(HaveLen(0))
+	_, err := os.Stat(outFile)
+	g.Expect(err).ToNot(HaveOccurred())
 }

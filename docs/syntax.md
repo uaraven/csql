@@ -14,8 +14,10 @@ SELECT projection FROM
     table [, table]* | join
 WHERE
     conditions
+[ UNION ...]
 ORDER BY order_by
 LIMIT number
+[INTO destination]
 ```
 
 ```

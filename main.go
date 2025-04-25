@@ -20,14 +20,15 @@
 package main
 
 import (
+	"log"
+	"strings"
+
 	"github.com/jessevdk/go-flags"
 	"github.com/uaraven/csql/cli"
 	"github.com/uaraven/csql/core"
-	"log"
-	"strings"
 )
 
-var Version = "local v0.2.3 series"
+var Version = "v0.3.0"
 
 var opts struct {
 	NullValue *string `short:"n" long:"null" description:"Sets the string value to be treated as NULL"`
