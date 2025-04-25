@@ -20,15 +20,13 @@
 package cli
 
 import (
-	"encoding/csv"
 	"fmt"
+	"time"
+
 	. "github.com/uaraven/ansie"
 	"github.com/uaraven/csql/core"
 	"github.com/uaraven/csql/errors"
-	"github.com/uaraven/csql/funky"
 	"github.com/uaraven/csql/sql"
-	"os"
-	"time"
 )
 
 func RunQuery(query string) (result core.DataSource) {
@@ -71,20 +69,9 @@ func ExecuteToCsv(query string, outputFile string) {
 		return
 	}
 	completed := time.Now().Sub(start)
-	file, err := os.Create(outputFile)
+	err := core.WriteDataSourceToFile(ds, outputFile)
 	if err != nil {
-		panic(err)
+		fmt.Printf("Failed to save results to '%s': '%v'\n", outputFile, err.Error())
 	}
-	defer func() { _ = file.Close() }()
-	csvWriter := csv.NewWriter(file)
-	csvWriter.Write(funky.Map(ds.Header().ColumnsMetadata(), func(c core.ColumnMetadata) string {
-		return c.Name()
-	}))
-	for _, row := range ds.GetRows() {
-		rowValues := funky.Map(row.Values(), func(v core.Value) string {
-			return v.AsString().Value().(string)
-		})
-		csvWriter.Write(rowValues)
-	}
-	fmt.Println(fmt.Sprintf("Rows: %d, elapsed time: %5.3f sec", len(ds.GetRows()), completed.Seconds()))
+	fmt.Printf("Rows: %d, elapsed time: %5.3f sec\n", len(ds.GetRows()), completed.Seconds())
 }

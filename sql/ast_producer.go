@@ -21,11 +21,12 @@ package sql
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/antlr4-go/antlr/v4"
 	. "github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/parser"
-	"strconv"
-	"strings"
 )
 
 type ParsingError struct {
@@ -138,7 +139,14 @@ func (c CsqlVisitorImpl) Visit(tree antlr.ParseTree) interface{} {
 
 // VisitQuery visits a parse tree produced by CsqlParser#query.
 func (c CsqlVisitorImpl) VisitQuery(ctx *parser.QueryContext) interface{} {
-	return ctx.UnionSelects().Accept(c).(*UnionSource)
+	unionSource := ctx.UnionSelects().Accept(c).(*UnionSource)
+	var ic *IntoClause
+	if ctx.IntoClause() != nil {
+		ic = ctx.IntoClause().Accept(c).(*IntoClause)
+	}
+	unionSource.Into = ic
+
+	return unionSource
 }
 
 // VisitSelectStatement visits a parse tree produced by CsqlParser#selectStatement.
@@ -166,6 +174,14 @@ func (c CsqlVisitorImpl) VisitSelectStatement(ctx *parser.SelectStatementContext
 		astSelect.Having = having
 	}
 	return astSelect
+}
+
+func (c CsqlVisitorImpl) VisitIntoClause(ctx *parser.IntoClauseContext) interface{} {
+	name := string(ctx.Name().Accept(c).(Identifier))
+	if !strings.HasSuffix(name, ".csv") {
+		name = name + ".csv"
+	}
+	return &IntoClause{Destination: Identifier(name)}
 }
 
 func (c CsqlVisitorImpl) VisitUnionSelects(ctx *parser.UnionSelectsContext) interface{} {

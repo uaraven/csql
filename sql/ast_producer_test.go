@@ -20,9 +20,10 @@
 package sql
 
 import (
+	"testing"
+
 	. "github.com/onsi/gomega"
 	. "github.com/uaraven/csql/errors"
-	"testing"
 )
 
 func TestSimpleQuery(t *testing.T) {
@@ -628,6 +629,22 @@ func TestSelectWithAvgGroupBy(t *testing.T) {
 			},
 		},
 	}))
+}
+
+func TestIntoClause(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT \"col\" FROM \"Table\" INTO \"Other-Table\"")
+
+	g.Expect(s.Select.Projection.Distinct).To(BeFalse())
+	g.Expect(s.Select.Projection.ProjectionFields).To(HaveLen(1))
+	g.Expect(s.Select.Projection.ProjectionFields[0].NamedField.Name).To(Equal(Identifier("col")))
+
+	g.Expect(s.Select.From.TableName).ToNot(BeNil())
+	g.Expect(s.Select.From.TableName.Name).To(Equal(Identifier("Table")))
+	g.Expect(s.Select.From.TableName.Alias).To(BeNil())
+
+	g.Expect(s.Into).ToNot(BeNil())
+	g.Expect(s.Into.Destination).To(Equal(Identifier("Other-Table.csv")))
 }
 
 func TestSelectWithAvgInExpression(t *testing.T) {

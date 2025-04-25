@@ -21,10 +21,11 @@ package sql
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/uaraven/csql/core"
 	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/funky"
-	"strings"
 )
 
 type AstTransformer struct {
@@ -42,16 +43,25 @@ func NewAstTransformer() AstTransformer {
 }
 
 func (ae AstTransformer) TransformUnion(u UnionSource) core.DataSource {
-	ds1 := ae.TransformSelect(u.Select)
-	if u.Union == nil {
-		return ds1
+	var dsResult core.DataSource
+	dsResult = ae.TransformSelect(u.Select)
+	if u.Union != nil {
+		ds2 := ae.TransformUnion(*u.Union)
+
+		if u.unionAll {
+			dsResult = core.NewUnionAll(dsResult, ds2)
+		} else {
+			dsResult = core.NewUnion(dsResult, ds2)
+		}
 	}
-	ds2 := ae.TransformUnion(*u.Union)
-	if u.unionAll {
-		return core.NewUnionAll(ds1, ds2)
-	} else {
-		return core.NewUnion(ds1, ds2)
+	if u.Into != nil {
+		err := core.WriteDataSourceToFile(dsResult, string(u.Into.Destination))
+		if err != nil {
+			panic(fmt.Errorf("failed to save to file '%s': %v", u.Into.Destination, err))
+		}
+		return core.NewMemDataSource(dsResult.GetName(), dsResult.Header().ColumnsMetadata(), []core.Row{})
 	}
+	return dsResult
 }
 
 func (ae AstTransformer) TransformSelect(ast Select) core.DataSource {

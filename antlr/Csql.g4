@@ -18,7 +18,7 @@
  */
 grammar Csql;
 
-query: unionSelects ';'? EOF;
+query: unionSelects intoClause? ';'? EOF;
 
 comparisonOperator: '<' | '<=' | '>' | '>=' | '=' | '!=' | '<>';
 
@@ -144,6 +144,10 @@ groupByField
     : (compoundName | fieldIndex)
     ;
 
+intoClause
+    : K_INTO name
+    ;
+
 function
     : K_ROUND
     | K_LEN
@@ -212,6 +216,7 @@ K_MIN: M I N;
 K_MAX: M A X;
 K_GROUP: G R O U P;
 K_HAVING: H A V I N G;
+K_INTO: I N T O;
 
 IDENTIFIER: SIMPLE_IDENTIFIER | QUOTED_IDENTIFIER;
 

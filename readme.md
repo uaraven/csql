@@ -15,6 +15,7 @@ csql supports basic<sup>*</sup> `SELECT` statement features, including:
 - Aggregate functions and HAVING expression
 - LIMIT and ORDER BY
 - Table and column aliases (`SELECT t.column as col FROM "Table.csv" T`)
+- SELECT ... INTO
 
 csql automatically converts values to integer and float types and nulls. 
 

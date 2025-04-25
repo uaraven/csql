@@ -264,6 +264,10 @@ func (v *BaseCsqlVisitor) VisitGroupByField(ctx *GroupByFieldContext) interface{
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseCsqlVisitor) VisitIntoClause(ctx *IntoClauseContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseCsqlVisitor) VisitFunction(ctx *FunctionContext) interface{} {
 	return v.VisitChildren(ctx)
 }

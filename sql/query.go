@@ -21,10 +21,11 @@ package sql
 
 import (
 	"fmt"
-	"github.com/uaraven/csql/errors"
-	"github.com/uaraven/csql/funky"
 	"strconv"
 	"strings"
+
+	"github.com/uaraven/csql/errors"
+	"github.com/uaraven/csql/funky"
 )
 
 // Identifier is really any identifier
@@ -224,6 +225,7 @@ type UnionSource struct {
 	Select   Select
 	Union    *UnionSource
 	unionAll bool
+	Into     *IntoClause
 }
 
 // JoinType is just that
@@ -520,4 +522,12 @@ func (cfc CountFunctionCall) String() string {
 	sb.WriteString(cfc.String())
 	sb.WriteRune(')')
 	return sb.String()
+}
+
+type IntoClause struct {
+	Destination Identifier
+}
+
+func (ic IntoClause) String() string {
+	return fmt.Sprintf("INTO %s", ic.Destination)
 }
