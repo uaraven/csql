@@ -233,7 +233,7 @@ func StatusCommand() *Command {
 				shell.PrintMessage(shell.C.Fg(ansie.Blue).S("%*s ", titleWidth, k).
 					Fg(ansie.Green).S("%10d", len(v.DataSource.GetRows())).Reset().A(" rows ").
 					Fg(ansie.Yellow).S("%s", util.FormatDuration(diff)).
-					Fg(ansie.Red).A(temp).
+					Fg(ansie.Red).A(temp).Reset().
 					String())
 			}
 		},
