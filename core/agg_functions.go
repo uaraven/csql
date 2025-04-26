@@ -212,7 +212,7 @@ func NewMaxFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 			for _, row := range rows[1:] {
 				value := arg.Evaluate(row)
 				if !IsNumeric(value) {
-					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for maxV: %v in row %s", value, row.String())))
+					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value encountered in MAX function: %v in row %s", value, row.String())))
 				}
 				if maxV.Type() == TypeFloat || value.Type() == TypeFloat {
 					a := maxV.AsFloat().Value().(float64)
