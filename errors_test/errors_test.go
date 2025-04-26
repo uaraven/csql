@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Oleksiy Voronin
+ *    Copyright 2025 Oleksiy Voronin
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,20 +14,21 @@
  *    limitations under the License.
  *
  *    SPDX-License-Identifier: Apache-2.0
- *    SPDX-FileCopyrightText: (c) 2022 Oleksiy Voronin <ovoronin@gmail.com>
+ *    SPDX-FileCopyrightText: (c) 2025 Oleksiy Voronin <ovoronin@gmail.com>
  */
 
 package errors_test
 
 import (
 	"fmt"
+	"reflect"
+	"testing"
+
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
 	"github.com/onsi/gomega/types"
 	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/sql"
-	"reflect"
-	"testing"
 )
 
 func TestTypeErrorComparison(t *testing.T) {

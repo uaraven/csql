@@ -12,6 +12,8 @@ type DatasetCacheEntry struct {
 	ModTime time.Time
 	// DataSource contains the actual data source
 	DataSource DataSource
+
+	TempTable bool
 }
 
 // maxCacheSize is the maximum size of the cache in rows
@@ -23,8 +25,8 @@ type DatasetCache map[string]*DatasetCacheEntry
 
 var TableCache = make(DatasetCache)
 
-func (ds DatasetCache) AddToCache(name string, dsEntry DataSource, modTime time.Time) {
-	if !CacheEnabled {
+func (ds DatasetCache) AddToCache(name string, dsEntry DataSource, modTime time.Time, tempTable bool) {
+	if !CacheEnabled && !tempTable {
 		return
 	}
 	entry := &DatasetCacheEntry{
@@ -32,6 +34,7 @@ func (ds DatasetCache) AddToCache(name string, dsEntry DataSource, modTime time.
 		Size:       len(dsEntry.GetRows()),
 		ModTime:    modTime,
 		DataSource: dsEntry,
+		TempTable:  tempTable,
 	}
 	totalSize := 0
 	for _, v := range ds {
@@ -54,9 +57,11 @@ func (ds DatasetCache) AddToCache(name string, dsEntry DataSource, modTime time.
 
 func (ds DatasetCache) ClearCache() (datasets int, rows int) {
 	for k, v := range TableCache {
-		rows += len(v.DataSource.GetRows())
-		delete(TableCache, k)
-		datasets++
+		if !v.TempTable {
+			rows += len(v.DataSource.GetRows())
+			delete(TableCache, k)
+			datasets++
+		}
 	}
 	return
 }

@@ -268,6 +268,10 @@ func (v *BaseCsqlVisitor) VisitIntoClause(ctx *IntoClauseContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseCsqlVisitor) VisitDropTempTable(ctx *DropTempTableContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseCsqlVisitor) VisitFunction(ctx *FunctionContext) interface{} {
 	return v.VisitChildren(ctx)
 }

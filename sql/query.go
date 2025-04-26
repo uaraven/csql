@@ -222,9 +222,10 @@ func (ds DataSource) String() string {
 }
 
 type UnionSource struct {
-	Select   Select
+	Select   *Select
 	Union    *UnionSource
 	unionAll bool
+	DropTmp  *DropTempTable
 	Into     *IntoClause
 }
 
@@ -303,10 +304,6 @@ type Literal struct {
 	IsNull       bool
 	NumericValue *string
 	StringValue  *string
-}
-
-func IntLiteral(i string) Literal {
-	return Literal{NumericValue: &i}
 }
 
 func (lit Literal) String() string {
@@ -526,8 +523,17 @@ func (cfc CountFunctionCall) String() string {
 
 type IntoClause struct {
 	Destination Identifier
+	TempTable   bool
 }
 
 func (ic IntoClause) String() string {
-	return fmt.Sprintf("INTO %s", ic.Destination)
+	return fmt.Sprintf("INTO \"%s\"", ic.Destination)
+}
+
+type DropTempTable struct {
+	Name Identifier
+}
+
+func (dt DropTempTable) String() string {
+	return fmt.Sprintf("DROP TEMP TABLE \"%v\"", dt.Name)
 }

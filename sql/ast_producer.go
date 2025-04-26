@@ -139,13 +139,15 @@ func (c CsqlVisitorImpl) Visit(tree antlr.ParseTree) interface{} {
 
 // VisitQuery visits a parse tree produced by CsqlParser#query.
 func (c CsqlVisitorImpl) VisitQuery(ctx *parser.QueryContext) interface{} {
-	unionSource := ctx.UnionSelects().Accept(c).(*UnionSource)
-	var ic *IntoClause
-	if ctx.IntoClause() != nil {
-		ic = ctx.IntoClause().Accept(c).(*IntoClause)
+	if ctx.DropTempTable() != nil {
+		dropTempTable := ctx.DropTempTable().Accept(c).(DropTempTable)
+		return &UnionSource{DropTmp: &dropTempTable}
 	}
-	unionSource.Into = ic
-
+	unionSource := ctx.UnionSelects().Accept(c).(*UnionSource)
+	if ctx.IntoClause() != nil {
+		ic := ctx.IntoClause().Accept(c).(*IntoClause)
+		unionSource.Into = ic
+	}
 	return unionSource
 }
 
@@ -178,15 +180,17 @@ func (c CsqlVisitorImpl) VisitSelectStatement(ctx *parser.SelectStatementContext
 
 func (c CsqlVisitorImpl) VisitIntoClause(ctx *parser.IntoClauseContext) interface{} {
 	name := string(ctx.Name().Accept(c).(Identifier))
-	if !strings.HasSuffix(name, ".csv") {
+	temp := ctx.K_TEMP() != nil
+	if !strings.HasSuffix(name, ".csv") && !temp {
 		name = name + ".csv"
 	}
-	return &IntoClause{Destination: Identifier(name)}
+	return &IntoClause{Destination: Identifier(name), TempTable: temp}
 }
 
 func (c CsqlVisitorImpl) VisitUnionSelects(ctx *parser.UnionSelectsContext) interface{} {
+	selectStmt := ctx.SelectStatement().Accept(c).(Select)
 	astUnion := UnionSource{
-		Select:   ctx.SelectStatement().Accept(c).(Select),
+		Select:   &selectStmt,
 		unionAll: ctx.K_ALL(0) != nil,
 	}
 	if len(ctx.AllUnionSelects()) > 0 {
@@ -205,7 +209,7 @@ func (c CsqlVisitorImpl) VisitLimitValue(ctx *parser.LimitValueContext) interfac
 
 func (c CsqlVisitorImpl) VisitOrderBy(ctx *parser.OrderByContext) interface{} {
 	obe := OrderByExpression{OrderFields: []OrderByField{}, Location: SLFromToken(ctx.GetStart())}
-	for idx, _ := range ctx.AllOrderByField() {
+	for idx := range ctx.AllOrderByField() {
 		obe.OrderFields = append(obe.OrderFields, ctx.OrderByField(idx).Accept(c).(OrderByField))
 	}
 	return obe
@@ -691,4 +695,9 @@ func (c CsqlVisitorImpl) VisitCountFunc(ctx *parser.CountFuncContext) interface{
 
 func (c CsqlVisitorImpl) VisitHaving(ctx *parser.HavingContext) interface{} {
 	return ctx.WhereExpr().Accept(c).(Expression)
+}
+
+func (c CsqlVisitorImpl) VisitDropTempTable(ctx *parser.DropTempTableContext) interface{} {
+	tableName := ctx.Name().Accept(c).(Identifier)
+	return DropTempTable{tableName}
 }

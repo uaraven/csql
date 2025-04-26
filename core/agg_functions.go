@@ -21,11 +21,12 @@ package core
 
 import (
 	"fmt"
+	"math"
+	"strings"
+
 	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/funky"
 	"github.com/uaraven/csql/util"
-	"math"
-	"strings"
 )
 
 type aggregateContextImpl struct {
@@ -176,27 +177,27 @@ func NewMinFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 		name: "MIN",
 		loc:  loc,
 		implementor: func(rows []Row, function AggregateFunction) Value {
-			min := arg.Evaluate(rows[0])
+			minV := arg.Evaluate(rows[0])
 			for _, row := range rows {
 				value := arg.Evaluate(row)
 				if !IsNumeric(value) {
-					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for min: %v in row %s", value, row)))
+					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value encountered for MIN function: %v in row %s", value, row)))
 				}
-				if min.Type() == TypeFloat || value.Type() == TypeFloat {
-					a := min.AsFloat().Value().(float64)
+				if minV.Type() == TypeFloat || value.Type() == TypeFloat {
+					a := minV.AsFloat().Value().(float64)
 					b := value.AsFloat().Value().(float64)
-					min = NewFloatValue(math.Min(a, b))
+					minV = NewFloatValue(math.Min(a, b))
 				} else {
-					a := min.AsInt().Value().(int64)
+					a := minV.AsInt().Value().(int64)
 					b := value.AsInt().Value().(int64)
 					if a < b {
-						min = NewIntValue(a)
+						minV = NewIntValue(a)
 					} else {
-						min = NewIntValue(b)
+						minV = NewIntValue(b)
 					}
 				}
 			}
-			return min
+			return minV
 		},
 	}
 }
@@ -207,27 +208,27 @@ func NewMaxFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 		name: "MAX",
 		loc:  loc,
 		implementor: func(rows []Row, function AggregateFunction) Value {
-			max := arg.Evaluate(rows[0])
+			maxV := arg.Evaluate(rows[0])
 			for _, row := range rows[1:] {
 				value := arg.Evaluate(row)
 				if !IsNumeric(value) {
-					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for max: %v in row %s", value, row.String())))
+					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value encountered in MAX function: %v in row %s", value, row.String())))
 				}
-				if max.Type() == TypeFloat || value.Type() == TypeFloat {
-					a := max.AsFloat().Value().(float64)
+				if maxV.Type() == TypeFloat || value.Type() == TypeFloat {
+					a := maxV.AsFloat().Value().(float64)
 					b := value.AsFloat().Value().(float64)
-					max = NewFloatValue(math.Max(a, b))
+					maxV = NewFloatValue(math.Max(a, b))
 				} else {
-					a := max.AsInt().Value().(int64)
+					a := maxV.AsInt().Value().(int64)
 					b := value.AsInt().Value().(int64)
 					if a > b {
-						max = NewIntValue(a)
+						maxV = NewIntValue(a)
 					} else {
-						max = NewIntValue(b)
+						maxV = NewIntValue(b)
 					}
 				}
 			}
-			return max
+			return maxV
 		},
 	}
 }

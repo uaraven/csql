@@ -203,6 +203,9 @@ type CsqlVisitor interface {
 	// Visit a parse tree produced by CsqlParser#intoClause.
 	VisitIntoClause(ctx *IntoClauseContext) interface{}
 
+	// Visit a parse tree produced by CsqlParser#dropTempTable.
+	VisitDropTempTable(ctx *DropTempTableContext) interface{}
+
 	// Visit a parse tree produced by CsqlParser#function.
 	VisitFunction(ctx *FunctionContext) interface{}
 }

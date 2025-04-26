@@ -29,7 +29,7 @@ func NewLeftOuterJoin(left DataSource, right DataSource, joinOn Condition) DataS
 		name:  fmt.Sprintf("(%s LEFT JOIN %s)", left.GetName(), right.GetName()),
 		index: -1,
 	}
-	mds.headers = NewHeadersFromOtherHeaders(mds, left.Header().ColumnsMetadata(), right.Header().ColumnsMetadata())
+	mds.headers = NewHeadersFromOtherHeaders(left.Header().ColumnsMetadata(), right.Header().ColumnsMetadata())
 	mds.data = leftOuterJoin(left, right, mds.headers, joinOn)
 	return mds
 }
@@ -39,7 +39,7 @@ func NewRightOuterJoin(left DataSource, right DataSource, joinOn Condition) Data
 		name:  fmt.Sprintf("(%s RIGHT JOIN %s)", left.GetName(), right.GetName()),
 		index: -1,
 	}
-	mds.headers = NewHeadersFromOtherHeaders(mds, left.Header().ColumnsMetadata(), right.Header().ColumnsMetadata())
+	mds.headers = NewHeadersFromOtherHeaders(left.Header().ColumnsMetadata(), right.Header().ColumnsMetadata())
 	mds.data = rightOuterJoin(left, right, mds.headers, joinOn)
 	return mds
 }

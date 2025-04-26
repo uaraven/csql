@@ -28,10 +28,12 @@ import (
 
 func TestSimpleQuery(t *testing.T) {
 	g := NewGomegaWithT(t)
-	us := ParseSQL("SELECT col FROM Table")
+	us := ParseSQL("SELECT col FROM TTable")
 
 	g.Expect(us.Select).ToNot(BeNil())
 	g.Expect(us.Union).To(BeNil())
+
+	g.Expect(us.DropTmp).To(BeNil())
 
 	s := us.Select
 
@@ -40,8 +42,9 @@ func TestSimpleQuery(t *testing.T) {
 	g.Expect(s.Projection.ProjectionFields[0].NamedField.Name).To(Equal(Identifier("col")))
 
 	g.Expect(s.From.TableName).ToNot(BeNil())
-	g.Expect(s.From.TableName.Name).To(Equal(Identifier("Table")))
+	g.Expect(s.From.TableName.Name).To(Equal(Identifier("TTable")))
 	g.Expect(s.From.TableName.Alias).To(BeNil())
+
 }
 
 func TestSimpleQueryQuotedIdentifier(t *testing.T) {
@@ -74,11 +77,11 @@ func TestSimpleQueryQuotedQualifiedIdentifier(t *testing.T) {
 
 func TestSimpleQueryWithQualifiedProjection(t *testing.T) {
 	g := NewGomegaWithT(t)
-	s := ParseSQL("SELECT Table.col FROM Table")
+	s := ParseSQL("SELECT ATable.col FROM ATable")
 
 	g.Expect(s.Select.Projection.Distinct).To(BeFalse())
 	g.Expect(s.Select.Projection.ProjectionFields).To(HaveLen(1))
-	tName := Identifier("Table")
+	tName := Identifier("ATable")
 	g.Expect(s.Select.Projection.ProjectionFields[0].NamedField).To(BeEquivalentTo(&CompoundName{
 		Location:  Loc(1, 7),
 		Qualifier: &tName,
@@ -86,13 +89,13 @@ func TestSimpleQueryWithQualifiedProjection(t *testing.T) {
 	}))
 
 	g.Expect(s.Select.From.TableName).ToNot(BeNil())
-	g.Expect(s.Select.From.TableName.Name).To(Equal(Identifier("Table")))
+	g.Expect(s.Select.From.TableName.Name).To(Equal(Identifier("ATable")))
 	g.Expect(s.Select.From.TableName.Alias).To(BeNil())
 }
 
 func TestSimpleQueryWithNegativeLiteral(t *testing.T) {
 	g := NewGomegaWithT(t)
-	s := ParseSQL("SELECT col, -2, -1e-10 FROM Table")
+	s := ParseSQL("SELECT col, -2, -1e-10 FROM \"Table\"")
 
 	g.Expect(s.Select.Projection.Distinct).To(BeFalse())
 	value := "-2"
@@ -116,7 +119,7 @@ func TestSimpleErrorQuery(t *testing.T) {
 
 func TestSimpleQueryDistinct(t *testing.T) {
 	g := NewGomegaWithT(t)
-	s := ParseSQL("SELECT distinct col FROM Table")
+	s := ParseSQL("SELECT distinct col FROM \"Table\"")
 
 	g.Expect(s.Select.Projection.Distinct).To(BeTrue())
 }
@@ -645,6 +648,35 @@ func TestIntoClause(t *testing.T) {
 
 	g.Expect(s.Into).ToNot(BeNil())
 	g.Expect(s.Into.Destination).To(Equal(Identifier("Other-Table.csv")))
+	g.Expect(s.Into.TempTable).To(BeFalse())
+}
+
+func TestIntoTempClause(t *testing.T) {
+	g := NewGomegaWithT(t)
+	s := ParseSQL("SELECT \"col\" FROM \"Table\" INTO TEMP \"Other-Table\"")
+
+	g.Expect(s.Select.Projection.Distinct).To(BeFalse())
+	g.Expect(s.Select.Projection.ProjectionFields).To(HaveLen(1))
+	g.Expect(s.Select.Projection.ProjectionFields[0].NamedField.Name).To(Equal(Identifier("col")))
+
+	g.Expect(s.Select.From.TableName).ToNot(BeNil())
+	g.Expect(s.Select.From.TableName.Name).To(Equal(Identifier("Table")))
+	g.Expect(s.Select.From.TableName.Alias).To(BeNil())
+
+	g.Expect(s.Into).ToNot(BeNil())
+	g.Expect(s.Into.Destination).To(Equal(Identifier("Other-Table")))
+	g.Expect(s.Into.TempTable).To(BeTrue())
+}
+
+func TestDropTempTable(t *testing.T) {
+	g := NewGomegaWithT(t)
+	us := ParseSQL("DROP TEMP TABLE TTable")
+
+	g.Expect(us.Select).To(BeNil())
+	g.Expect(us.Union).To(BeNil())
+
+	g.Expect(us.DropTmp).ToNot(BeNil())
+	g.Expect(us.DropTmp.Name).To(Equal(Identifier("TTable")))
 }
 
 func TestSelectWithAvgInExpression(t *testing.T) {

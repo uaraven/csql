@@ -17,7 +17,7 @@ WHERE
 [ UNION ...]
 ORDER BY order_by
 LIMIT number
-[INTO destination]
+[INTO [TEMP] destination]
 ```
 
 ```
@@ -156,3 +156,26 @@ M*N time complexity. In short, don't expect fabulous performance, especially on 
 ## Functions
 
 TBD
+
+
+## Temp tables
+
+The result of the last query is stored in the temporary table named ".last". This table can be used in the
+later queries, like
+
+    select * from data;
+    select name, value from ".last";
+
+Note that running the query from the ".last" table will replace the ".last" table with the new data.
+
+New temporary tables can be created from the query results. To create new temporary table use `INTO TEMP "table_name"`
+clause, for example:
+
+    select * from data where value > 15 into temp large_values;
+
+To view temporary tables, use `status` command in the csql shell.
+
+Temporary tables are stored in memory until they are deleted. `purge` command doesn't clean up temporary tables.
+To delete temporary table, use the following SQL command:
+
+    DROP TEMP TABLE "tableName";
