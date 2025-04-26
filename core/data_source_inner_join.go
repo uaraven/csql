@@ -32,7 +32,7 @@ func NewInnerJoin(left DataSource, right DataSource, joinCondition Condition) Da
 		name:  fmt.Sprintf("(%s JOIN %s)", left.GetName(), right.GetName()),
 		index: -1,
 	}
-	mds.headers = NewHeadersFromOtherHeaders(mds, left.Header().ColumnsMetadata(), right.Header().ColumnsMetadata())
+	mds.headers = NewHeadersFromOtherHeaders(left.Header().ColumnsMetadata(), right.Header().ColumnsMetadata())
 	mds.data = innerJoin(left, right, mds.headers, joinCondition)
 	return mds
 }

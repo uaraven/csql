@@ -21,14 +21,22 @@ package core
 
 import (
 	"fmt"
-	"github.com/uaraven/csql/util"
 	"strings"
+
+	"github.com/uaraven/csql/util"
 )
 
 type columnMetadata struct {
 	parentName string
 	name       string
 	index      int
+}
+
+func NewSimpleColumnMetadata(name string, index int) ColumnMetadata {
+	return &columnMetadata{
+		name:  name,
+		index: index,
+	}
 }
 
 func (cm columnMetadata) ParentName() string {
@@ -93,13 +101,12 @@ func NewHeadersFromSlice(parent DataSource, headers []string) DataSourceHeader {
 	return &dataSourceHeader{ /*parent: parent,*/ columns: columns}
 }
 
-func NewHeadersFromOtherHeaders(parent DataSource, headers ...[]ColumnMetadata) DataSourceHeader {
+func NewHeadersFromOtherHeaders(headers ...[]ColumnMetadata) DataSourceHeader {
 	columns := make([]ColumnMetadata, 0)
 	for _, otherHeaders := range headers {
 		columns = append(columns, otherHeaders...)
 	}
 	return &dataSourceHeader{
-		//parent:  parent,
 		columns: columns,
 	}
 }

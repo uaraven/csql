@@ -621,7 +621,7 @@ func TestAstTransformer_SelectInto(t *testing.T) {
 	rows := ExecuteSql(`
 		select * from "../test-data/cities.csv" into "/tmp/tmp_cities.csv"`).
 		GetRows()
-	g.Expect(rows).To(HaveLen(0))
+	g.Expect(rows).To(HaveLen(1))
 	_, err := os.Stat(outFile)
 	g.Expect(err).ToNot(HaveOccurred())
 }
@@ -632,9 +632,29 @@ func TestAstTransformer_SelectIntoTemp(t *testing.T) {
 	rows := ExecuteSql(`
 		select * from "../test-data/cities.csv" into temp ttt`).
 		GetRows()
-	g.Expect(rows).To(HaveLen(0))
+	g.Expect(rows).To(HaveLen(1))
+	sl := core.RowsToSlice(rows, "Rows saved")
+	g.Expect(sl[0][0]).To(Equal(int64(15)))
 	_, err := os.Stat("ttt")
 	g.Expect(err).To(HaveOccurred())
 	g.Expect(core.TableCache).To(HaveKey("ttt"))
 	g.Expect(core.TableCache["ttt"].TempTable).To(BeTrue())
+}
+
+func TestAstTransformer_DropTempTable(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	rows := ExecuteSql(`
+		select * from "../test-data/cities.csv" into temp ttt`).
+		GetRows()
+	g.Expect(rows).To(HaveLen(1))
+	g.Expect(rows).To(HaveLen(1))
+	sl := core.RowsToSlice(rows, "Rows saved")
+	g.Expect(sl[0][0]).To(Equal(int64(15)))
+	g.Expect(core.TableCache).To(HaveKey("ttt"))
+	g.Expect(core.TableCache["ttt"].TempTable).To(BeTrue())
+
+	rows = ExecuteSql("drop temp table ttt").GetRows()
+	g.Expect(rows).To(HaveLen(1))
+	g.Expect(core.TableCache).NotTo(HaveKey("ttt"))
 }

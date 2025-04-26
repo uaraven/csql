@@ -21,9 +21,10 @@ package core
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/funky"
-	"strings"
 )
 
 type rowImpl struct {

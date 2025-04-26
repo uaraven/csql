@@ -50,3 +50,15 @@ func WriteDataSourceToFile(ds DataSource, outputFile string) error {
 	}
 	return nil
 }
+
+func NewStatusDataSource(columnNames []string, values []string) DataSource {
+	columns := funky.MapWithIndex(columnNames, func(index int, name string) ColumnMetadata {
+		return NewSimpleColumnMetadata(name, index)
+	})
+	headers := NewHeadersFromOtherHeaders(columns)
+	data := funky.Map(values, func(value string) Value {
+		return ParseStringToValue(value)
+	})
+	row := newRowWithId(0, headers, data)
+	return NewMemDataSource("DROP_TEMP_TABLE", columns, []Row{row})
+}

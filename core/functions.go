@@ -21,10 +21,11 @@ package core
 
 import (
 	"fmt"
-	"github.com/uaraven/csql/errors"
-	"github.com/uaraven/csql/funky"
 	"math"
 	"strings"
+
+	"github.com/uaraven/csql/errors"
+	"github.com/uaraven/csql/funky"
 )
 
 type SqlFunction interface {

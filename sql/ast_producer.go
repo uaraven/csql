@@ -139,6 +139,10 @@ func (c CsqlVisitorImpl) Visit(tree antlr.ParseTree) interface{} {
 
 // VisitQuery visits a parse tree produced by CsqlParser#query.
 func (c CsqlVisitorImpl) VisitQuery(ctx *parser.QueryContext) interface{} {
+	if ctx.DropTempTable() != nil {
+		dropTempTable := ctx.DropTempTable().Accept(c).(DropTempTable)
+		return &UnionSource{DropTmp: &dropTempTable}
+	}
 	unionSource := ctx.UnionSelects().Accept(c).(*UnionSource)
 	if ctx.IntoClause() != nil {
 		ic := ctx.IntoClause().Accept(c).(*IntoClause)
@@ -184,8 +188,9 @@ func (c CsqlVisitorImpl) VisitIntoClause(ctx *parser.IntoClauseContext) interfac
 }
 
 func (c CsqlVisitorImpl) VisitUnionSelects(ctx *parser.UnionSelectsContext) interface{} {
+	selectStmt := ctx.SelectStatement().Accept(c).(Select)
 	astUnion := UnionSource{
-		Select:   ctx.SelectStatement().Accept(c).(Select),
+		Select:   &selectStmt,
 		unionAll: ctx.K_ALL(0) != nil,
 	}
 	if len(ctx.AllUnionSelects()) > 0 {
@@ -690,4 +695,9 @@ func (c CsqlVisitorImpl) VisitCountFunc(ctx *parser.CountFuncContext) interface{
 
 func (c CsqlVisitorImpl) VisitHaving(ctx *parser.HavingContext) interface{} {
 	return ctx.WhereExpr().Accept(c).(Expression)
+}
+
+func (c CsqlVisitorImpl) VisitDropTempTable(ctx *parser.DropTempTableContext) interface{} {
+	tableName := ctx.Name().Accept(c).(Identifier)
+	return DropTempTable{tableName}
 }

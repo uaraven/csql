@@ -222,9 +222,10 @@ func (ds DataSource) String() string {
 }
 
 type UnionSource struct {
-	Select   Select
+	Select   *Select
 	Union    *UnionSource
 	unionAll bool
+	DropTmp  *DropTempTable
 	Into     *IntoClause
 }
 
@@ -526,5 +527,13 @@ type IntoClause struct {
 }
 
 func (ic IntoClause) String() string {
-	return fmt.Sprintf("INTO %s", ic.Destination)
+	return fmt.Sprintf("INTO \"%s\"", ic.Destination)
+}
+
+type DropTempTable struct {
+	Name Identifier
+}
+
+func (dt DropTempTable) String() string {
+	return fmt.Sprintf("DROP TEMP TABLE \"%v\"", dt.Name)
 }

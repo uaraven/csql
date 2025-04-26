@@ -18,7 +18,7 @@
  */
 grammar Csql;
 
-query: unionSelects intoClause? ';'? EOF;
+query: (unionSelects intoClause?)|(dropTempTable) ';'? EOF;
 
 comparisonOperator: '<' | '<=' | '>' | '>=' | '=' | '!=' | '<>';
 
@@ -146,6 +146,10 @@ groupByField
 
 intoClause
     : K_INTO K_TEMP? name
+    ;
+
+dropTempTable
+    : K_DROP K_TEMP K_TABLE name
     ;
 
 function

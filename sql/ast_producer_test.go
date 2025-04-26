@@ -33,6 +33,8 @@ func TestSimpleQuery(t *testing.T) {
 	g.Expect(us.Select).ToNot(BeNil())
 	g.Expect(us.Union).To(BeNil())
 
+	g.Expect(us.DropTmp).To(BeNil())
+
 	s := us.Select
 
 	g.Expect(s.Projection.Distinct).To(BeFalse())
@@ -42,6 +44,7 @@ func TestSimpleQuery(t *testing.T) {
 	g.Expect(s.From.TableName).ToNot(BeNil())
 	g.Expect(s.From.TableName.Name).To(Equal(Identifier("TTable")))
 	g.Expect(s.From.TableName.Alias).To(BeNil())
+
 }
 
 func TestSimpleQueryQuotedIdentifier(t *testing.T) {
@@ -661,8 +664,19 @@ func TestIntoTempClause(t *testing.T) {
 	g.Expect(s.Select.From.TableName.Alias).To(BeNil())
 
 	g.Expect(s.Into).ToNot(BeNil())
-	g.Expect(s.Into.Destination).To(Equal(Identifier("Other-Table.csv")))
+	g.Expect(s.Into.Destination).To(Equal(Identifier("Other-Table")))
 	g.Expect(s.Into.TempTable).To(BeTrue())
+}
+
+func TestDropTempTable(t *testing.T) {
+	g := NewGomegaWithT(t)
+	us := ParseSQL("DROP TEMP TABLE TTable")
+
+	g.Expect(us.Select).To(BeNil())
+	g.Expect(us.Union).To(BeNil())
+
+	g.Expect(us.DropTmp).ToNot(BeNil())
+	g.Expect(us.DropTmp.Name).To(Equal(Identifier("TTable")))
 }
 
 func TestSelectWithAvgInExpression(t *testing.T) {

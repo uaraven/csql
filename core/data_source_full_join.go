@@ -31,7 +31,7 @@ func NewFullJoin(left DataSource, right DataSource, joinOn Condition) DataSource
 		name:  fmt.Sprintf("(%s FULL JOIN %s)", left.GetName(), right.GetName()),
 		index: -1,
 	}
-	mds.headers = NewHeadersFromOtherHeaders(mds, left.Header().ColumnsMetadata(), right.Header().ColumnsMetadata())
+	mds.headers = NewHeadersFromOtherHeaders(left.Header().ColumnsMetadata(), right.Header().ColumnsMetadata())
 	mds.data = fullJoin(left, right, mds.headers, joinOn)
 	return mds
 

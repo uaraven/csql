@@ -45,7 +45,12 @@ func NewAstTransformer() AstTransformer {
 
 func (ae AstTransformer) TransformUnion(u UnionSource) core.DataSource {
 	var dsResult core.DataSource
-	dsResult = ae.TransformSelect(u.Select)
+
+	if u.DropTmp != nil {
+		return ae.TransformDropTempTable(*u.DropTmp)
+	}
+
+	dsResult = ae.TransformSelect(*u.Select)
 	if u.Union != nil {
 		ds2 := ae.TransformUnion(*u.Union)
 
@@ -59,15 +64,15 @@ func (ae AstTransformer) TransformUnion(u UnionSource) core.DataSource {
 		if u.Into.TempTable {
 			core.TableCache.AddToCache(string(u.Into.Destination), dsResult, time.Now(), true)
 		} else {
-			core.TableCache.AddToCache("$1", dsResult, time.Now(), true)
+			core.TableCache.AddToCache(".last", dsResult, time.Now(), true)
 			err := core.WriteDataSourceToFile(dsResult, string(u.Into.Destination))
 			if err != nil {
 				panic(fmt.Errorf("failed to save to file '%s': %v", u.Into.Destination, err))
 			}
 		}
-		return core.NewMemDataSource(dsResult.GetName(), dsResult.Header().ColumnsMetadata(), []core.Row{})
+		return core.NewStatusDataSource([]string{"Rows saved"}, []string{fmt.Sprintf("%d", len(dsResult.GetRows()))})
 	} else {
-		core.TableCache.AddToCache("$1", dsResult, time.Now(), true)
+		core.TableCache.AddToCache(".last", dsResult, time.Now(), true)
 	}
 	return dsResult
 }
@@ -459,5 +464,16 @@ func (ae AstTransformer) TransformGroupByField(gbf GroupByField) core.GroupByCol
 	} else {
 		fn := ae.TransformCompoundName(gbf.FieldName).(core.Identifiable)
 		return core.NewGroupByName(fn.Identifier(), gbf.Location)
+	}
+}
+
+func (ae AstTransformer) TransformDropTempTable(table DropTempTable) core.DataSource {
+	tableName := string(table.Name)
+	_, present := core.TableCache[tableName]
+	if present {
+		delete(core.TableCache, tableName)
+		return core.NewStatusDataSource([]string{"Table"}, []string{tableName})
+	} else {
+		return core.NewStatusDataSource([]string{"Table"}, []string{})
 	}
 }

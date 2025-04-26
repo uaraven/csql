@@ -57,7 +57,7 @@ func (ds DatasetCache) AddToCache(name string, dsEntry DataSource, modTime time.
 
 func (ds DatasetCache) ClearCache() (datasets int, rows int) {
 	for k, v := range TableCache {
-		if v.TempTable {
+		if !v.TempTable {
 			rows += len(v.DataSource.GetRows())
 			delete(TableCache, k)
 			datasets++
