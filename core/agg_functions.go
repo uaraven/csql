@@ -181,7 +181,7 @@ func NewMinFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 			for _, row := range rows {
 				value := arg.Evaluate(row)
 				if !IsNumeric(value) {
-					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for minV: %v in row %s", value, row)))
+					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value encountered for MIN function: %v in row %s", value, row)))
 				}
 				if minV.Type() == TypeFloat || value.Type() == TypeFloat {
 					a := minV.AsFloat().Value().(float64)
