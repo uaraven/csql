@@ -76,7 +76,9 @@ func NewOrderedDatasource(ds DataSource, orderBy []OrderByField, limit int) Data
 	}
 
 	if limit > 0 {
-		rows = rows[:limit]
+		if limit < len(rows) {
+			rows = rows[:limit]
+		}
 	}
 	return NewMemDataSource(ds.GetName(), ds.Header().ColumnsMetadata(), rows)
 }

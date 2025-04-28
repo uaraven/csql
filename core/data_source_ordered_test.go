@@ -112,6 +112,18 @@ func TestOrderedDatasource_Limit(t *testing.T) {
 	g.Expect(rows[1].GetByIndex(1).Value()).To(Equal(int64(2)))
 }
 
+func TestOrderedDatasource_LimitLargerThanNumberOfRows(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ds := loadTestMemDatasource("people")
+
+	ods := NewOrderedDatasource(ds, []OrderByField{}, 20)
+
+	rows := ReadAllRows(ods)
+
+	g.Expect(rows).To(HaveLen(4))
+}
+
 func TestOrderedDatasource_OrderByIndexLimit(t *testing.T) {
 	g := NewGomegaWithT(t)
 
