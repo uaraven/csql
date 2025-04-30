@@ -17,7 +17,7 @@ type DatasetCacheEntry struct {
 }
 
 // maxCacheSize is the maximum size of the cache in rows
-const maxCacheSize = 1_000_000
+const maxCacheSize = 5_000_000
 
 var CacheEnabled = false
 
