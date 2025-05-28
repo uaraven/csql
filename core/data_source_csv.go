@@ -22,6 +22,7 @@ package core
 import (
 	"bufio"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -33,6 +34,7 @@ import (
 )
 
 var CSVSeparator = ','
+var IgnoreMalformedCsvRows = false
 
 func SetCsvSeparator(separator string) error {
 	sep := util.Unquote(separator)
@@ -93,6 +95,7 @@ func NewCsvDataSourceWithAlias(csvFile string, alias string) DataSource {
 	csvReader := csv.NewReader(bufio.NewReader(file))
 	csvReader.TrimLeadingSpace = true
 	csvReader.Comma = CSVSeparator
+	csvReader.ReuseRecord = true
 	headers, err := csvReader.Read()
 	if err != nil {
 		panic(err)
@@ -118,7 +121,12 @@ func loadCsv(csvReader *csv.Reader, header DataSourceHeader) ([]Row, error) {
 		if err == io.EOF {
 			return rows, nil
 		} else if err != nil {
-			return nil, err
+			if errors.Is(err, csv.ErrFieldCount) && IgnoreMalformedCsvRows {
+				index++
+				continue
+			} else {
+				return nil, err
+			}
 		}
 		r := parseRowWithId(index, header, csvRow)
 		index++

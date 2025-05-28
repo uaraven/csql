@@ -28,7 +28,7 @@ import (
 	"github.com/uaraven/csql/core"
 )
 
-var Version = "v0.4.1"
+var Version = "v0.4.2"
 
 var opts struct {
 	NullValue *string `short:"n" long:"null" description:"Sets the string value to be treated as NULL"`

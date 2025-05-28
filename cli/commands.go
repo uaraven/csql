@@ -141,13 +141,15 @@ func CsvCommand() *Command {
 			status := func() {
 				s.PrintMessage(s.C.A("Null String=").Attr(ansie.Bold).A(core.NullValueString).Reset().String())
 				s.PrintMessage(s.C.A("Separator=").Attr(ansie.Bold).S("%q", string(core.CSVSeparator)).Reset().String())
+				s.PrintMessage(s.C.A("Ignore Malformed Rows=").Attr(ansie.Bold).S("%t", core.IgnoreMalformedCsvRows).Reset().String())
 			}
 			if params == nil || len(params) == 0 {
 				status()
 			} else {
 				var opts struct {
-					Null      *string `long:"null"`
-					Separator *string `long:"separator"`
+					Null            *string `long:"null"`
+					Separator       *string `long:"separator"`
+					IgnoreMalformed *string `long:"ignore-malformed-rows" description:"Ignore malformed CSV rows"`
 				}
 				args, err := flags.ParseArgs(&opts, params)
 				if err != nil {
@@ -159,6 +161,7 @@ func CsvCommand() *Command {
 				}) {
 					s.PrintMessage("csv --null=\"<null string>\", i.e. csv --null=\"\" to treat empty strings as null")
 					s.PrintMessage("csv --separator=\"<csv separator>\", i.e. csv --separator=\\t to use tab as a csv field separator")
+					s.PrintMessage("csv --ignore-malformed-rows=true|false, i.e. csv --ignore-malformed-rows=true to skip rows that don't match the header")
 					return
 				}
 				if opts.Null != nil {
@@ -170,6 +173,9 @@ func CsvCommand() *Command {
 					if err != nil {
 						s.PrintError(fmt.Sprintf("Failed to set separator %v", err))
 					}
+				}
+				if opts.IgnoreMalformed != nil {
+					core.IgnoreMalformedCsvRows = strings.ToLower(*opts.IgnoreMalformed) == "true"
 				}
 
 				status()
