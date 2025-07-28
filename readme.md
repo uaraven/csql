@@ -1,6 +1,8 @@
 # csql - Query language for comma-separated values
 
-csql is a small tool allowing to run SQL queries on CSV files.
+csql is a small tool allowing to run SQL queries on CSV files. 
+
+csql is not particularly fast or flexible, it exists solely because at one moment I though "wouldn't it be nice to run sql queries on csv files". Of course there's probably a ton of answers for this questiom, but reinventing the wheel is one of my favourite pastimes, so here we go.
 
 csql supports basic<sup>*</sup> `SELECT` statement features, including:
 
