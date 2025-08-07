@@ -45,9 +45,11 @@ func WriteDataSourceToFile(ds DataSource, outputFile string) error {
 		})
 		err = csvWriter.Write(rowValues)
 		if err != nil {
-			return err
+			os.Stderr.WriteString("Failed to write row: " + err.Error() + "\n")
 		}
 	}
+	csvWriter.Flush()
+
 	return nil
 }
 
