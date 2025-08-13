@@ -48,7 +48,7 @@ func WriteDataSourceToFile(ds DataSource, outputFile string) error {
 		})
 		err = csvWriter.Write(rowValues)
 		if err != nil {
-			errBuffer.WriteString(fmt.Sprintf("Failed to write row %v: %v\n", row.Id(), err))
+			fmt.Fprintf(&errBuffer, "Failed to write row %d: %s\n", row.Id(), err)
 		}
 	}
 	csvWriter.Flush()
