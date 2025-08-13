@@ -28,14 +28,14 @@ import (
 	"github.com/uaraven/csql/core"
 )
 
-var Version = "v0.4.2"
+var Version = "v0.4.3"
 
 var opts struct {
 	NullValue *string `short:"n" long:"null" description:"Sets the string value to be treated as NULL"`
 	RunQuery  bool    `short:"c" long:"command" description:"Runs the query passed as command line arguments"`
 	Separator *string `short:"s" long:"separator" description:"CSV separator character"`
 	Output    *string `short:"o" long:"output" description:"Output results into a file"`
-	NoCache   bool    `long:"no-cache" description:"Disable datasource caching"`
+	NoCache   bool    `long:"no-cache" description:"Disable datasource caching" default:"true"`
 }
 
 func main() {
