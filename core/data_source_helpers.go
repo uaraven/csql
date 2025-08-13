@@ -21,12 +21,15 @@ package core
 
 import (
 	"encoding/csv"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/uaraven/csql/funky"
 )
 
 func WriteDataSourceToFile(ds DataSource, outputFile string) error {
+	var errBuffer strings.Builder
 	file, err := os.Create(outputFile)
 	if err != nil {
 		return err
@@ -45,11 +48,13 @@ func WriteDataSourceToFile(ds DataSource, outputFile string) error {
 		})
 		err = csvWriter.Write(rowValues)
 		if err != nil {
-			os.Stderr.WriteString("Failed to write row: " + err.Error() + "\n")
+			errBuffer.WriteString(fmt.Sprintf("Failed to write row %v: %v\n", row.Id(), err))
 		}
 	}
 	csvWriter.Flush()
-
+	if errBuffer.Len() > 0 {
+		return fmt.Errorf("errors occurred while writing CSV: %v", errBuffer.String())
+	}
 	return nil
 }
 
