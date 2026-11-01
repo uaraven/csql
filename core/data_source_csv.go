@@ -55,6 +55,19 @@ func SetCsvSeparator(separator string) error {
 	return nil
 }
 
+// NewCsvReader creates a CSV reader that uses the current separator and skips the UTF-8 byte order mark
+func NewCsvReader(r io.Reader) *csv.Reader {
+	buffered := bufio.NewReader(r)
+	if bom, err := buffered.Peek(3); err == nil && bom[0] == 0xEF && bom[1] == 0xBB && bom[2] == 0xBF {
+		_, _ = buffered.Discard(3)
+	}
+	csvReader := csv.NewReader(buffered)
+	csvReader.TrimLeadingSpace = true
+	csvReader.Comma = CSVSeparator
+	csvReader.ReuseRecord = true
+	return csvReader
+}
+
 func NewCsvDataSource(csvFile string) DataSource {
 	return NewCsvDataSourceWithAlias(csvFile, "")
 }
@@ -100,13 +113,12 @@ func NewCsvDataSourceWithAlias(csvFile string, alias string) DataSource {
 		panic(err)
 	}
 	defer func() { _ = file.Close() }()
-	csvReader := csv.NewReader(bufio.NewReader(file))
-	csvReader.TrimLeadingSpace = true
-	csvReader.Comma = CSVSeparator
-	csvReader.ReuseRecord = true
+	csvReader := NewCsvReader(file)
 	headers, err := csvReader.Read()
-	if err != nil {
-		panic(err)
+	if err == io.EOF {
+		panic(fmt.Errorf("%s: file is empty, expected a header row", csvFile))
+	} else if err != nil {
+		panic(fmt.Errorf("%s: failed to read the header: %w", csvFile, err))
 	}
 	cds := &memDataSource{
 		name:  justName,
@@ -115,7 +127,7 @@ func NewCsvDataSourceWithAlias(csvFile string, alias string) DataSource {
 	cds.headers = NewHeadersFromSlice(cds, headers)
 	cds.data, err = loadCsv(csvReader, cds.Header())
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("%s: %w", csvFile, err))
 	}
 	TableCache.AddToCache(cacheKey, cds, stat.ModTime(), false)
 	if _, cached := TableCache[cacheKey]; cached {
@@ -148,8 +160,9 @@ func loadCsv(csvReader *csv.Reader, header DataSourceHeader) ([]Row, error) {
 		if err == io.EOF {
 			return rows, nil
 		} else if err != nil {
-			if errors.Is(err, csv.ErrFieldCount) && IgnoreMalformedCsvRows {
-				index++
+			var parseErr *csv.ParseError
+			if errors.As(err, &parseErr) && IgnoreMalformedCsvRows {
+				// skipped rows do not consume row ids
 				continue
 			} else {
 				return nil, err
