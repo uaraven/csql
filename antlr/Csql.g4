@@ -18,7 +18,7 @@
  */
 grammar Csql;
 
-query: (unionSelects intoClause?)|(dropTempTable) ';'? EOF;
+query: (unionSelects intoClause? | dropTempTable) ';'? EOF;
 
 comparisonOperator: '<' | '<=' | '>' | '>=' | '=' | '!=' | '<>';
 

@@ -73,8 +73,8 @@ func csqlParserInit() {
 		31, 2, 32, 7, 32, 2, 33, 7, 33, 2, 34, 7, 34, 2, 35, 7, 35, 2, 36, 7, 36,
 		2, 37, 7, 37, 2, 38, 7, 38, 2, 39, 7, 39, 2, 40, 7, 40, 2, 41, 7, 41, 2,
 		42, 7, 42, 2, 43, 7, 43, 2, 44, 7, 44, 2, 45, 7, 45, 2, 46, 7, 46, 2, 47,
-		7, 47, 2, 48, 7, 48, 1, 0, 1, 0, 3, 0, 101, 8, 0, 1, 0, 1, 0, 3, 0, 105,
-		8, 0, 1, 0, 1, 0, 3, 0, 109, 8, 0, 1, 1, 1, 1, 1, 2, 1, 2, 1, 3, 1, 3,
+		7, 47, 2, 48, 7, 48, 1, 0, 1, 0, 3, 0, 101, 8, 0, 1, 0, 3, 0, 104, 8, 0,
+		1, 0, 3, 0, 107, 8, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 2, 1, 2, 1, 3, 1, 3,
 		1, 3, 1, 3, 5, 3, 119, 8, 3, 10, 3, 12, 3, 122, 9, 3, 1, 3, 1, 3, 1, 4,
 		1, 4, 3, 4, 128, 8, 4, 1, 5, 1, 5, 1, 5, 1, 5, 1, 5, 1, 5, 1, 5, 1, 5,
 		3, 5, 138, 8, 5, 1, 5, 1, 5, 1, 5, 1, 5, 5, 5, 144, 8, 5, 10, 5, 12, 5,
@@ -115,7 +115,7 @@ func csqlParserInit() {
 		36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70,
 		72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 0, 7, 1, 0, 2, 8, 1,
 		0, 9, 14, 1, 0, 65, 68, 2, 0, 11, 11, 75, 75, 1, 0, 9, 10, 1, 0, 47, 48,
-		1, 0, 51, 63, 470, 0, 108, 1, 0, 0, 0, 2, 110, 1, 0, 0, 0, 4, 112, 1, 0,
+		1, 0, 51, 63, 470, 0, 103, 1, 0, 0, 0, 2, 110, 1, 0, 0, 0, 4, 112, 1, 0,
 		0, 0, 6, 114, 1, 0, 0, 0, 8, 127, 1, 0, 0, 0, 10, 137, 1, 0, 0, 0, 12,
 		191, 1, 0, 0, 0, 14, 208, 1, 0, 0, 0, 16, 211, 1, 0, 0, 0, 18, 214, 1,
 		0, 0, 0, 20, 216, 1, 0, 0, 0, 22, 234, 1, 0, 0, 0, 24, 236, 1, 0, 0, 0,
@@ -130,31 +130,31 @@ func csqlParserInit() {
 		0, 82, 410, 1, 0, 0, 0, 84, 422, 1, 0, 0, 0, 86, 427, 1, 0, 0, 0, 88, 429,
 		1, 0, 0, 0, 90, 441, 1, 0, 0, 0, 92, 443, 1, 0, 0, 0, 94, 449, 1, 0, 0,
 		0, 96, 454, 1, 0, 0, 0, 98, 100, 3, 56, 28, 0, 99, 101, 3, 92, 46, 0, 100,
-		99, 1, 0, 0, 0, 100, 101, 1, 0, 0, 0, 101, 109, 1, 0, 0, 0, 102, 104, 3,
-		94, 47, 0, 103, 105, 5, 1, 0, 0, 104, 103, 1, 0, 0, 0, 104, 105, 1, 0,
-		0, 0, 105, 106, 1, 0, 0, 0, 106, 107, 5, 0, 0, 1, 107, 109, 1, 0, 0, 0,
-		108, 98, 1, 0, 0, 0, 108, 102, 1, 0, 0, 0, 109, 1, 1, 0, 0, 0, 110, 111,
-		7, 0, 0, 0, 111, 3, 1, 0, 0, 0, 112, 113, 7, 1, 0, 0, 113, 5, 1, 0, 0,
-		0, 114, 115, 5, 15, 0, 0, 115, 120, 3, 10, 5, 0, 116, 117, 5, 16, 0, 0,
-		117, 119, 3, 10, 5, 0, 118, 116, 1, 0, 0, 0, 119, 122, 1, 0, 0, 0, 120,
-		118, 1, 0, 0, 0, 120, 121, 1, 0, 0, 0, 121, 123, 1, 0, 0, 0, 122, 120,
-		1, 0, 0, 0, 123, 124, 5, 17, 0, 0, 124, 7, 1, 0, 0, 0, 125, 128, 3, 72,
-		36, 0, 126, 128, 3, 66, 33, 0, 127, 125, 1, 0, 0, 0, 127, 126, 1, 0, 0,
-		0, 128, 9, 1, 0, 0, 0, 129, 130, 6, 5, -1, 0, 130, 138, 3, 8, 4, 0, 131,
-		138, 3, 20, 10, 0, 132, 138, 3, 22, 11, 0, 133, 134, 5, 15, 0, 0, 134,
-		135, 3, 10, 5, 0, 135, 136, 5, 17, 0, 0, 136, 138, 1, 0, 0, 0, 137, 129,
-		1, 0, 0, 0, 137, 131, 1, 0, 0, 0, 137, 132, 1, 0, 0, 0, 137, 133, 1, 0,
-		0, 0, 138, 145, 1, 0, 0, 0, 139, 140, 10, 5, 0, 0, 140, 141, 3, 4, 2, 0,
-		141, 142, 3, 10, 5, 6, 142, 144, 1, 0, 0, 0, 143, 139, 1, 0, 0, 0, 144,
-		147, 1, 0, 0, 0, 145, 143, 1, 0, 0, 0, 145, 146, 1, 0, 0, 0, 146, 11, 1,
-		0, 0, 0, 147, 145, 1, 0, 0, 0, 148, 149, 6, 6, -1, 0, 149, 192, 3, 8, 4,
-		0, 150, 192, 3, 10, 5, 0, 151, 152, 5, 25, 0, 0, 152, 192, 3, 12, 6, 7,
-		153, 154, 3, 10, 5, 0, 154, 155, 5, 21, 0, 0, 155, 156, 3, 10, 5, 0, 156,
-		157, 5, 19, 0, 0, 157, 158, 3, 10, 5, 0, 158, 192, 1, 0, 0, 0, 159, 161,
-		3, 10, 5, 0, 160, 162, 5, 25, 0, 0, 161, 160, 1, 0, 0, 0, 161, 162, 1,
-		0, 0, 0, 162, 163, 1, 0, 0, 0, 163, 164, 5, 42, 0, 0, 164, 165, 3, 10,
-		5, 0, 165, 192, 1, 0, 0, 0, 166, 168, 3, 10, 5, 0, 167, 169, 5, 25, 0,
-		0, 168, 167, 1, 0, 0, 0, 168, 169, 1, 0, 0, 0, 169, 170, 1, 0, 0, 0, 170,
+		99, 1, 0, 0, 0, 100, 101, 1, 0, 0, 0, 101, 104, 1, 0, 0, 0, 102, 104, 3,
+		94, 47, 0, 103, 98, 1, 0, 0, 0, 103, 102, 1, 0, 0, 0, 104, 106, 1, 0, 0,
+		0, 105, 107, 5, 1, 0, 0, 106, 105, 1, 0, 0, 0, 106, 107, 1, 0, 0, 0, 107,
+		108, 1, 0, 0, 0, 108, 109, 5, 0, 0, 1, 109, 1, 1, 0, 0, 0, 110, 111, 7,
+		0, 0, 0, 111, 3, 1, 0, 0, 0, 112, 113, 7, 1, 0, 0, 113, 5, 1, 0, 0, 0,
+		114, 115, 5, 15, 0, 0, 115, 120, 3, 10, 5, 0, 116, 117, 5, 16, 0, 0, 117,
+		119, 3, 10, 5, 0, 118, 116, 1, 0, 0, 0, 119, 122, 1, 0, 0, 0, 120, 118,
+		1, 0, 0, 0, 120, 121, 1, 0, 0, 0, 121, 123, 1, 0, 0, 0, 122, 120, 1, 0,
+		0, 0, 123, 124, 5, 17, 0, 0, 124, 7, 1, 0, 0, 0, 125, 128, 3, 72, 36, 0,
+		126, 128, 3, 66, 33, 0, 127, 125, 1, 0, 0, 0, 127, 126, 1, 0, 0, 0, 128,
+		9, 1, 0, 0, 0, 129, 130, 6, 5, -1, 0, 130, 138, 3, 8, 4, 0, 131, 138, 3,
+		20, 10, 0, 132, 138, 3, 22, 11, 0, 133, 134, 5, 15, 0, 0, 134, 135, 3,
+		10, 5, 0, 135, 136, 5, 17, 0, 0, 136, 138, 1, 0, 0, 0, 137, 129, 1, 0,
+		0, 0, 137, 131, 1, 0, 0, 0, 137, 132, 1, 0, 0, 0, 137, 133, 1, 0, 0, 0,
+		138, 145, 1, 0, 0, 0, 139, 140, 10, 5, 0, 0, 140, 141, 3, 4, 2, 0, 141,
+		142, 3, 10, 5, 6, 142, 144, 1, 0, 0, 0, 143, 139, 1, 0, 0, 0, 144, 147,
+		1, 0, 0, 0, 145, 143, 1, 0, 0, 0, 145, 146, 1, 0, 0, 0, 146, 11, 1, 0,
+		0, 0, 147, 145, 1, 0, 0, 0, 148, 149, 6, 6, -1, 0, 149, 192, 3, 8, 4, 0,
+		150, 192, 3, 10, 5, 0, 151, 152, 5, 25, 0, 0, 152, 192, 3, 12, 6, 7, 153,
+		154, 3, 10, 5, 0, 154, 155, 5, 21, 0, 0, 155, 156, 3, 10, 5, 0, 156, 157,
+		5, 19, 0, 0, 157, 158, 3, 10, 5, 0, 158, 192, 1, 0, 0, 0, 159, 161, 3,
+		10, 5, 0, 160, 162, 5, 25, 0, 0, 161, 160, 1, 0, 0, 0, 161, 162, 1, 0,
+		0, 0, 162, 163, 1, 0, 0, 0, 163, 164, 5, 42, 0, 0, 164, 165, 3, 10, 5,
+		0, 165, 192, 1, 0, 0, 0, 166, 168, 3, 10, 5, 0, 167, 169, 5, 25, 0, 0,
+		168, 167, 1, 0, 0, 0, 168, 169, 1, 0, 0, 0, 169, 170, 1, 0, 0, 0, 170,
 		171, 5, 30, 0, 0, 171, 172, 3, 10, 5, 0, 172, 192, 1, 0, 0, 0, 173, 175,
 		3, 10, 5, 0, 174, 176, 5, 25, 0, 0, 175, 174, 1, 0, 0, 0, 175, 176, 1,
 		0, 0, 0, 176, 177, 1, 0, 0, 0, 177, 178, 5, 23, 0, 0, 178, 179, 3, 6, 3,
@@ -260,7 +260,7 @@ func csqlParserInit() {
 		1, 0, 0, 0, 447, 448, 3, 74, 37, 0, 448, 93, 1, 0, 0, 0, 449, 450, 5, 73,
 		0, 0, 450, 451, 5, 72, 0, 0, 451, 452, 5, 74, 0, 0, 452, 453, 3, 74, 37,
 		0, 453, 95, 1, 0, 0, 0, 454, 455, 7, 6, 0, 0, 455, 97, 1, 0, 0, 0, 49,
-		100, 104, 108, 120, 127, 137, 145, 161, 168, 175, 183, 191, 203, 205, 223,
+		100, 103, 106, 120, 127, 137, 145, 161, 168, 175, 183, 191, 203, 205, 223,
 		234, 239, 247, 254, 260, 263, 266, 271, 278, 284, 290, 296, 307, 321, 331,
 		333, 341, 347, 352, 360, 363, 366, 369, 372, 375, 386, 392, 397, 417, 422,
 		425, 436, 441, 445,
@@ -448,10 +448,10 @@ type IQueryContext interface {
 	GetParser() antlr.Parser
 
 	// Getter signatures
-	UnionSelects() IUnionSelectsContext
-	IntoClause() IIntoClauseContext
 	EOF() antlr.TerminalNode
+	UnionSelects() IUnionSelectsContext
 	DropTempTable() IDropTempTableContext
+	IntoClause() IIntoClauseContext
 
 	// IsQueryContext differentiates from other interfaces.
 	IsQueryContext()
@@ -489,6 +489,10 @@ func NewQueryContext(parser antlr.Parser, parent antlr.ParserRuleContext, invoki
 
 func (s *QueryContext) GetParser() antlr.Parser { return s.parser }
 
+func (s *QueryContext) EOF() antlr.TerminalNode {
+	return s.GetToken(CsqlParserEOF, 0)
+}
+
 func (s *QueryContext) UnionSelects() IUnionSelectsContext {
 	var t antlr.RuleContext
 	for _, ctx := range s.GetChildren() {
@@ -505,26 +509,6 @@ func (s *QueryContext) UnionSelects() IUnionSelectsContext {
 	return t.(IUnionSelectsContext)
 }
 
-func (s *QueryContext) IntoClause() IIntoClauseContext {
-	var t antlr.RuleContext
-	for _, ctx := range s.GetChildren() {
-		if _, ok := ctx.(IIntoClauseContext); ok {
-			t = ctx.(antlr.RuleContext)
-			break
-		}
-	}
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(IIntoClauseContext)
-}
-
-func (s *QueryContext) EOF() antlr.TerminalNode {
-	return s.GetToken(CsqlParserEOF, 0)
-}
-
 func (s *QueryContext) DropTempTable() IDropTempTableContext {
 	var t antlr.RuleContext
 	for _, ctx := range s.GetChildren() {
@@ -539,6 +523,22 @@ func (s *QueryContext) DropTempTable() IDropTempTableContext {
 	}
 
 	return t.(IDropTempTableContext)
+}
+
+func (s *QueryContext) IntoClause() IIntoClauseContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IIntoClauseContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IIntoClauseContext)
 }
 
 func (s *QueryContext) GetRuleContext() antlr.RuleContext {
@@ -564,7 +564,8 @@ func (p *CsqlParser) Query() (localctx IQueryContext) {
 	p.EnterRule(localctx, 0, CsqlParserRULE_query)
 	var _la int
 
-	p.SetState(108)
+	p.EnterOuterAlt(localctx, 1)
+	p.SetState(103)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -572,7 +573,6 @@ func (p *CsqlParser) Query() (localctx IQueryContext) {
 
 	switch p.GetTokenStream().LA(1) {
 	case CsqlParserK_SELECT:
-		p.EnterOuterAlt(localctx, 1)
 		{
 			p.SetState(98)
 			p.UnionSelects()
@@ -593,42 +593,40 @@ func (p *CsqlParser) Query() (localctx IQueryContext) {
 		}
 
 	case CsqlParserK_DROP:
-		p.EnterOuterAlt(localctx, 2)
 		{
 			p.SetState(102)
 			p.DropTempTable()
 		}
 
-		p.SetState(104)
-		p.GetErrorHandler().Sync(p)
-		if p.HasError() {
-			goto errorExit
-		}
-		_la = p.GetTokenStream().LA(1)
+	default:
+		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		goto errorExit
+	}
+	p.SetState(106)
+	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
+	_la = p.GetTokenStream().LA(1)
 
-		if _la == CsqlParserT__0 {
-			{
-				p.SetState(103)
-				p.Match(CsqlParserT__0)
-				if p.HasError() {
-					// Recognition error - abort rule
-					goto errorExit
-				}
-			}
-
-		}
+	if _la == CsqlParserT__0 {
 		{
-			p.SetState(106)
-			p.Match(CsqlParserEOF)
+			p.SetState(105)
+			p.Match(CsqlParserT__0)
 			if p.HasError() {
 				// Recognition error - abort rule
 				goto errorExit
 			}
 		}
 
-	default:
-		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
-		goto errorExit
+	}
+	{
+		p.SetState(108)
+		p.Match(CsqlParserEOF)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
 errorExit:

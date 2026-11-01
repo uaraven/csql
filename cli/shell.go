@@ -134,7 +134,13 @@ func (s *CsqlShell) Start() {
 		} else if err != nil {
 			panic(err)
 		} else if inMultiline {
+			// shell commands are not recognised here, because a query line can start with a command name
+			// (for example a column called "status"). Ctrl-C abandons the query.
 			buffer.WriteString(input)
+			buffer.WriteRune('\n')
+			if len(input) > 0 {
+				s.line.AppendHistory(input)
+			}
 		} else if s.IsCommand(input) {
 			s.ExecuteCommand(input)
 			s.line.AppendHistory(input)
@@ -160,13 +166,52 @@ func (s *CsqlShell) Terminate() {
 
 // isTerminalLine checks whether the input string terminates up with ';', meaning it is the last line in multiline input
 func (s *CsqlShell) isTerminalLine(input string) bool {
-	return len(input) > 0 && RuneIndex(input, ';') == len(input)-1
+	trimmed := strings.TrimRight(input, " \t")
+	return len(trimmed) > 0 && RuneIndex(trimmed, ';') == len([]rune(trimmed))-1
 }
 
 func (s *CsqlShell) IsCommand(input string) bool {
-	inputData := strings.Split(input, " ")
+	inputData := splitArgs(input)
+	if len(inputData) == 0 {
+		return false
+	}
 	_, ok := s.Commands[inputData[0]]
 	return ok
+}
+
+// splitArgs splits the input on whitespace. Single or double quotes group words with whitespace into one
+// argument and are removed. A quote that is never closed runs to the end of the input.
+func splitArgs(input string) []string {
+	args := make([]string, 0)
+	var current strings.Builder
+	inArg := false
+	var quote rune
+	for _, r := range input {
+		switch {
+		case quote != 0:
+			if r == quote {
+				quote = 0
+			} else {
+				current.WriteRune(r)
+			}
+		case r == '"' || r == '\'':
+			quote = r
+			inArg = true
+		case r == ' ' || r == '\t':
+			if inArg {
+				args = append(args, current.String())
+				current.Reset()
+				inArg = false
+			}
+		default:
+			current.WriteRune(r)
+			inArg = true
+		}
+	}
+	if inArg {
+		args = append(args, current.String())
+	}
+	return args
 }
 
 func (s *CsqlShell) ExecuteQuery(query string) {
@@ -183,7 +228,10 @@ func (s *CsqlShell) ExecuteQuery(query string) {
 }
 
 func (s *CsqlShell) ExecuteCommand(input string) {
-	inputData := strings.Split(input, " ")
+	inputData := splitArgs(input)
+	if len(inputData) == 0 {
+		return
+	}
 	cmd, ok := s.Commands[inputData[0]]
 	if !ok {
 		return

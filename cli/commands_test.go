@@ -33,3 +33,38 @@ func TestRuneIndex(t *testing.T) {
 
 	g.Expect(RuneIndex("this is a \"string;\";dw", ';')).To(Equal(19))
 }
+
+func TestSplitArgs(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	g.Expect(splitArgs("")).To(BeEmpty())
+	g.Expect(splitArgs("   ")).To(BeEmpty())
+	g.Expect(splitArgs("ls")).To(Equal([]string{"ls"}))
+	g.Expect(splitArgs("ls\t-l  dir")).To(Equal([]string{"ls", "-l", "dir"}))
+	g.Expect(splitArgs(`cd "my dir"`)).To(Equal([]string{"cd", "my dir"}))
+	g.Expect(splitArgs(`cd 'my dir'/sub`)).To(Equal([]string{"cd", "my dir/sub"}))
+	g.Expect(splitArgs(`csv --null ""`)).To(Equal([]string{"csv", "--null", ""}))
+	g.Expect(splitArgs(`cd "unclosed dir`)).To(Equal([]string{"cd", "unclosed dir"}))
+}
+
+func TestShellIsCommand(t *testing.T) {
+	g := NewGomegaWithT(t)
+	shell := &CsqlShell{Commands: map[string]*Command{"ls": LsCmd(), "cd": CdCmd()}}
+
+	g.Expect(shell.IsCommand("ls")).To(BeTrue())
+	g.Expect(shell.IsCommand("ls\t-l")).To(BeTrue())
+	g.Expect(shell.IsCommand("  cd   \"my dir\"")).To(BeTrue())
+	g.Expect(shell.IsCommand("select 1")).To(BeFalse())
+	g.Expect(shell.IsCommand("")).To(BeFalse())
+}
+
+func TestShellIsTerminalLine(t *testing.T) {
+	g := NewGomegaWithT(t)
+	shell := &CsqlShell{}
+
+	g.Expect(shell.isTerminalLine("select 1;")).To(BeTrue())
+	g.Expect(shell.isTerminalLine("select 1;  \t")).To(BeTrue())
+	g.Expect(shell.isTerminalLine("select 1")).To(BeFalse())
+	g.Expect(shell.isTerminalLine("select ';'")).To(BeFalse())
+	g.Expect(shell.isTerminalLine("")).To(BeFalse())
+}

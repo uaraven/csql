@@ -155,3 +155,25 @@ func TestDistinctWithGroupBy(t *testing.T) {
 	rows := ExecuteSql(`select distinct count(*) from "` + a + `" group by g`).GetRows()
 	g.Expect(rows).To(HaveLen(1))
 }
+
+func TestTrailingGarbageIsRejected(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "id\n1\n2\n")
+	src := `"` + a + `"`
+
+	for _, q := range []string{
+		`select id from ` + src + ` where id=1 garbage`,
+		`select id from ` + src + `; garbage here`,
+		`select id from ` + src + ` limit 1 where id = 1`,
+		`select id from ` + src + ` ; ;`,
+	} {
+		g.Expect(func() { ExecuteSql(q) }).To(Panic(), q)
+	}
+	for _, q := range []string{
+		`select id from ` + src,
+		`select id from ` + src + `;`,
+		`select id from ` + src + ` where id = 1;`,
+	} {
+		g.Expect(func() { ExecuteSql(q) }).ToNot(Panic(), q)
+	}
+}
