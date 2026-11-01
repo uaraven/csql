@@ -88,8 +88,16 @@ type CsqlVisitorImpl struct {
 	*parser.BaseCsqlVisitor
 }
 
+// unquote removes one pair of surrounding quote characters and turns every doubled quote inside into a single one
+func unquote(text string, quote string) string {
+	if len(text) >= 2 && strings.HasPrefix(text, quote) && strings.HasSuffix(text, quote) {
+		text = text[1 : len(text)-1]
+	}
+	return strings.ReplaceAll(text, quote+quote, quote)
+}
+
 func removeStringQuotes(text string) string {
-	return strings.Trim(text, "'")
+	return unquote(text, "'")
 }
 
 func isQuotedIdentifier(text string) bool {
@@ -97,7 +105,7 @@ func isQuotedIdentifier(text string) bool {
 }
 
 func removeIdentifierQuotes(text string) string {
-	return strings.Trim(text, `"`)
+	return unquote(text, `"`)
 }
 
 func parseIdentifier(identifier string) Identifier {
@@ -568,7 +576,7 @@ func (c CsqlVisitorImpl) VisitLiteralValue(ctx *parser.LiteralValueContext) inte
 		v := ctx.SignedNumber().Accept(c).(string)
 		l.NumericValue = &v
 	} else if ctx.StringValue() != nil {
-		v := removeStringQuotes(ctx.StringValue().Accept(c).(string))
+		v := ctx.StringValue().Accept(c).(string)
 		l.StringValue = &v
 	}
 	l.IsNull = ctx.NullValue() != nil

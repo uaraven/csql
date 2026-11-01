@@ -310,3 +310,35 @@ func TestLastResultCanBeQueried(t *testing.T) {
 	g.Expect(ExecuteSql(`select id from ".last"`).GetRows()).To(HaveLen(2))
 	g.Expect(ExecuteSql(`select id from ".last"`).GetRows()).To(HaveLen(2))
 }
+
+func TestStringLiteralUnescaping(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "id\n1\n")
+	src := `"` + a + `"`
+
+	for literal, expected := range map[string]string{
+		`'abc'`:    "abc",
+		`'it''s'`:  "it's",
+		`'abc'''`:  "abc'",
+		`'''a'`:    "'a",
+		`''''`:     "'",
+		`''`:       "",
+		`'a''''b'`: "a''b",
+	} {
+		rows := ExecuteSql(`select ` + literal + ` as v from ` + src).GetRows()
+		g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(expected), literal)
+	}
+	// the literal can be compared with data that contains quotes
+	b := writeCsv(t, "b.csv", "name\nit's\nplain\n")
+	g.Expect(ExecuteSql(`select name from "` + b + `" where name = 'it''s'`).GetRows()).To(HaveLen(1))
+}
+
+func TestQuotedIdentifierUnescaping(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "\"a\"\"b\",plain\n1,2\n")
+
+	rows := ExecuteSql(`select "a""b" from "` + a + `"`).GetRows()
+	g.Expect(rows).To(HaveLen(1))
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(int64(1)))
+	g.Expect(ExecuteSql(`select "plain" from "` + a + `"`).GetRows()[0].GetByIndex(1).Value()).To(Equal(int64(2)))
+}
