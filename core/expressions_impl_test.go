@@ -21,7 +21,7 @@ package core
 
 import (
 	. "github.com/onsi/gomega"
-	"math"
+	"github.com/uaraven/csql/errors"
 	"testing"
 )
 
@@ -124,9 +124,7 @@ func TestArithExpression_EvaluateDiv(t *testing.T) {
 	g.Expect(result.Value()).To(Equal(20.8))
 
 	expr = NewExpression(division, NewRowValue("ten_four"), NewFloatValue(0))
-	result = expr.Evaluate(context)
-	g.Expect(result.Type()).To(Equal(TypeFloat))
-	g.Expect(result.Value()).To(Equal(math.Inf(1)))
+	g.Expect(func() { expr.Evaluate(context) }).To(PanicWith(MatchError(ContainSubstring("division by zero"))))
 
 	expr = NewExpression(division, NewStringValue("10.4"), NewIntValue(-2))
 	g.Expect(func() { expr.Evaluate(context) }).To(Panic())
@@ -148,7 +146,7 @@ func TestArithExpression_EvaluateMod(t *testing.T) {
 
 	expr = NewExpression(modulo, NewRowValue("ten_four"), NewIntValue(6))
 	result = expr.Evaluate(context)
-	g.Expect(result.Value()).To(Equal(4.0))
+	g.Expect(result.Value()).To(BeNumerically("~", 4.4, 1e-9))
 
 	expr = NewExpression(modulo, NewStringValue("10"), NewIntValue(-2))
 	g.Expect(func() { expr.Evaluate(context) }).To(Panic())
@@ -174,4 +172,27 @@ func TestConcatExpression_Evaluate(t *testing.T) {
 
 	expr = NewConcat(NewRowValue("i"), NewStringValue("123"))
 	g.Expect(func() { expr.Evaluate(context) }).To(Panic())
+}
+
+func TestArithExpression_ZeroDivisor(t *testing.T) {
+	g := NewGomegaWithT(t)
+	context := newMapContext()
+
+	for _, oper := range []BinaryOperator{division, modulo} {
+		for _, zero := range []Value{NewIntValue(0), NewFloatValue(0)} {
+			for _, left := range []Value{NewIntValue(5), NewFloatValue(5.5)} {
+				expr := NewExpressionL(oper, left, zero, errors.Loc(1, 8))
+				g.Expect(func() { expr.Evaluate(context) }).To(PanicWith(MatchError(ContainSubstring("division by zero"))))
+			}
+		}
+	}
+}
+
+func TestArithExpression_FloatModulo(t *testing.T) {
+	g := NewGomegaWithT(t)
+	context := newMapContext()
+
+	g.Expect(NewExpression(modulo, NewFloatValue(5.5), NewIntValue(2)).Evaluate(context).Value()).To(Equal(1.5))
+	g.Expect(NewExpression(modulo, NewIntValue(5), NewFloatValue(0.5)).Evaluate(context).Value()).To(Equal(0.0))
+	g.Expect(NewExpression(modulo, NewIntValue(7), NewIntValue(3)).Evaluate(context).Value()).To(Equal(int64(1)))
 }

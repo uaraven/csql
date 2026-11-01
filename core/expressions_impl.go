@@ -22,7 +22,7 @@ package core
 import (
 	"fmt"
 	"github.com/uaraven/csql/errors"
-	"github.com/uaraven/csql/util"
+	"math"
 )
 
 type BinaryOperator int
@@ -59,9 +59,18 @@ func operationExecutor[T int64 | float64](oper BinaryOperator, a T, b T) (T, err
 	case multiplication:
 		return a * b, nil
 	case division:
+		if b == 0 {
+			return 0, fmt.Errorf("division by zero")
+		}
 		return a / b, nil
 	case modulo:
-		return T(int64(a) % int64(b)), nil
+		if b == 0 {
+			return 0, fmt.Errorf("division by zero in modulo")
+		}
+		if fa, isFloat := any(a).(float64); isFloat {
+			return T(math.Mod(fa, any(b).(float64))), nil
+		}
+		return T(any(a).(int64) % any(b).(int64)), nil
 	default:
 		var empty T
 		return empty, fmt.Errorf("unsupported operation: %v", oper)
@@ -81,11 +90,19 @@ func (ae binaryExpression) Evaluate(context EvaluationContext) Value {
 	if left.Type() == TypeFloat || right.Type() == TypeFloat {
 		a := left.AsFloat().Value().(float64)
 		b := right.AsFloat().Value().(float64)
-		return util.Must(wrapInFloat(operationExecutor(ae.operation, a, b)))
+		result, err := wrapInFloat(operationExecutor(ae.operation, a, b))
+		if err != nil {
+			panic(errors.NewError(ae.loc, err.Error()))
+		}
+		return result
 	} else {
 		a := left.AsInt().Value().(int64)
 		b := right.AsInt().Value().(int64)
-		return util.Must(wrapInInt(operationExecutor(ae.operation, a, b)))
+		result, err := wrapInInt(operationExecutor(ae.operation, a, b))
+		if err != nil {
+			panic(errors.NewError(ae.loc, err.Error()))
+		}
+		return result
 	}
 }
 
