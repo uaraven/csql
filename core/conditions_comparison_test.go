@@ -158,3 +158,36 @@ func Test_LteConditions(t *testing.T) {
 
 	testSet(g, lteTests)
 }
+
+func TestMixedTypeComparison(t *testing.T) {
+	g := NewGomegaWithT(t)
+	ctx := newMapContext()
+	ctx.SetValue("empty", "")
+	ctx.SetValue("num", "5")
+	ctx.SetValue("txt", "abc")
+	ctx.SetValue("nul", "null")
+
+	one := NewIntValue(1)
+	cases := []struct {
+		cond     Condition
+		expected bool
+	}{
+		{NewEq(NewRowValue("empty"), NewFloatValue(1.5)), false},
+		{NewNeq(NewRowValue("empty"), NewFloatValue(1.5)), true},
+		{NewEq(NewRowValue("txt"), NewIntValue(7)), false},
+		{NewEq(NewRowValue("num"), NewStringValue("5")), true},
+		{NewEq(NewRowValue("num"), NewStringValue("5.0")), true},
+		{NewEq(NewStringValue("5"), NewIntValue(5)), true},
+		{NewGt(NewStringValue("10"), NewIntValue(9)), true},
+		{NewEq(NewRowValue("nul"), NewIntValue(1)), false},
+		{NewNeq(NewRowValue("nul"), NewIntValue(1)), false},
+		// int vs float must not truncate the float
+		{NewEq(one, NewFloatValue(1.5)), false},
+		{NewLt(one, NewFloatValue(1.5)), true},
+		{NewGt(NewFloatValue(1.5), one), true},
+		{NewEq(NewFloatValue(1.0), one), true},
+	}
+	for _, c := range cases {
+		g.Expect(c.cond.Evaluate(ctx).Value()).To(Equal(c.expected), c.cond.String())
+	}
+}

@@ -49,8 +49,8 @@ func (inc isNullCondition) String() string {
 func (inc isNullCondition) Evaluate(context EvaluationContext) Value {
 	result := inc.expr.Evaluate(context)
 	if inc.negate {
-		return NewBoolValue(result != nullV)
+		return NewBoolValue(result.Type() != TypeNull)
 	} else {
-		return NewBoolValue(result == nullV)
+		return NewBoolValue(result.Type() == TypeNull)
 	}
 }

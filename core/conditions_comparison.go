@@ -90,30 +90,48 @@ func (cc ComparisonCondition) Evaluate(ctx EvaluationContext) Value {
 	}()
 	lv := cc.left.Evaluate(ctx)
 	rv := cc.right.Evaluate(ctx)
-	switch lv.Type() {
+	return NewBoolValue(cc.compareValues(lv, rv))
+}
+
+// numericOperand returns v as a number, converting strings that look like numbers.
+func numericOperand(v Value) (Value, bool) {
+	switch v.Type() {
+	case TypeInt, TypeFloat:
+		return v, true
 	case TypeString:
-		rs, err := EnsureString(rv)
-		if err != nil {
-			panic(errors.NewTypeMismatch(cc.loc, cc.right, "string", ctx))
+		return parseNumber(v.Value().(string))
+	}
+	return nil, false
+}
+
+// compareValues applies the operator to two values. Numbers compare as numbers (as floats if either is a float),
+// strings compare lexically, and a string compared to a number is coerced if it parses as a number. Any comparison
+// with NULL is false. Operands that cannot be compared are never equal and never ordered.
+func (cc ComparisonCondition) compareValues(lv Value, rv Value) bool {
+	if lv.Type() == TypeNull || rv.Type() == TypeNull {
+		return false
+	}
+	if lv.Type() == TypeString && rv.Type() == TypeString {
+		return getComparator(lv.Value().(string), cc.operator)(rv.Value().(string))
+	}
+	ln, lok := numericOperand(lv)
+	rn, rok := numericOperand(rv)
+	if lok && rok {
+		if ln.Type() == TypeInt && rn.Type() == TypeInt {
+			return getComparator(ln.Value().(int64), cc.operator)(rn.Value().(int64))
 		}
-		return NewBoolValue(getComparator(lv.Value().(string), cc.operator)(rs))
-	case TypeInt:
-		ri, err := EnsureInt(rv)
-		if err != nil {
-			panic(errors.NewTypeMismatch(cc.loc, cc.right, "integer", ctx))
+		return getComparator(ln.AsFloat().Value().(float64), cc.operator)(rn.AsFloat().Value().(float64))
+	}
+	if lv.Type() == TypeBoolean && rv.Type() == TypeBoolean {
+		switch cc.operator {
+		case equal:
+			return lv.Equals(rv)
+		case notEqual:
+			return !lv.Equals(rv)
 		}
-		return NewBoolValue(getComparator(lv.Value().(int64), cc.operator)(ri))
-	case TypeFloat:
-		rf, err := EnsureFloat(rv)
-		if err != nil {
-			panic(errors.NewTypeMismatch(cc.loc, cc.right, "float", ctx))
-		}
-		return NewBoolValue(getComparator(lv.Value().(float64), cc.operator)(rf))
-	case TypeNull:
-		return NewBoolValue(false)
-	default:
 		panic(fmt.Errorf("unsupported type in expression %v", cc))
 	}
+	return cc.operator == notEqual
 }
 
 func (cc ComparisonCondition) String() string {

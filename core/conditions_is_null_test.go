@@ -38,3 +38,13 @@ func TestIsNullCondition_Evaluate(t *testing.T) {
 	isNotN = NewIsNull(NewIntValue(10), false)
 	g.Expect(isNotN.Evaluate(context).Value()).To(BeFalse())
 }
+
+func TestIsNullLiteralAndEvaluatedNull(t *testing.T) {
+	g := NewGomegaWithT(t)
+	ctx := newMapContext()
+
+	g.Expect(NewIsNull(NewNullValue(), false).Evaluate(ctx).Value()).To(BeTrue())
+	g.Expect(NewIsNull(NewNullValueL(nil), false).Evaluate(ctx).Value()).To(BeTrue())
+	g.Expect(NewIsNull(NewNullValue(), true).Evaluate(ctx).Value()).To(BeFalse())
+	g.Expect(NewIsNull(NewIntValue(1), true).Evaluate(ctx).Value()).To(BeTrue())
+}

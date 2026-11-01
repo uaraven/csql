@@ -31,13 +31,6 @@ import (
 	"github.com/uaraven/csql/sql"
 )
 
-func TestTypeErrorComparison(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	g.Expect(func() { sql.ExecuteSql("SELECT * FROM \"../test-data/employees.csv\" WHERE 1 > '4'") }).
-		To(PanicWith(SourceLocation(errors.Loc(1, 49))))
-}
-
 func TestInvalidSource(t *testing.T) {
 	g := NewGomegaWithT(t)
 

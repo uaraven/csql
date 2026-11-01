@@ -22,6 +22,8 @@ package core
 import (
 	"fmt"
 	"github.com/uaraven/csql/errors"
+	"math"
+	"regexp"
 	"strconv"
 )
 
@@ -406,18 +408,35 @@ func DecodeNumericL(value string, l *errors.SourceLocation) Value {
 	return NewIntValueL(i64, l)
 }
 
+var (
+	intPattern   = regexp.MustCompile(`^-?(0|[1-9][0-9]*)$`)
+	floatPattern = regexp.MustCompile(`^-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][-+]?[0-9]+)?$`)
+)
+
+// parseNumber strictly recognises decimal numbers. Leading zeros, NaN, Inf, hex floats, integers that do not fit
+// into int64 and floats that overflow are not numbers.
+func parseNumber(value string) (Value, bool) {
+	if intPattern.MatchString(value) {
+		if i64, err := strconv.ParseInt(value, 10, 64); err == nil {
+			return NewIntValue(i64), true
+		}
+		return nil, false
+	}
+	if floatPattern.MatchString(value) {
+		if f64, err := strconv.ParseFloat(value, 64); err == nil && !math.IsInf(f64, 0) {
+			return NewFloatValue(f64), true
+		}
+	}
+	return nil, false
+}
+
 // ParseStringToValue parses a string and converts it into a value of appropriate type
 func ParseStringToValue(value string) Value {
-	i64, err := strconv.ParseInt(value, 10, 64)
-	if err != nil {
-		f64, err := strconv.ParseFloat(value, 64)
-		if err != nil {
-			if value == NullValueString {
-				return NewNullValue()
-			}
-			return NewStringValue(value)
-		}
-		return NewFloatValue(f64)
+	if value == NullValueString {
+		return NewNullValue()
 	}
-	return NewIntValue(i64)
+	if v, ok := parseNumber(value); ok {
+		return v
+	}
+	return NewStringValue(value)
 }
