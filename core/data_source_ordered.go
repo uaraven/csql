@@ -69,12 +69,36 @@ func NewOrderByIndexL(index int, desc bool, l *errors.SourceLocation) OrderByFie
 // NoLimit is the limit value that disables limiting of the rows
 const NoLimit = -1
 
+// CanOrderBy returns true if all fields can be resolved against the header
+func CanOrderBy(header DataSourceHeader, orderBy []OrderByField) bool {
+	for _, order := range orderBy {
+		if order.index > 0 {
+			if order.index > header.ColumnCount() {
+				return false
+			}
+		} else if header.IndexByName(order.name) == InvalidFieldIndex {
+			return false
+		}
+	}
+	return true
+}
+
+// NewOrderedDatasource sorts the rows of ds (without modifying ds) and keeps at most limit of them.
+// The sort is stable. NULLs sort before all other values, numbers before strings.
 func NewOrderedDatasource(ds DataSource, orderBy []OrderByField, limit int) DataSource {
-	rows := ds.GetRows()
+	if !CanOrderBy(ds.Header(), orderBy) {
+		for _, order := range orderBy {
+			if !CanOrderBy(ds.Header(), []OrderByField{order}) {
+				panic(errors.NewError(order.loc, fmt.Sprintf("unknown column: %v", orderColumnName(order))))
+			}
+		}
+	}
+	rows := make([]Row, len(ds.GetRows()))
+	copy(rows, ds.GetRows())
 
 	if len(orderBy) > 0 {
-		sort.Slice(rows, func(i, j int) bool {
-			return rowSorter(i, j, rows, orderBy)
+		sort.SliceStable(rows, func(i, j int) bool {
+			return rowSorter(rows[i], rows[j], orderBy) < 0
 		})
 	}
 
@@ -84,10 +108,56 @@ func NewOrderedDatasource(ds DataSource, orderBy []OrderByField, limit int) Data
 	return NewMemDataSource(ds.GetName(), ds.Header().ColumnsMetadata(), rows)
 }
 
-func rowSorter(i, j int, rows []Row, orderBy []OrderByField) bool {
-	r1 := rows[i]
-	r2 := rows[j]
+func orderColumnName(order OrderByField) string {
+	if order.index > 0 {
+		return fmt.Sprintf("%d", order.index)
+	}
+	return order.name
+}
 
+// typeRank defines the order between values of different types
+func typeRank(v Value) int {
+	switch v.Type() {
+	case TypeNull:
+		return 0
+	case TypeInt, TypeFloat:
+		return 1
+	case TypeString:
+		return 2
+	default:
+		return 3
+	}
+}
+
+// compareForOrder defines a total order of values: NULL < numbers < strings < booleans
+func compareForOrder(a Value, b Value) int {
+	ra, rb := typeRank(a), typeRank(b)
+	if ra != rb {
+		return compare(ra, rb)
+	}
+	switch ra {
+	case 1:
+		if a.Type() == TypeInt && b.Type() == TypeInt {
+			return compare(a.Value().(int64), b.Value().(int64))
+		}
+		return compare(a.AsFloat().Value().(float64), b.AsFloat().Value().(float64))
+	case 2:
+		return compare(a.Value().(string), b.Value().(string))
+	case 3:
+		return compare(boolRank(a), boolRank(b))
+	}
+	return 0
+}
+
+func boolRank(v Value) int {
+	if v.Value().(bool) {
+		return 1
+	}
+	return 0
+}
+
+// rowSorter compares two rows using the order by fields, returns negative, zero or positive number
+func rowSorter(r1 Row, r2 Row, orderBy []OrderByField) int {
 	for _, order := range orderBy {
 		var r1v, r2v Value
 		if order.index > 0 {
@@ -97,14 +167,12 @@ func rowSorter(i, j int, rows []Row, orderBy []OrderByField) bool {
 			r1v = r1.Get(order.name).OrPanic(errors.NewError(order.loc, fmt.Sprintf("unknown column: %v", order.name)))
 			r2v = r2.Get(order.name).OrPanic(errors.NewError(order.loc, fmt.Sprintf("unknown column: %v", order.name)))
 		}
-		if !r1v.Equals(r2v) {
-			less := r1v.Less(r2v)
+		if c := compareForOrder(r1v, r2v); c != 0 {
 			if order.desc {
-				return !less
-			} else {
-				return less
+				return -c
 			}
+			return c
 		}
 	}
-	return false
+	return 0
 }

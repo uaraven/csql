@@ -109,9 +109,9 @@ type countFunction struct {
 	implementor AggregateFunctionImplementor
 }
 
-// isMissing reports whether an aggregate function has to skip the value: NULL or an empty CSV cell
+// isMissing reports whether an aggregate function has to skip the value
 func isMissing(v Value) bool {
-	return v.Type() == TypeNull || (v.Type() == TypeString && v.Value().(string) == "")
+	return v.Type() == TypeNull
 }
 
 // sumNumeric adds up all numeric values of arg, skipping missing ones, and returns the sum with the number of values added
@@ -228,7 +228,7 @@ func NewMaxFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 	}
 }
 
-// NewCountFunction creates COUNT. COUNT(*) counts all rows, COUNT(column) skips NULLs and empty cells
+// NewCountFunction creates COUNT. COUNT(*) counts all rows, COUNT(column) skips NULLs
 func NewCountFunction(distinct bool, arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
 	return &countFunction{
 		arg:      arg,

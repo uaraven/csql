@@ -113,7 +113,14 @@ func (ae AstTransformer) TransformSelect(ast Select) core.DataSource {
 		if ast.Having != nil {
 			panic(errors.NewError(nil, "HAVING clause in non-aggregate query"))
 		}
-		ds = core.NewProjectionDataSource(ds, projection, ast.Projection.Distinct)
+		source := ds
+		ds = core.NewProjectionDataSource(source, projection, ast.Projection.Distinct)
+		if len(orderBy) > 0 && !core.CanOrderBy(ds.Header(), orderBy) && core.CanOrderBy(source.Header(), orderBy) {
+			// ORDER BY refers to columns that are not in the projection: sort the source rows, then project
+			sorted := core.NewOrderedDatasource(source, orderBy, core.NoLimit)
+			ds = core.NewProjectionDataSource(sorted, projection, ast.Projection.Distinct)
+			orderBy = nil
+		}
 		if ast.Limit != nil || len(orderBy) > 0 {
 			ds = core.NewOrderedDatasource(ds, orderBy, limit)
 		}

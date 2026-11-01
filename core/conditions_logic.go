@@ -21,6 +21,8 @@ package core
 
 import (
 	"fmt"
+
+	"github.com/uaraven/csql/errors"
 )
 
 type andCondition struct {
@@ -39,12 +41,31 @@ func (ac andCondition) String() string {
 	return fmt.Sprintf("%s AND %s", ac.left, ac.right)
 }
 
+// truth interprets a value as a boolean. known is false for NULL (unknown)
+func truth(v Value) (value bool, known bool) {
+	if v.Type() == TypeNull {
+		return false, false
+	}
+	b := v.AsBool()
+	if b == nil {
+		panic(errors.NewError(nil, fmt.Sprintf("cannot use %v as a boolean condition", v)))
+	}
+	return b.Value().(bool), true
+}
+
 func (ac andCondition) Evaluate(ctx EvaluationContext) Value {
-	if ac.left.Evaluate(ctx).AsBool().Value().(bool) {
-		return ac.right.Evaluate(ctx).AsBool()
-	} else {
+	lv, lKnown := truth(ac.left.Evaluate(ctx))
+	if lKnown && !lv {
 		return ValueFalse
 	}
+	rv, rKnown := truth(ac.right.Evaluate(ctx))
+	if rKnown && !rv {
+		return ValueFalse
+	}
+	if lKnown && rKnown {
+		return ValueTrue
+	}
+	return NewNullValue()
 }
 
 type orCondition struct {
@@ -64,11 +85,18 @@ func (oc orCondition) String() string {
 }
 
 func (oc orCondition) Evaluate(ctx EvaluationContext) Value {
-	if oc.left.Evaluate(ctx).AsBool().Value().(bool) {
+	lv, lKnown := truth(oc.left.Evaluate(ctx))
+	if lKnown && lv {
 		return ValueTrue
-	} else {
-		return oc.right.Evaluate(ctx).AsBool()
 	}
+	rv, rKnown := truth(oc.right.Evaluate(ctx))
+	if rKnown && rv {
+		return ValueTrue
+	}
+	if lKnown && rKnown {
+		return ValueFalse
+	}
+	return NewNullValue()
 }
 
 type notCondition struct {
@@ -84,5 +112,9 @@ func (nc notCondition) String() string {
 }
 
 func (nc notCondition) Evaluate(ctx EvaluationContext) Value {
-	return NewBoolValue(!nc.arg.Evaluate(ctx).AsBool().Value().(bool))
+	v, known := truth(nc.arg.Evaluate(ctx))
+	if !known {
+		return NewNullValue()
+	}
+	return NewBoolValue(!v)
 }

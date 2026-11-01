@@ -44,6 +44,9 @@ func WriteDataSourceToFile(ds DataSource, outputFile string) error {
 	}
 	for _, row := range ds.GetRows() {
 		rowValues := funky.Map(row.Values(), func(v Value) string {
+			if v.Type() == TypeNull {
+				return ""
+			}
 			return v.AsString().Value().(string)
 		})
 		err = csvWriter.Write(rowValues)

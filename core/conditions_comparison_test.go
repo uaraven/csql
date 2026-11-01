@@ -170,17 +170,18 @@ func TestMixedTypeComparison(t *testing.T) {
 	one := NewIntValue(1)
 	cases := []struct {
 		cond     Condition
-		expected bool
+		expected interface{}
 	}{
-		{NewEq(NewRowValue("empty"), NewFloatValue(1.5)), false},
-		{NewNeq(NewRowValue("empty"), NewFloatValue(1.5)), true},
+		{NewEq(NewRowValue("empty"), NewFloatValue(1.5)), nil},
+		{NewNeq(NewRowValue("empty"), NewFloatValue(1.5)), nil},
+		{NewNeq(NewRowValue("txt"), NewFloatValue(1.5)), true},
 		{NewEq(NewRowValue("txt"), NewIntValue(7)), false},
 		{NewEq(NewRowValue("num"), NewStringValue("5")), true},
 		{NewEq(NewRowValue("num"), NewStringValue("5.0")), true},
 		{NewEq(NewStringValue("5"), NewIntValue(5)), true},
 		{NewGt(NewStringValue("10"), NewIntValue(9)), true},
-		{NewEq(NewRowValue("nul"), NewIntValue(1)), false},
-		{NewNeq(NewRowValue("nul"), NewIntValue(1)), false},
+		{NewEq(NewRowValue("nul"), NewIntValue(1)), nil},
+		{NewNeq(NewRowValue("nul"), NewIntValue(1)), nil},
 		// int vs float must not truncate the float
 		{NewEq(one, NewFloatValue(1.5)), false},
 		{NewLt(one, NewFloatValue(1.5)), true},
@@ -188,6 +189,10 @@ func TestMixedTypeComparison(t *testing.T) {
 		{NewEq(NewFloatValue(1.0), one), true},
 	}
 	for _, c := range cases {
-		g.Expect(c.cond.Evaluate(ctx).Value()).To(Equal(c.expected), c.cond.String())
+		if c.expected == nil {
+			g.Expect(c.cond.Evaluate(ctx).Type()).To(Equal(TypeNull), c.cond.String())
+		} else {
+			g.Expect(c.cond.Evaluate(ctx).Value()).To(Equal(c.expected), c.cond.String())
+		}
 	}
 }

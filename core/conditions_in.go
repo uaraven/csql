@@ -41,11 +41,26 @@ func (ie inCondition) String() string {
 	rightS := funky.Map(ie.right, func(re Evaluator) string {
 		return re.String()
 	})
-	return fmt.Sprintf("%s ON (%s)", ie.left, strings.Join(rightS, ", "))
+	return fmt.Sprintf("%s IN (%s)", ie.left, strings.Join(rightS, ", "))
 }
 
 func (ie inCondition) Evaluate(context EvaluationContext) Value {
-	return NewBoolValue(funky.AnyMatches(ie.right, func(v Evaluator) bool {
-		return ie.left.Evaluate(context).Equals(v.Evaluate(context))
-	}))
+	left := ie.left.Evaluate(context)
+	if left.Type() == TypeNull {
+		return NewNullValue()
+	}
+	eq := ComparisonCondition{operator: equal}
+	sawNull := false
+	for _, item := range ie.right {
+		v := item.Evaluate(context)
+		if v.Type() == TypeNull {
+			sawNull = true
+		} else if eq.compareValues(left, v) {
+			return ValueTrue
+		}
+	}
+	if sawNull {
+		return NewNullValue()
+	}
+	return ValueFalse
 }

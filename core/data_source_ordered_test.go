@@ -141,3 +141,14 @@ func TestOrderedDatasource_OrderByIndexLimit(t *testing.T) {
 	g.Expect(rows[1].GetByIndex(1).Value()).To(Equal(int64(4)))
 	g.Expect(rows[2].GetByIndex(1).Value()).To(Equal(int64(2)))
 }
+
+func TestOrderedDatasource_DoesNotModifySource(t *testing.T) {
+	g := NewGomegaWithT(t)
+	ds := loadTestMemDatasource("people")
+	before := make([]Row, len(ds.GetRows()))
+	copy(before, ds.GetRows())
+
+	NewOrderedDatasource(ds, []OrderByField{NewOrderBy("width", true)}, NoLimit)
+
+	g.Expect(ds.GetRows()).To(Equal(before))
+}

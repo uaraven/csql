@@ -177,3 +177,99 @@ func TestTrailingGarbageIsRejected(t *testing.T) {
 		g.Expect(func() { ExecuteSql(q) }).ToNot(Panic(), q)
 	}
 }
+
+func column(ds interface{ GetRows() []core.Row }, index int) []interface{} {
+	result := make([]interface{}, 0)
+	for _, row := range ds.GetRows() {
+		result = append(result, row.GetByIndex(index).Value())
+	}
+	return result
+}
+
+func TestEmptyCellsAreNull(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "id,v,s\n1,10,a\n2,,\n3,null,c\n")
+	src := `"` + a + `"`
+
+	g.Expect(column(ExecuteSql(`select id from `+src+` where v is null`), 1)).To(Equal([]interface{}{int64(2), int64(3)}))
+	g.Expect(column(ExecuteSql(`select id from `+src+` where s is null`), 1)).To(Equal([]interface{}{int64(2)}))
+	g.Expect(column(ExecuteSql(`select v + 1 from `+src), 1)).To(Equal([]interface{}{int64(11), nil, nil}))
+	g.Expect(column(ExecuteSql(`select s || 'x' from `+src), 1)).To(Equal([]interface{}{"ax", nil, "cx"}))
+	g.Expect(column(ExecuteSql(`select to_upper(s) from `+src), 1)).To(Equal([]interface{}{"A", nil, "C"}))
+	g.Expect(column(ExecuteSql(`select coalesce(v, 0) from `+src), 1)).To(Equal([]interface{}{int64(10), int64(0), int64(0)}))
+	g.Expect(firstValue(ExecuteSql(`select avg(v) from ` + src))).To(Equal(10.0))
+}
+
+func TestThreeValuedLogic(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "id,v\n1,1\n2,\n3,5\n")
+	src := `"` + a + `"`
+	ids := func(where string) []interface{} {
+		return column(ExecuteSql(`select id from `+src+` where `+where), 1)
+	}
+
+	g.Expect(ids(`v = 1`)).To(Equal([]interface{}{int64(1)}))
+	g.Expect(ids(`not v = 1`)).To(Equal([]interface{}{int64(3)}))
+	g.Expect(ids(`v <> 1`)).To(Equal([]interface{}{int64(3)}))
+	g.Expect(ids(`not (v = 1 or v = 5)`)).To(BeEmpty())
+	g.Expect(ids(`v = 1 or v is null`)).To(Equal([]interface{}{int64(1), int64(2)}))
+	g.Expect(ids(`v = 99 and v is null`)).To(BeEmpty())
+	g.Expect(ids(`not (v = 99 and v = 1)`)).To(Equal([]interface{}{int64(1), int64(3)}))
+	g.Expect(ids(`not (v = 1 and 1 = 2)`)).To(Equal([]interface{}{int64(1), int64(2), int64(3)}))
+	g.Expect(ids(`v in (1, 2.0)`)).To(Equal([]interface{}{int64(1)}))
+	g.Expect(ids(`v not in (1, 2)`)).To(Equal([]interface{}{int64(3)}))
+	g.Expect(ids(`v in (1, null)`)).To(Equal([]interface{}{int64(1)}))
+	g.Expect(ids(`v not in (1, null)`)).To(BeEmpty())
+	g.Expect(ids(`v between 1 and 5`)).To(Equal([]interface{}{int64(1), int64(3)}))
+}
+
+func TestGroupByKeepsFirstSeenOrder(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "g\nz\nb\nz\na\nq\nb\nm\n")
+
+	expected := []interface{}{"z", "b", "a", "q", "m"}
+	for i := 0; i < 20; i++ {
+		g.Expect(column(ExecuteSql(`select g, count(*) from "`+a+`" group by g`), 1)).To(Equal(expected))
+	}
+}
+
+func TestOrderBy(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "id,v,s\n1,b,x\n2,,x\n3,2,y\n4,1.5,y\n5,a,z\n6,2,z\n")
+	src := `"` + a + `"`
+	ids := func(query string) []interface{} {
+		return column(ExecuteSql(query), 1)
+	}
+	i := func(v ...int64) []interface{} {
+		r := make([]interface{}, len(v))
+		for idx, x := range v {
+			r[idx] = x
+		}
+		return r
+	}
+
+	// NULL first, then numbers, then strings; ties keep the input order
+	g.Expect(ids(`select id from ` + src + ` order by v`)).To(Equal(i(2, 4, 3, 6, 5, 1)))
+	g.Expect(ids(`select id from ` + src + ` order by v desc`)).To(Equal(i(1, 5, 3, 6, 4, 2)))
+	g.Expect(ids(`select id from ` + src + ` order by s desc, id desc`)).To(Equal(i(6, 5, 4, 3, 2, 1)))
+	// order by a column that is not in the select list
+	g.Expect(ids(`select s from ` + src + ` order by id desc limit 2`)).To(Equal([]interface{}{"z", "z"}))
+	g.Expect(ids(`select id from ` + src + ` order by s desc, id limit 3`)).To(Equal(i(5, 6, 3)))
+	// aliases and positions still work
+	g.Expect(ids(`select id as k from ` + src + ` order by k desc limit 2`)).To(Equal(i(6, 5)))
+	g.Expect(ids(`select id from ` + src + ` order by 1 desc limit 1`)).To(Equal(i(6)))
+
+	g.Expect(func() { ExecuteSql(`select id from ` + src + ` where id = 1 order by nope`) }).
+		To(PanicWith(MatchError(ContainSubstring("unknown column"))))
+}
+
+func TestNullsAreExportedAsEmptyCells(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "a,b\n1,\nnull,x\n")
+	out := filepath.Join(t.TempDir(), "out.csv")
+
+	g.Expect(core.WriteDataSourceToFile(ExecuteSql(`select * from "`+a+`"`), out)).To(Succeed())
+	content, err := os.ReadFile(out)
+	g.Expect(err).ToNot(HaveOccurred())
+	g.Expect(string(content)).To(Equal("a,b\n1,\n,x\n"))
+}

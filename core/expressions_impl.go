@@ -72,6 +72,9 @@ func (ae binaryExpression) Evaluate(context EvaluationContext) Value {
 	left := ae.left.Evaluate(context)
 	right := ae.right.Evaluate(context)
 
+	if left.Type() == TypeNull || right.Type() == TypeNull {
+		return NewNullValue()
+	}
 	if !IsNumeric(left) || !IsNumeric(right) {
 		panic(errors.NewError(ae.loc, fmt.Sprintf("both operands must be numeric: %v and %v", left, right)))
 	}
@@ -134,11 +137,16 @@ func (c concatExpression) Evaluate(context EvaluationContext) Value {
 			panic(errors.NewError(c.loc, fmt.Sprintf("%v", err)))
 		}
 	}()
-	ls, err := EnsureString(c.left.Evaluate(context))
+	leftV := c.left.Evaluate(context)
+	rightV := c.right.Evaluate(context)
+	if leftV.Type() == TypeNull || rightV.Type() == TypeNull {
+		return NewNullValue()
+	}
+	ls, err := EnsureString(leftV)
 	if err != nil {
 		panic(errors.NewTypeMismatch(c.loc, c.left, "string", c))
 	}
-	rs, err := EnsureString(c.right.Evaluate(context))
+	rs, err := EnsureString(rightV)
 	if err != nil {
 		panic(errors.NewTypeMismatch(c.loc, c.right, "string", c))
 	}

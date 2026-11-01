@@ -85,6 +85,9 @@ type ComparisonCondition struct {
 func (cc ComparisonCondition) Evaluate(ctx EvaluationContext) Value {
 	lv := cc.left.Evaluate(ctx)
 	rv := cc.right.Evaluate(ctx)
+	if lv.Type() == TypeNull || rv.Type() == TypeNull {
+		return NewNullValue()
+	}
 	return NewBoolValue(cc.compareValues(lv, rv))
 }
 
@@ -101,7 +104,7 @@ func numericOperand(v Value) (Value, bool) {
 
 // compareValues applies the operator to two values. Numbers compare as numbers (as floats if either is a float),
 // strings compare lexically, and a string compared to a number is coerced if it parses as a number. Any comparison
-// with NULL is false. Operands that cannot be compared are never equal and never ordered.
+// with NULL is false (Evaluate turns it into NULL before getting here). Operands that cannot be compared are never equal and never ordered.
 func (cc ComparisonCondition) compareValues(lv Value, rv Value) bool {
 	if lv.Type() == TypeNull || rv.Type() == TypeNull {
 		return false

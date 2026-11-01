@@ -174,25 +174,23 @@ func expressionContainsAggregate(e Evaluator) bool {
 	return false
 }
 
+// groupRows splits the rows into groups. Groups are returned in the order of their first row.
 func groupRows(ds DataSource, by []GroupByColumn, projection []ProjectionColumn) [][]Row {
-	groupings := make(map[string][]Row)
+	groupIndex := make(map[string]int)
+	results := make([][]Row, 0)
 	for _, row := range ds.GetRows() {
-		vals := make([]Value, len(by))
-		for idx, groupColumn := range by {
-			vals[idx] = getByGroupColumn(row, groupColumn, projection)
-		}
 		var keyBuilder strings.Builder
-		for _, v := range vals {
-			keyBuilder.WriteString(valueKey(v))
+		for _, groupColumn := range by {
+			keyBuilder.WriteString(valueKey(getByGroupColumn(row, groupColumn, projection)))
 		}
 		key := keyBuilder.String()
-		groupings[key] = append(groupings[key], row)
-	}
-	results := make([][]Row, len(groupings))
-	index := 0
-	for _, vals := range groupings {
-		results[index] = vals
-		index++
+		idx, found := groupIndex[key]
+		if !found {
+			idx = len(results)
+			groupIndex[key] = idx
+			results = append(results, nil)
+		}
+		results[idx] = append(results[idx], row)
 	}
 	return results
 }

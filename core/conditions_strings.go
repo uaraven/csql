@@ -51,11 +51,16 @@ func NewMatchConditionL(left Evaluator, right Evaluator, l *errors.SourceLocatio
 }
 
 func (mc matchCondition) Evaluate(context EvaluationContext) Value {
-	expression, err := EnsureString(mc.right.Evaluate(context))
+	rightV := mc.right.Evaluate(context)
+	leftV := mc.left.Evaluate(context)
+	if rightV.Type() == TypeNull || leftV.Type() == TypeNull {
+		return NewNullValue()
+	}
+	expression, err := EnsureString(rightV)
 	if err != nil {
 		panic(errors.NewTypeMismatch(mc.loc, mc.right, "string", mc))
 	}
-	value, err := EnsureString(mc.left.Evaluate(context))
+	value, err := EnsureString(leftV)
 	if err != nil {
 		panic(errors.NewTypeMismatch(mc.loc, mc.left, "string", mc))
 	}
@@ -97,11 +102,16 @@ func NewLikeConditionL(left Evaluator, right Evaluator, location *errors.SourceL
 }
 
 func (lc likeCondition) Evaluate(context EvaluationContext) Value {
-	expression, err := EnsureString(lc.right.Evaluate(context))
+	rightV := lc.right.Evaluate(context)
+	leftV := lc.left.Evaluate(context)
+	if rightV.Type() == TypeNull || leftV.Type() == TypeNull {
+		return NewNullValue()
+	}
+	expression, err := EnsureString(rightV)
 	if err != nil {
 		panic(errors.NewTypeMismatch(lc.loc, lc.right, "string", lc))
 	}
-	value, err := EnsureString(lc.left.Evaluate(context))
+	value, err := EnsureString(leftV)
 	if err != nil {
 		panic(errors.NewTypeMismatch(lc.loc, lc.left, "string", lc))
 	}

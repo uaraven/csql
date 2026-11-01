@@ -56,7 +56,15 @@ func (sf sqlFunctionImpl) Location() *errors.SourceLocation {
 	return sf.loc
 }
 
+// Evaluate calls the function. Every function except COALESCE returns NULL if any of its arguments is NULL.
 func (sf sqlFunctionImpl) Evaluate(ctx EvaluationContext) Value {
+	if sf.name != "COALESCE" {
+		for _, arg := range sf.args {
+			if arg.Evaluate(ctx).Type() == TypeNull {
+				return NewNullValue()
+			}
+		}
+	}
 	return sf.implementor(ctx, sf)
 }
 

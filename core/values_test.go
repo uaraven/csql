@@ -66,7 +66,7 @@ func TestStringValue_AsFloatExp(t *testing.T) {
 func TestParseStringToValue_Strict(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	for _, s := range []string{"Nan", "NaN", "inf", "-inf", "Infinity", "007", "008", "0x1p3", "+5", ".5", "1.", "-", "",
+	for _, s := range []string{"Nan", "NaN", "inf", "-inf", "Infinity", "007", "008", "0x1p3", "+5", ".5", "1.", "-",
 		"123456789012345678901234567", "1e999"} {
 		g.Expect(ParseStringToValue(s).Type()).To(Equal(TypeString), s)
 		g.Expect(ParseStringToValue(s).Repr()).To(Equal(s), s)
@@ -78,4 +78,5 @@ func TestParseStringToValue_Strict(t *testing.T) {
 	g.Expect(ParseStringToValue("1e5").Value()).To(Equal(100000.0))
 	g.Expect(ParseStringToValue("2.5E-1").Value()).To(Equal(0.25))
 	g.Expect(ParseStringToValue("null").Type()).To(Equal(TypeNull))
+	g.Expect(ParseStringToValue("").Type()).To(Equal(TypeNull))
 }

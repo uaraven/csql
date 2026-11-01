@@ -430,9 +430,10 @@ func parseNumber(value string) (Value, bool) {
 	return nil, false
 }
 
-// ParseStringToValue parses a string and converts it into a value of appropriate type
+// ParseStringToValue parses a string and converts it into a value of appropriate type.
+// Empty strings and the configured null string are NULL.
 func ParseStringToValue(value string) Value {
-	if value == NullValueString {
+	if value == "" || value == NullValueString {
 		return NewNullValue()
 	}
 	if v, ok := parseNumber(value); ok {

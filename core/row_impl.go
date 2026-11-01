@@ -110,7 +110,8 @@ func (r rowImpl) Get(column string) funky.Option[Value] {
 }
 
 func (r rowImpl) Satisfies(cond Condition) bool {
-	return cond.Evaluate(r).AsBool().Value().(bool)
+	value, known := truth(cond.Evaluate(r))
+	return known && value
 }
 
 func (r rowImpl) Id() int {
