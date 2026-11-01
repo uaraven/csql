@@ -83,11 +83,6 @@ type ComparisonCondition struct {
 }
 
 func (cc ComparisonCondition) Evaluate(ctx EvaluationContext) Value {
-	defer func() {
-		if err := recover(); err != nil {
-			panic(errors.NewError(cc.loc, fmt.Sprintf("Incompatible operand types %v and %v in %s", cc.left, cc.right, cc)))
-		}
-	}()
 	lv := cc.left.Evaluate(ctx)
 	rv := cc.right.Evaluate(ctx)
 	return NewBoolValue(cc.compareValues(lv, rv))
@@ -129,7 +124,7 @@ func (cc ComparisonCondition) compareValues(lv Value, rv Value) bool {
 		case notEqual:
 			return !lv.Equals(rv)
 		}
-		panic(fmt.Errorf("unsupported type in expression %v", cc))
+		panic(errors.NewError(cc.loc, fmt.Sprintf("unsupported operator for boolean operands in %s", cc)))
 	}
 	return cc.operator == notEqual
 }

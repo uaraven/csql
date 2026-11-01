@@ -102,6 +102,9 @@ func (ae AstTransformer) TransformSelect(ast Select) core.DataSource {
 			having = ae.TransformExpression(ast.Having)
 		}
 		ds := core.NewAggregationDataSourceHaving(ds, projection, groupBy, having)
+		if ast.Projection.Distinct {
+			ds = core.NewDistinct(ds)
+		}
 		if ast.Limit != nil || len(orderBy) > 0 {
 			ds = core.NewOrderedDatasource(ds, orderBy, limit)
 		}

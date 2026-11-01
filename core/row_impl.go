@@ -130,11 +130,8 @@ func (r rowImpl) String() string {
 
 func (r rowImpl) Key() string {
 	var sb strings.Builder
-	for idx, v := range r.values {
-		if idx != 0 {
-			sb.WriteRune('-')
-		}
-		sb.WriteString(v.Evaluate(r).String())
+	for _, v := range r.values {
+		sb.WriteString(valueKey(v.Evaluate(r)))
 	}
 	return sb.String()
 }

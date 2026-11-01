@@ -81,20 +81,28 @@ func NewAggregationDataSourceHaving(
 		return NewProjectionDataSource(intermediate, projection, false)
 	} else {
 		rowGroups := groupRows(source, groupBy, expandedProjection)
+		if len(groupBy) == 0 && len(rowGroups) == 0 {
+			// aggregates without GROUP BY over no rows still produce a single row
+			rowGroups = [][]Row{{}}
+		}
 		newHeader := NewHeaderWithProjection(source, expandedProjection)
-		result = applyAggregates(rowGroups, expandedProjection, newHeader, aggregateFunctions, having)
+		result = applyAggregates(rowGroups, nullRow(source.Header()), expandedProjection, newHeader, aggregateFunctions, having)
 		return NewMemDataSource(source.GetName(), newHeader.ColumnsMetadata(), result)
 	}
 }
 
-func applyAggregates(groups [][]Row, projection []ProjectionColumn, headers DataSourceHeader, aggregates map[int]Evaluator, having Evaluator) []Row {
+func applyAggregates(groups [][]Row, emptyGroupRow Row, projection []ProjectionColumn, headers DataSourceHeader, aggregates map[int]Evaluator, having Evaluator) []Row {
 	result := make([]Row, 0)
 	rowId := 0
 	for _, row := range groups {
+		firstRow := emptyGroupRow
 		if len(row) > 0 {
+			firstRow = row[0]
+		}
+		{
 			aggregateCtx := NewAggregateContext(row)
 			if having == nil || having.Evaluate(aggregateCtx).Equals(ValueTrue) {
-				projectedRow := projectRow(projection, headers, row[0])
+				projectedRow := projectRow(projection, headers, firstRow)
 				values := projectedRow.Values()
 				for index, v := range aggregates {
 					value := v.Evaluate(aggregateCtx)
@@ -173,9 +181,11 @@ func groupRows(ds DataSource, by []GroupByColumn, projection []ProjectionColumn)
 		for idx, groupColumn := range by {
 			vals[idx] = getByGroupColumn(row, groupColumn, projection)
 		}
-		key := strings.Join(funky.Map(vals, func(v Value) string {
-			return v.String()
-		}), "-")
+		var keyBuilder strings.Builder
+		for _, v := range vals {
+			keyBuilder.WriteString(valueKey(v))
+		}
+		key := keyBuilder.String()
 		groupings[key] = append(groupings[key], row)
 	}
 	results := make([][]Row, len(groupings))

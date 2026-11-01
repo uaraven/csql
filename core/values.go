@@ -440,3 +440,21 @@ func ParseStringToValue(value string) Value {
 	}
 	return NewStringValue(value)
 }
+
+// valueKey returns a string that is equal for two values only if they have the same type and value.
+// Strings are length-prefixed, so keys of several values can be concatenated without collisions.
+func valueKey(v Value) string {
+	switch v.Type() {
+	case TypeString:
+		str := v.Value().(string)
+		return "s" + strconv.Itoa(len(str)) + ":" + str
+	case TypeInt:
+		return "i" + v.String() + ";"
+	case TypeFloat:
+		return "f" + v.String() + ";"
+	case TypeBoolean:
+		return "b" + v.String() + ";"
+	default:
+		return "n;"
+	}
+}

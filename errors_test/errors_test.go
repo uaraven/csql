@@ -45,7 +45,7 @@ func TestInvalidInList(t *testing.T) {
 		sql.ExecuteSql(`
 			SELECT * FROM "../test-data/employees.csv" 
 			         WHERE width between 1 and "3"`)
-	}).To(PanicWith(SourceLocation(errors.Loc(3, 18))))
+	}).To(PanicWith(SourceLocation(errors.Loc(3, 38))))
 }
 
 func TestInvalidTypeMatch(t *testing.T) {
@@ -75,7 +75,7 @@ func TestInvalidTypeConcat(t *testing.T) {
 		sql.ExecuteSql(`
 			SELECT * FROM "../test-data/employees.csv" 
 			         WHERE last_name = '12' || width`)
-	}).To(PanicWith(SourceLocation(errors.Loc(3, 18))))
+	}).To(PanicWith(SourceLocation(errors.Loc(3, 30))))
 }
 
 type WithLocationMatcher struct {

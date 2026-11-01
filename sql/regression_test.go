@@ -24,6 +24,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/uaraven/csql/core"
+
 	. "github.com/onsi/gomega"
 )
 
@@ -90,4 +92,66 @@ func TestFloatPrecision(t *testing.T) {
 	g.Expect(rows[2].GetByIndex(1).String()).To(Equal("1.5"))
 	g.Expect(ExecuteSql(`select distinct a from "` + a + `"`).GetRows()).To(HaveLen(3))
 	g.Expect(ExecuteSql(`select count(distinct a) from "` + a + `"`).GetRows()[0].GetByIndex(1).Value()).To(Equal(int64(3)))
+}
+
+func firstValue(ds interface{ GetRows() []core.Row }) interface{} {
+	return ds.GetRows()[0].GetByIndex(1).Value()
+}
+
+func TestComparisonDoesNotHideErrors(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "id\n1\n")
+
+	g.Expect(func() { ExecuteSql(`select id from "` + a + `" where nope = 1`) }).
+		To(PanicWith(MatchError(ContainSubstring("unknown column"))))
+	g.Expect(func() { ExecuteSql(`select id from "` + a + `" where id = 1/0`) }).
+		ToNot(PanicWith(MatchError(ContainSubstring("Incompatible operand types"))))
+}
+
+func TestKeysDoNotCollide(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "a,b\n\"x-'y\",z\nx,\"y'-'z\"\n1,2\n\"1-2\",\n")
+
+	g.Expect(ExecuteSql(`select distinct a, b from "` + a + `"`).GetRows()).To(HaveLen(4))
+	g.Expect(ExecuteSql(`select a, b, count(*) from "` + a + `" group by a, b`).GetRows()).To(HaveLen(4))
+}
+
+func TestAggregatesSkipNulls(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "g,v,s\nx,1,b\nx,,a\nx,null,c\nx,3,\n")
+	q := func(expr string) interface{} {
+		return firstValue(ExecuteSql(`select ` + expr + ` from "` + a + `"`))
+	}
+
+	g.Expect(q("count(v)")).To(Equal(int64(2)))
+	g.Expect(q("count(*)")).To(Equal(int64(4)))
+	g.Expect(q("sum(v)")).To(Equal(int64(4)))
+	g.Expect(q("avg(v)")).To(Equal(2.0))
+	g.Expect(q("min(v)")).To(Equal(int64(1)))
+	g.Expect(q("max(v)")).To(Equal(int64(3)))
+	g.Expect(q("min(s)")).To(Equal("a"))
+	g.Expect(q("max(s)")).To(Equal("c"))
+}
+
+func TestAggregatesOverNoRows(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "id,v\n1,5\n")
+
+	rows := ExecuteSql(`select count(*), sum(v), min(v), avg(v) from "` + a + `" where id = 99`).GetRows()
+	g.Expect(rows).To(HaveLen(1))
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(int64(0)))
+	g.Expect(rows[0].GetByIndex(2).Type()).To(Equal(core.TypeNull))
+	g.Expect(rows[0].GetByIndex(3).Type()).To(Equal(core.TypeNull))
+	g.Expect(rows[0].GetByIndex(4).Type()).To(Equal(core.TypeNull))
+
+	// GROUP BY over no rows has no groups
+	g.Expect(ExecuteSql(`select id, count(*) from "` + a + `" where id = 99 group by id`).GetRows()).To(BeEmpty())
+}
+
+func TestDistinctWithGroupBy(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "g,v\nx,1\ny,1\nz,2\n")
+
+	rows := ExecuteSql(`select distinct count(*) from "` + a + `" group by g`).GetRows()
+	g.Expect(rows).To(HaveLen(1))
 }

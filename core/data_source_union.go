@@ -39,6 +39,11 @@ func NewUnionAll(ds1, ds2 DataSource) DataSource {
 	return combineRows([]DataSource{ds1, ds2})
 }
 
+// NewDistinct removes duplicate rows from the datasource
+func NewDistinct(ds DataSource) DataSource {
+	return NewMemDataSource(ds.GetName(), ds.Header().ColumnsMetadata(), performDistinct(ds))
+}
+
 func performDistinct(ds DataSource) []Row {
 	keySet := mapset.NewThreadUnsafeSet[string]()
 	result := make([]Row, 0)

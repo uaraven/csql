@@ -21,7 +21,6 @@ package core
 
 import (
 	"fmt"
-	"math"
 	"strings"
 
 	"github.com/uaraven/csql/errors"
@@ -110,27 +109,82 @@ type countFunction struct {
 	implementor AggregateFunctionImplementor
 }
 
+// isMissing reports whether an aggregate function has to skip the value: NULL or an empty CSV cell
+func isMissing(v Value) bool {
+	return v.Type() == TypeNull || (v.Type() == TypeString && v.Value().(string) == "")
+}
+
+// sumNumeric adds up all numeric values of arg, skipping missing ones, and returns the sum with the number of values added
+func sumNumeric(name string, arg Evaluator, rows []Row, loc *errors.SourceLocation) (Value, int) {
+	sum := NewIntValue(0)
+	count := 0
+	for _, row := range rows {
+		value := arg.Evaluate(row)
+		if isMissing(value) {
+			continue
+		}
+		if !IsNumeric(value) {
+			panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for %s: %v in row %s", name, value, row)))
+		}
+		if sum.Type() == TypeFloat || value.Type() == TypeFloat {
+			a := sum.AsFloat().Value().(float64)
+			b := value.AsFloat().Value().(float64)
+			sum = util.Must(wrapInFloat(operationExecutor(addition, a, b)))
+		} else {
+			a := sum.AsInt().Value().(int64)
+			b := value.AsInt().Value().(int64)
+			sum = util.Must(wrapInInt(operationExecutor(addition, a, b)))
+		}
+		count++
+	}
+	return sum, count
+}
+
+// extremum finds the smallest or the largest value of arg, skipping missing ones. Numbers and strings can be
+// compared, but not with each other. The result is NULL if there are no values.
+func extremum(name string, arg Evaluator, rows []Row, loc *errors.SourceLocation, wantMax bool) Value {
+	var best Value
+	for _, row := range rows {
+		value := arg.Evaluate(row)
+		if isMissing(value) {
+			continue
+		}
+		if best == nil {
+			best = value
+			continue
+		}
+		var cmp int
+		switch {
+		case IsNumeric(best) && IsNumeric(value):
+			if best.Type() == TypeInt && value.Type() == TypeInt {
+				cmp = compare(value.Value().(int64), best.Value().(int64))
+			} else {
+				cmp = compare(value.AsFloat().Value().(float64), best.AsFloat().Value().(float64))
+			}
+		case best.Type() == TypeString && value.Type() == TypeString:
+			cmp = compare(value.Value().(string), best.Value().(string))
+		default:
+			panic(errors.NewError(loc, fmt.Sprintf("cannot compare %v and %v in %s", best, value, name)))
+		}
+		if (wantMax && cmp > 0) || (!wantMax && cmp < 0) {
+			best = value
+		}
+	}
+	if best == nil {
+		return NewNullValue()
+	}
+	return best
+}
+
 func NewSumFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
 	return &aggFunctionImpl{
 		arg:  arg,
 		name: "SUM",
 		loc:  loc,
 		implementor: func(rows []Row, function AggregateFunction) Value {
-			sum := NewIntValue(0)
-			for _, row := range rows {
-				value := arg.Evaluate(row)
-				if !IsNumeric(value) {
-					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for sum: %v in row %s", value, row)))
-				}
-				if sum.Type() == TypeFloat || value.Type() == TypeFloat {
-					a := sum.AsFloat().Value().(float64)
-					b := value.AsFloat().Value().(float64)
-					sum = util.Must(wrapInFloat(operationExecutor(addition, a, b)))
-				} else {
-					a := sum.AsInt().Value().(int64)
-					b := value.AsInt().Value().(int64)
-					sum = util.Must(wrapInInt(operationExecutor(addition, a, b)))
-				}
+			sum, count := sumNumeric("sum", arg, rows, loc)
+			if count == 0 {
+				return NewNullValue()
 			}
 			return sum
 		},
@@ -143,30 +197,11 @@ func NewAvgFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 		name: "AVG",
 		loc:  loc,
 		implementor: func(rows []Row, function AggregateFunction) Value {
-			sum := NewIntValue(0)
-			for _, row := range rows {
-				value := arg.Evaluate(row)
-				if !IsNumeric(value) {
-					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value for avg: %v in row %s", value, row)))
-				}
-				if sum.Type() == TypeFloat || value.Type() == TypeFloat {
-					a := sum.AsFloat().Value().(float64)
-					b := value.AsFloat().Value().(float64)
-					sum = util.Must(wrapInFloat(operationExecutor(addition, a, b)))
-				} else {
-					a := sum.AsInt().Value().(int64)
-					b := value.AsInt().Value().(int64)
-					sum = util.Must(wrapInInt(operationExecutor(addition, a, b)))
-				}
+			sum, count := sumNumeric("avg", arg, rows, loc)
+			if count == 0 {
+				return NewNullValue()
 			}
-			switch sum.Type() {
-			case TypeInt:
-				return NewFloatValue(float64(sum.Value().(int64)) / float64(len(rows)))
-			case TypeFloat:
-				return NewFloatValue(sum.Value().(float64) / float64(len(rows)))
-			default:
-				panic(fmt.Errorf("unexpected type in AVG"))
-			}
+			return NewFloatValue(sum.AsFloat().Value().(float64) / float64(count))
 		},
 	}
 }
@@ -177,27 +212,7 @@ func NewMinFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 		name: "MIN",
 		loc:  loc,
 		implementor: func(rows []Row, function AggregateFunction) Value {
-			minV := arg.Evaluate(rows[0])
-			for _, row := range rows {
-				value := arg.Evaluate(row)
-				if !IsNumeric(value) {
-					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value encountered for MIN function: %v in row %s", value, row)))
-				}
-				if minV.Type() == TypeFloat || value.Type() == TypeFloat {
-					a := minV.AsFloat().Value().(float64)
-					b := value.AsFloat().Value().(float64)
-					minV = NewFloatValue(math.Min(a, b))
-				} else {
-					a := minV.AsInt().Value().(int64)
-					b := value.AsInt().Value().(int64)
-					if a < b {
-						minV = NewIntValue(a)
-					} else {
-						minV = NewIntValue(b)
-					}
-				}
-			}
-			return minV
+			return extremum("MIN", arg, rows, loc, false)
 		},
 	}
 }
@@ -208,31 +223,12 @@ func NewMaxFunction(arg Evaluator, loc *errors.SourceLocation) AggregateFunction
 		name: "MAX",
 		loc:  loc,
 		implementor: func(rows []Row, function AggregateFunction) Value {
-			maxV := arg.Evaluate(rows[0])
-			for _, row := range rows[1:] {
-				value := arg.Evaluate(row)
-				if !IsNumeric(value) {
-					panic(errors.NewError(loc, fmt.Sprintf("non-numeric value encountered in MAX function: %v in row %s", value, row.String())))
-				}
-				if maxV.Type() == TypeFloat || value.Type() == TypeFloat {
-					a := maxV.AsFloat().Value().(float64)
-					b := value.AsFloat().Value().(float64)
-					maxV = NewFloatValue(math.Max(a, b))
-				} else {
-					a := maxV.AsInt().Value().(int64)
-					b := value.AsInt().Value().(int64)
-					if a > b {
-						maxV = NewIntValue(a)
-					} else {
-						maxV = NewIntValue(b)
-					}
-				}
-			}
-			return maxV
+			return extremum("MAX", arg, rows, loc, true)
 		},
 	}
 }
 
+// NewCountFunction creates COUNT. COUNT(*) counts all rows, COUNT(column) skips NULLs and empty cells
 func NewCountFunction(distinct bool, arg Evaluator, loc *errors.SourceLocation) AggregateFunction {
 	return &countFunction{
 		arg:      arg,
@@ -240,23 +236,29 @@ func NewCountFunction(distinct bool, arg Evaluator, loc *errors.SourceLocation) 
 		distinct: distinct,
 		implementor: func(rows []Row, function AggregateFunction) Value {
 			countAll := isCountAll(arg)
-			duplicates := make(map[string]bool)
+			if countAll && !distinct {
+				return NewIntValue(int64(len(rows)))
+			}
+			seen := make(map[string]bool)
 			counter := 0
 			for _, row := range rows {
-				var value Value
+				var key string
 				if countAll {
-					value = NewStringValue(row.Key())
+					key = row.Key()
 				} else {
-					value = arg.Evaluate(row)
+					value := arg.Evaluate(row)
+					if isMissing(value) {
+						continue
+					}
+					key = valueKey(value)
 				}
 				if distinct {
-					if !duplicates[value.String()] {
-						counter += 1
-						duplicates[value.String()] = true
+					if seen[key] {
+						continue
 					}
-				} else {
-					counter += 1
+					seen[key] = true
 				}
+				counter++
 			}
 			return NewIntValue(int64(counter))
 		},
