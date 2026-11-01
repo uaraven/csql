@@ -30,6 +30,7 @@ func InspectCsv(csvFile string) ([]CsvColumn, error) {
 	defer func() { _ = file.Close() }()
 	csvReader := csv.NewReader(bufio.NewReader(file))
 	csvReader.TrimLeadingSpace = true
+	csvReader.Comma = core.CSVSeparator
 	headers, err := csvReader.Read()
 	if err != nil {
 		return nil, fmt.Errorf("error reading from file: %s\n%v", csvFile, err)

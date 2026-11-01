@@ -39,3 +39,16 @@ func TestMust(t *testing.T) {
 
 	g.Expect(func() { Must(15, fmt.Errorf("error")) }).To(PanicWith(fmt.Errorf("error")))
 }
+
+func TestUnquote(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	g.Expect(Unquote(`"x"`)).To(Equal("x"))
+	g.Expect(Unquote(`'x'`)).To(Equal("x"))
+	g.Expect(Unquote(`""`)).To(Equal(""))
+	g.Expect(Unquote(`"a b"`)).To(Equal("a b"))
+	g.Expect(Unquote(`x`)).To(Equal("x"))
+	g.Expect(Unquote(`"x'`)).To(Equal(`"x'`))
+	g.Expect(Unquote(`"`)).To(Equal(`"`))
+	g.Expect(Unquote("")).To(Equal(""))
+}

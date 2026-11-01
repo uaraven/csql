@@ -29,6 +29,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/uaraven/csql/util"
 )
@@ -36,16 +37,21 @@ import (
 var CSVSeparator = ','
 var IgnoreMalformedCsvRows = false
 
+// SetCsvSeparator sets the CSV separator used for reading and writing files. The separator can be quoted and can
+// contain Go escape sequences, like \t. It must be a single character that is not a quote or a line break.
 func SetCsvSeparator(separator string) error {
 	sep := util.Unquote(separator)
-	sep, err := strconv.Unquote("\"" + sep + "\"")
-	if err != nil {
-		return err
+	if unescaped, err := strconv.Unquote("\"" + sep + "\""); err == nil {
+		sep = unescaped
 	}
-	if len(sep) > 1 {
-		return fmt.Errorf("separator cannot consist of multiple characters")
+	if utf8.RuneCountInString(sep) != 1 {
+		return fmt.Errorf("separator must be a single character, got %q", separator)
 	}
-	CSVSeparator = rune(sep[0])
+	r, _ := utf8.DecodeRuneInString(sep)
+	if r == 0 || r == '"' || r == '\r' || r == '\n' || r == utf8.RuneError {
+		return fmt.Errorf("invalid separator %q: it cannot be a quote, a line break or an invalid character", separator)
+	}
+	CSVSeparator = r
 	return nil
 }
 

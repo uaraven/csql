@@ -36,6 +36,7 @@ func WriteDataSourceToFile(ds DataSource, outputFile string) error {
 	}
 	defer func() { _ = file.Close() }()
 	csvWriter := csv.NewWriter(file)
+	csvWriter.Comma = CSVSeparator
 	err = csvWriter.Write(funky.Map(ds.Header().ColumnsMetadata(), func(c ColumnMetadata) string {
 		return c.Name()
 	}))
