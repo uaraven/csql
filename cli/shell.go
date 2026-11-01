@@ -28,6 +28,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -70,10 +71,11 @@ func NewCsqlShell(version string) *CsqlShell {
 	return csql
 }
 
+// TerminalSize returns the size of the terminal, or -1, -1 if the output is not a terminal
 func (s *CsqlShell) TerminalSize() (int, int) {
 	w, h, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
-		panic(err)
+		return -1, -1
 	}
 	return w, h
 }
@@ -86,22 +88,36 @@ func (s *CsqlShell) PrintError(text string) {
 	fmt.Println(s.C.Fg(ansie.Red).A(text).Reset().String())
 }
 
+// historyFileName returns the path of the history file. It is empty if the home directory is not known
 func (s *CsqlShell) historyFileName() string {
-	home := os.Getenv("HOME")
-	return home + "/.csql_history"
+	home, err := os.UserHomeDir()
+	if err != nil || home == "" {
+		return ""
+	}
+	return filepath.Join(home, ".csql_history")
 }
 
 func (s *CsqlShell) loadHistory() {
-	if f, err := os.Open(s.historyFileName()); err == nil {
+	name := s.historyFileName()
+	if name == "" {
+		return
+	}
+	if f, err := os.Open(name); err == nil {
 		_, _ = s.line.ReadHistory(f)
 		_ = f.Close()
 	}
 }
 
 func (s *CsqlShell) saveHistory() {
-	if f, err := os.Create(s.historyFileName()); err != nil {
+	name := s.historyFileName()
+	if name == "" {
+		return
+	}
+	// history contains queries, keep it private
+	if f, err := os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600); err != nil {
 		log.Print("Error writing history file: ", err)
 	} else {
+		_ = f.Chmod(0600)
 		_, _ = s.line.WriteHistory(f)
 		_ = f.Close()
 	}

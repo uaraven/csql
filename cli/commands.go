@@ -22,6 +22,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -86,6 +87,7 @@ func PwdCmd() *Command {
 			path, err := os.Getwd()
 			if err != nil {
 				s.PrintError(fmt.Sprint(err))
+				return
 			}
 			s.PrintMessage(path)
 		},
@@ -98,7 +100,8 @@ func CdCmd() *Command {
 		Help: "Change current directory",
 		Func: func(s *CsqlShell, args []string) {
 			if len(args) != 1 {
-				s.PrintError(".cd accepts only one parameter - directory name")
+				s.PrintError("cd accepts only one parameter - directory name")
+				return
 			}
 			err := os.Chdir(args[0])
 			if err != nil {
@@ -116,6 +119,7 @@ func LsCmd() *Command {
 			files, err := os.ReadDir(".")
 			if err != nil {
 				s.PrintError(fmt.Sprint(err))
+				return
 			}
 			for _, file := range files {
 				if strings.HasPrefix(file.Name(), ".") {
@@ -164,6 +168,14 @@ func CsvCommand() *Command {
 					s.PrintMessage("csv --ignore-malformed-rows=true|false, i.e. csv --ignore-malformed-rows=true to skip rows that don't match the header")
 					return
 				}
+				var ignoreMalformed bool
+				if opts.IgnoreMalformed != nil {
+					ignoreMalformed, err = strconv.ParseBool(*opts.IgnoreMalformed)
+					if err != nil {
+						s.PrintError(fmt.Sprintf("Invalid value for --ignore-malformed-rows: %q, expected true or false", *opts.IgnoreMalformed))
+						return
+					}
+				}
 				if opts.Null != nil {
 					core.NullValueString = util.Unquote(*opts.Null)
 
@@ -175,7 +187,7 @@ func CsvCommand() *Command {
 					}
 				}
 				if opts.IgnoreMalformed != nil {
-					core.IgnoreMalformedCsvRows = strings.ToLower(*opts.IgnoreMalformed) == "true"
+					core.IgnoreMalformedCsvRows = ignoreMalformed
 				}
 
 				status()

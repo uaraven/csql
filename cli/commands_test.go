@@ -20,8 +20,13 @@
 package cli
 
 import (
-	. "github.com/onsi/gomega"
+	"os"
+	"path/filepath"
 	"testing"
+
+	. "github.com/onsi/gomega"
+	"github.com/uaraven/ansie"
+	"github.com/uaraven/csql/core"
 )
 
 func TestRuneIndex(t *testing.T) {
@@ -67,4 +72,63 @@ func TestShellIsTerminalLine(t *testing.T) {
 	g.Expect(shell.isTerminalLine("select 1")).To(BeFalse())
 	g.Expect(shell.isTerminalLine("select ';'")).To(BeFalse())
 	g.Expect(shell.isTerminalLine("")).To(BeFalse())
+}
+
+func testShell() *CsqlShell {
+	return &CsqlShell{C: ansie.NewAnsiFor(os.Stdout)}
+}
+
+func TestCdCommandChecksArguments(t *testing.T) {
+	g := NewGomegaWithT(t)
+	dir, err := os.Getwd()
+	g.Expect(err).ToNot(HaveOccurred())
+	t.Cleanup(func() { _ = os.Chdir(dir) })
+	target := t.TempDir()
+
+	g.Expect(func() { CdCmd().Func(testShell(), nil) }).ToNot(Panic())
+	g.Expect(func() { CdCmd().Func(testShell(), []string{target, "extra"}) }).ToNot(Panic())
+	now, _ := os.Getwd()
+	g.Expect(now).To(Equal(dir), "cd with a wrong number of arguments must not change the directory")
+
+	CdCmd().Func(testShell(), []string{target})
+	now, _ = os.Getwd()
+	resolvedTarget, _ := filepath.EvalSymlinks(target)
+	resolvedNow, _ := filepath.EvalSymlinks(now)
+	g.Expect(resolvedNow).To(Equal(resolvedTarget))
+}
+
+func TestClearCommandWithoutTerminal(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	// tests do not run in a terminal
+	g.Expect(func() { ClearCmd().Func(testShell(), nil) }).ToNot(Panic())
+}
+
+func TestHistoryFileName(t *testing.T) {
+	g := NewGomegaWithT(t)
+	shell := testShell()
+
+	t.Setenv("HOME", "/home/someone")
+	g.Expect(shell.historyFileName()).To(Equal("/home/someone/.csql_history"))
+
+	t.Setenv("HOME", "")
+	g.Expect(shell.historyFileName()).To(BeEmpty())
+	g.Expect(func() { shell.loadHistory() }).ToNot(Panic())
+	g.Expect(func() { shell.saveHistory() }).ToNot(Panic())
+}
+
+func TestCsvCommandValidatesIgnoreMalformedRows(t *testing.T) {
+	g := NewGomegaWithT(t)
+	saved := core.IgnoreMalformedCsvRows
+	t.Cleanup(func() { core.IgnoreMalformedCsvRows = saved })
+	core.IgnoreMalformedCsvRows = true
+
+	CsvCommand().Func(testShell(), []string{"--ignore-malformed-rows=maybe"})
+	g.Expect(core.IgnoreMalformedCsvRows).To(BeTrue(), "an invalid value must not change the setting")
+
+	CsvCommand().Func(testShell(), []string{"--ignore-malformed-rows=false"})
+	g.Expect(core.IgnoreMalformedCsvRows).To(BeFalse())
+
+	CsvCommand().Func(testShell(), []string{"--ignore-malformed-rows=TRUE"})
+	g.Expect(core.IgnoreMalformedCsvRows).To(BeTrue())
 }
