@@ -221,12 +221,18 @@ func (ds DataSource) String() string {
 	return ds.Join.String()
 }
 
+// UnionTerm is a select that is combined with the preceding selects using UNION or UNION ALL
+type UnionTerm struct {
+	Select Select
+	All    bool
+}
+
+// UnionSource is a chain of selects. Unions are applied left to right
 type UnionSource struct {
-	Select   *Select
-	Union    *UnionSource
-	unionAll bool
-	DropTmp  *DropTempTable
-	Into     *IntoClause
+	Select  *Select
+	Unions  []UnionTerm
+	DropTmp *DropTempTable
+	Into    *IntoClause
 }
 
 // JoinType is just that

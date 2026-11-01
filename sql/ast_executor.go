@@ -51,10 +51,10 @@ func (ae AstTransformer) TransformUnion(u UnionSource) core.DataSource {
 	}
 
 	dsResult = ae.TransformSelect(*u.Select)
-	if u.Union != nil {
-		ds2 := ae.TransformUnion(*u.Union)
+	for _, term := range u.Unions {
+		ds2 := ae.TransformSelect(term.Select)
 
-		if u.unionAll {
+		if term.All {
 			dsResult = core.NewUnionAll(dsResult, ds2)
 		} else {
 			dsResult = core.NewUnion(dsResult, ds2)

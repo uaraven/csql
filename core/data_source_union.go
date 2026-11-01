@@ -23,7 +23,6 @@ import (
 	"fmt"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/uaraven/csql/funky"
-	"reflect"
 	"strings"
 )
 
@@ -68,6 +67,7 @@ func combineRows(datasources []DataSource) DataSource {
 		rows := ReadAllRows(ds)
 		for _, row := range rows {
 			result = append(result, newRowWithId(counter, ds.Header(), row.Values()))
+			counter++
 		}
 	}
 	names := funky.Map(datasources, func(ds DataSource) string {
@@ -79,12 +79,12 @@ func combineRows(datasources []DataSource) DataSource {
 }
 
 func ensureSameProjection(first DataSource, other DataSource) {
+	// like in standard SQL only the number of columns has to match, result takes the names from the first select
 	projectionFirst := getProjection(first.Header().ColumnsMetadata())
 	projectionOther := getProjection(other.Header().ColumnsMetadata())
-	if !reflect.DeepEqual(projectionFirst, projectionOther) {
+	if len(projectionFirst) != len(projectionOther) {
 		panic(fmt.Errorf("different columns in UNION: %v", projectionOther))
 	}
-
 }
 
 func getProjection(columns []ColumnMetadata) []string {

@@ -21,6 +21,7 @@ package sql
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -118,11 +119,11 @@ func parseIdentifier(identifier string) Identifier {
 func parseUnsignedIntValue(token antlr.Token, text string) interface{} {
 	limitValue, err := strconv.ParseInt(text, 10, 32)
 	if err != nil {
-		panic(ParsingError{
-			line:    token.GetLine(),
-			column:  token.GetColumn(),
-			message: fmt.Sprintf("Unexpected: %v, expected unsigned integer", text),
-		})
+		if numErr, ok := err.(*strconv.NumError); ok && numErr.Err == strconv.ErrRange {
+			return int32(math.MaxInt32)
+		}
+		panic(NewError(Loc(token.GetLine(), token.GetColumn()),
+			fmt.Sprintf("Unexpected: %v, expected unsigned integer", text)))
 	}
 	return int32(limitValue)
 }
@@ -197,13 +198,22 @@ func (c CsqlVisitorImpl) VisitIntoClause(ctx *parser.IntoClauseContext) interfac
 }
 
 func (c CsqlVisitorImpl) VisitUnionSelects(ctx *parser.UnionSelectsContext) interface{} {
-	selectStmt := ctx.SelectStatement().Accept(c).(Select)
-	astUnion := UnionSource{
-		Select:   &selectStmt,
-		unionAll: ctx.K_ALL(0) != nil,
-	}
-	if len(ctx.AllUnionSelects()) > 0 {
-		astUnion.Union = ctx.UnionSelects(0).Accept(c).(*UnionSource)
+	selectStmt := ctx.SelectStatement(0).Accept(c).(Select)
+	astUnion := UnionSource{Select: &selectStmt}
+	// K_UNION and K_ALL tokens are in source order; ALL belongs to the UNION that precedes it
+	unions := ctx.AllK_UNION()
+	alls := ctx.AllK_ALL()
+	for i := range unions {
+		next := ctx.SelectStatement(i + 1).Accept(c).(Select)
+		all := false
+		for _, a := range alls {
+			after := a.GetSymbol().GetTokenIndex() > unions[i].GetSymbol().GetTokenIndex()
+			before := i+1 >= len(unions) || a.GetSymbol().GetTokenIndex() < unions[i+1].GetSymbol().GetTokenIndex()
+			if after && before {
+				all = true
+			}
+		}
+		astUnion.Unions = append(astUnion.Unions, UnionTerm{Select: next, All: all})
 	}
 	return &astUnion
 }
@@ -529,27 +539,18 @@ func (c CsqlVisitorImpl) VisitSources(ctx *parser.SourcesContext) interface{} {
 		return dataSources[0]
 	}
 	// all datasouces in the list are implicit cross join, we need to convert it to such
-	topSource := DataSource{
-		Join: &JoinedSource{
-			Type:   CrossJoin,
-			Source: dataSources[0],
-		},
-	}
-	parent := topSource
-	for i, src := range dataSources[1:] {
-		if i == len(dataSources)-2 {
-			parent.Join.Target.TableName = src.TableName
-		} else {
-			parent.Join.Target = DataSource{
-				Join: &JoinedSource{
-					Type:   CrossJoin,
-					Source: src,
-				},
-			}
+	// build right-nested chain: a CROSS (b CROSS (c ...)), the last source is kept as is
+	result := dataSources[len(dataSources)-1]
+	for i := len(dataSources) - 2; i >= 0; i-- {
+		result = DataSource{
+			Join: &JoinedSource{
+				Type:   CrossJoin,
+				Source: dataSources[i],
+				Target: result,
+			},
 		}
-		parent = parent.Join.Target
 	}
-	return topSource
+	return result
 }
 
 // VisitSignedNumber visits a parse tree produced by CsqlParser#signedNumber.

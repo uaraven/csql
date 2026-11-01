@@ -104,9 +104,15 @@ dataSource:
 sources: dataSource (',' dataSource)*;
 
 unionSelects:
-    selectStatement (K_UNION K_ALL? unionSelects)*;
+    selectStatement (K_UNION K_ALL? selectStatement)*;
 
-selectStatement: K_SELECT projection K_FROM sources where? orderBy? limit? groupBy? having?;
+// Standard clause order is GROUP BY, HAVING, ORDER BY, LIMIT. The legacy order (ORDER BY, LIMIT, GROUP BY, HAVING)
+// is still accepted for backwards compatibility.
+selectStatement: K_SELECT projection K_FROM sources where?
+    ( groupBy? having? orderBy? limit?
+    | orderBy limit? groupBy? having?
+    | limit groupBy? having?
+    );
 
 signedNumber: ( '+' | '-')? NUMERIC_LITERAL;
 

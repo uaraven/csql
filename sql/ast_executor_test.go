@@ -462,7 +462,7 @@ func TestAstTransformer_UnionDifferentProjections(t *testing.T) {
 		ExecuteSql(`
 		select first_name, last_name from "../test-data/employees.csv" 
 		union 
-		select first_name, first_name from "../test-data/people.csv"`)
+		select first_name, last_name, first_name from "../test-data/people.csv"`)
 	}).To(Panic())
 }
 

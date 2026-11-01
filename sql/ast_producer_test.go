@@ -31,7 +31,7 @@ func TestSimpleQuery(t *testing.T) {
 	us := ParseSQL("SELECT col FROM TTable")
 
 	g.Expect(us.Select).ToNot(BeNil())
-	g.Expect(us.Union).To(BeNil())
+	g.Expect(us.Unions).To(BeEmpty())
 
 	g.Expect(us.DropTmp).To(BeNil())
 
@@ -673,7 +673,7 @@ func TestDropTempTable(t *testing.T) {
 	us := ParseSQL("DROP TEMP TABLE TTable")
 
 	g.Expect(us.Select).To(BeNil())
-	g.Expect(us.Union).To(BeNil())
+	g.Expect(us.Unions).To(BeEmpty())
 
 	g.Expect(us.DropTmp).ToNot(BeNil())
 	g.Expect(us.DropTmp.Name).To(Equal(Identifier("TTable")))

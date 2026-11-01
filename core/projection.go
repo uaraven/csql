@@ -58,6 +58,19 @@ func ExpandProjection(projection ProjectionColumns, headers DataSourceHeader) Pr
 	return result
 }
 
+// indexByNameAt resolves the column name and reports resolution errors (e.g. ambiguous name) at the given location
+func indexByNameAt(header DataSourceHeader, name string, loc *errors.SourceLocation) int {
+	defer func() {
+		if err := recover(); err != nil {
+			if csqlErr, ok := err.(*errors.CsqlError); ok && csqlErr.Location == nil && loc != nil {
+				panic(errors.NewError(loc, csqlErr.Message))
+			}
+			panic(err)
+		}
+	}()
+	return header.IndexByName(name)
+}
+
 func NewHeaderWithProjection(src DataSource, projection []ProjectionColumn) DataSourceHeader {
 	columns := make([]ColumnMetadata, len(projection))
 	for idx, prjColumn := range projection {
@@ -65,7 +78,7 @@ func NewHeaderWithProjection(src DataSource, projection []ProjectionColumn) Data
 		if rowId, ok := prjColumn.source.(Identifiable); ok {
 			// projection column references datasource column
 			sourceColumn := rowId.Identifier()
-			columnIdx := src.Header().IndexByName(sourceColumn)
+			columnIdx := indexByNameAt(src.Header(), sourceColumn, prjColumn.loc)
 			if columnIdx == InvalidFieldIndex {
 				panic(errors.UnknownColumnError(prjColumn.loc, sourceColumn))
 			}

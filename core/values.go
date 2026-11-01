@@ -22,6 +22,7 @@ package core
 import (
 	"fmt"
 	"github.com/uaraven/csql/errors"
+	"github.com/uaraven/csql/funky"
 	"math"
 	"regexp"
 	"strconv"
@@ -363,12 +364,25 @@ func NewRowValueL(identifier string, loc *errors.SourceLocation) Evaluator {
 }
 
 func (rv rowValue) Evaluate(ctx EvaluationContext) Value {
-	val := ctx.Get(rv.identifier)
+	val := rv.lookup(ctx)
 	if val.IsPresent() {
 		return val.Value()
 	} else {
 		panic(errors.NewError(rv.location, fmt.Sprintf("unknown column %s", rv.identifier)))
 	}
+}
+
+// lookup finds the column in the context and attaches source location to errors that do not have one
+func (rv rowValue) lookup(ctx EvaluationContext) funky.Option[Value] {
+	defer func() {
+		if err := recover(); err != nil {
+			if csqlErr, ok := err.(*errors.CsqlError); ok && csqlErr.Location == nil && rv.location != nil {
+				panic(errors.NewError(rv.location, csqlErr.Message))
+			}
+			panic(err)
+		}
+	}()
+	return ctx.Get(rv.identifier)
 }
 
 func (rv rowValue) Identifier() string {

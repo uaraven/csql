@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/uaraven/csql/errors"
 	"github.com/uaraven/csql/util"
 )
 
@@ -48,6 +49,10 @@ func (cm columnMetadata) Index() int {
 }
 
 func (cm columnMetadata) MatchesName(name string) bool {
+	if util.EqualsIgnoreCase(name, cm.name) {
+		// column names may contain dots
+		return true
+	}
 	table, column := qualified(name)
 	if table != "" && !util.EqualsIgnoreCase(table, cm.parentName) {
 		return false
@@ -81,7 +86,7 @@ func (d dataSourceHeader) IndexByName(s string) int {
 	for idx, column := range d.columns {
 		if column.MatchesName(s) {
 			if index != InvalidFieldIndex {
-				panic(fmt.Errorf("ambiguous column name: %s", s))
+				panic(errors.NewError(nil, fmt.Sprintf("ambiguous column name: %s", s)))
 			}
 			index = idx
 		}
@@ -112,10 +117,9 @@ func NewHeadersFromOtherHeaders(headers ...[]ColumnMetadata) DataSourceHeader {
 }
 
 func qualified(name string) (string, string) {
-	p := strings.Split(name, ".")
-	if len(p) == 1 {
+	table, column, found := strings.Cut(name, ".")
+	if !found {
 		return "", name
-	} else {
-		return p[0], p[1]
 	}
+	return table, column
 }

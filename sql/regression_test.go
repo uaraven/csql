@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	"github.com/uaraven/csql/core"
+	"github.com/uaraven/csql/errors"
 
 	. "github.com/onsi/gomega"
 )
@@ -341,4 +342,103 @@ func TestQuotedIdentifierUnescaping(t *testing.T) {
 	g.Expect(rows).To(HaveLen(1))
 	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(int64(1)))
 	g.Expect(ExecuteSql(`select "plain" from "` + a + `"`).GetRows()[0].GetByIndex(1).Value()).To(Equal(int64(2)))
+}
+
+func TestUnionIsLeftAssociative(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "v\n1\n1\n")
+	src := `"` + a + `"`
+
+	// (A UNION ALL B) UNION C removes duplicates from everything, A UNION ALL (B UNION C) would keep two rows
+	rows := ExecuteSql(`select v from ` + src + ` union all select v from ` + src + ` union select v from ` + src).GetRows()
+	g.Expect(rows).To(HaveLen(1))
+
+	// (A UNION B) UNION ALL C
+	rows = ExecuteSql(`select v from ` + src + ` union select v from ` + src + ` union all select v from ` + src).GetRows()
+	g.Expect(rows).To(HaveLen(3))
+	for i, r := range rows {
+		g.Expect(r.Id()).To(Equal(i))
+	}
+}
+
+func TestUnionIgnoresColumnNames(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "id\n1\n")
+	src := `"` + a + `"`
+
+	ds := ExecuteSql(`select 'a' from ` + src + ` union select 'b' from ` + src)
+	g.Expect(ds.GetRows()).To(HaveLen(2))
+	g.Expect(func() {
+		ExecuteSql(`select 'a', 'c' from ` + src + ` union select 'b' from ` + src)
+	}).To(Panic())
+}
+
+func TestClauseOrder(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "k,v\nx,1\nx,2\ny,5\n")
+	src := `"` + a + `"`
+
+	standard := ExecuteSql(`select k, sum(v) as s from ` + src + ` group by k having sum(v) > 2 order by s desc limit 5`).GetRows()
+	legacy := ExecuteSql(`select k, sum(v) as s from ` + src + ` order by s desc limit 5 group by k having sum(v) > 2`).GetRows()
+	g.Expect(standard).To(HaveLen(2))
+	g.Expect(legacy).To(HaveLen(2))
+	g.Expect(standard[0].GetByIndex(1).Value()).To(Equal("y"))
+	g.Expect(legacy[0].GetByIndex(1).Value()).To(Equal("y"))
+	g.Expect(ExecuteSql(`select k from ` + src + ` limit 1 group by k`).GetRows()).To(HaveLen(1))
+}
+
+func TestMultipleCommaSources(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "a\n1\n2\n")
+	b := writeCsv(t, "b.csv", "b\n3\n")
+	c := writeCsv(t, "c.csv", "c\n4\n")
+	d := writeCsv(t, "d.csv", "d\n1\n")
+
+	rows := ExecuteSql(`select a, b, c from "` + a + `", "` + b + `", "` + c + `"`).GetRows()
+	g.Expect(rows).To(HaveLen(2))
+
+	// the last source keeps its join
+	rows = ExecuteSql(`select a, b, c, d from "` + a + `", "` + b + `", "` + c + `" x join "` + d + `" y on x.c = y.d + 3`).GetRows()
+	g.Expect(rows).To(HaveLen(2))
+}
+
+func TestHugeLimitAndErrorLocation(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "id\n1\n2\n")
+	src := `"` + a + `"`
+
+	g.Expect(ExecuteSql(`select id from ` + src + ` limit 99999999999`).GetRows()).To(HaveLen(2))
+
+	defer func() {
+		err := recover()
+		csqlErr, ok := err.(*errors.CsqlError)
+		g.Expect(ok).To(BeTrue(), "limit error must be a CsqlError, got %T", err)
+		g.Expect(csqlErr.Location).ToNot(BeNil())
+	}()
+	ExecuteSql(`select id from ` + src + ` limit 1.5`)
+}
+
+func TestDottedColumnNames(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "unit.price,qty\n10,2\n")
+	src := `"` + a + `"`
+
+	rows := ExecuteSql(`select "unit.price" from ` + src).GetRows()
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(int64(10)))
+	rows = ExecuteSql(`select t."unit.price" from ` + src + ` t`).GetRows()
+	g.Expect(rows[0].GetByIndex(1).Value()).To(Equal(int64(10)))
+}
+
+func TestAmbiguousColumnHasLocation(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "id\n1\n")
+	src := `"` + a + `"`
+
+	defer func() {
+		csqlErr, ok := recover().(*errors.CsqlError)
+		g.Expect(ok).To(BeTrue())
+		g.Expect(csqlErr.Message).To(ContainSubstring("ambiguous"))
+		g.Expect(csqlErr.Location).ToNot(BeNil())
+	}()
+	ExecuteSql(`select id from ` + src + ` x join ` + src + ` y on x.id = y.id`)
 }
