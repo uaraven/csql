@@ -64,7 +64,7 @@ func (ae AstTransformer) TransformUnion(u UnionSource) core.DataSource {
 		if u.Into.TempTable {
 			core.TableCache.AddToCache(string(u.Into.Destination), dsResult, time.Now(), true)
 		} else {
-			core.TableCache.AddToCache(".last", dsResult, time.Now(), true)
+			core.TableCache.SetLastResult(dsResult)
 			err := core.WriteDataSourceToFile(dsResult, string(u.Into.Destination))
 			if err != nil {
 				panic(fmt.Errorf("failed to save to file '%s': %v", u.Into.Destination, err))
@@ -72,7 +72,7 @@ func (ae AstTransformer) TransformUnion(u UnionSource) core.DataSource {
 		}
 		return core.NewStatusDataSource([]string{"Rows saved"}, []string{fmt.Sprintf("%d", len(dsResult.GetRows()))})
 	} else {
-		core.TableCache.AddToCache(".last", dsResult, time.Now(), true)
+		core.TableCache.SetLastResult(dsResult)
 	}
 	return dsResult
 }

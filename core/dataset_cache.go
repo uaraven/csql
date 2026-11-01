@@ -25,10 +25,17 @@ type DatasetCache map[string]*DatasetCacheEntry
 
 var TableCache = make(DatasetCache)
 
+// LastResultName is the name of the temp table with the result of the last query
+const LastResultName = ".last"
+
+// AddToCache stores the datasource in the cache, replacing the entry with the same name. Temp tables are owned by
+// the user: they do not count against maxCacheSize and are never evicted. Other entries are evicted, oldest first,
+// to make room for the new one, and entries bigger than maxCacheSize are not cached at all.
 func (ds DatasetCache) AddToCache(name string, dsEntry DataSource, modTime time.Time, tempTable bool) {
 	if !CacheEnabled && !tempTable {
 		return
 	}
+	delete(ds, name)
 	entry := &DatasetCacheEntry{
 		AccessTime: time.Now(),
 		Size:       len(dsEntry.GetRows()),
@@ -36,30 +43,55 @@ func (ds DatasetCache) AddToCache(name string, dsEntry DataSource, modTime time.
 		DataSource: dsEntry,
 		TempTable:  tempTable,
 	}
-	totalSize := 0
-	for _, v := range ds {
-		totalSize += v.Size
-	}
-
-	for totalSize+entry.Size > maxCacheSize {
-		oldest := ""
-		oldestTime := time.Now()
-		for k, v := range ds {
-			if v.AccessTime.Before(oldestTime) {
-				oldestTime = v.AccessTime
-				oldest = k
-			}
+	if !tempTable {
+		if entry.Size > maxCacheSize {
+			return
 		}
-		delete(ds, oldest)
+		ds.evictFor(entry.Size)
 	}
 	ds[name] = entry
 }
 
+// SetLastResult stores the result of the query as ".last" temp table. The old result is dropped, and
+// a result that is bigger than maxCacheSize is not kept in memory.
+func (ds DatasetCache) SetLastResult(dsEntry DataSource) {
+	delete(ds, LastResultName)
+	if len(dsEntry.GetRows()) > maxCacheSize {
+		return
+	}
+	ds.AddToCache(LastResultName, dsEntry, time.Now(), true)
+}
+
+// evictFor removes the least recently used cached (non-temp) datasets until size more rows fit
+func (ds DatasetCache) evictFor(size int) {
+	totalSize := 0
+	for _, v := range ds {
+		if !v.TempTable {
+			totalSize += v.Size
+		}
+	}
+	for totalSize+size > maxCacheSize {
+		oldest := ""
+		var oldestTime time.Time
+		for k, v := range ds {
+			if !v.TempTable && (oldest == "" || v.AccessTime.Before(oldestTime)) {
+				oldestTime = v.AccessTime
+				oldest = k
+			}
+		}
+		if oldest == "" {
+			return
+		}
+		totalSize -= ds[oldest].Size
+		delete(ds, oldest)
+	}
+}
+
 func (ds DatasetCache) ClearCache() (datasets int, rows int) {
-	for k, v := range TableCache {
+	for k, v := range ds {
 		if !v.TempTable {
 			rows += len(v.DataSource.GetRows())
-			delete(TableCache, k)
+			delete(ds, k)
 			datasets++
 		}
 	}

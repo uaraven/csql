@@ -59,38 +59,40 @@ func NewCsvDataSource(csvFile string) DataSource {
 	return NewCsvDataSourceWithAlias(csvFile, "")
 }
 
+// NewCsvDataSourceWithAlias returns a datasource for a temp table or a CSV file. A temp table is used when the
+// source is a plain name (no directory, no extension) of an existing temp table. The columns of the datasource are
+// qualified with the alias, or with the table/file name if there is no alias.
+//
+// Every call returns a datasource with its own cursor, even if the data comes from the cache.
 func NewCsvDataSourceWithAlias(csvFile string, alias string) DataSource {
-	csvFile = ExpandCsvFileName(csvFile)
-	_, nameExt := filepath.Split(csvFile)
-	var justName string
-	if alias != "" {
-		justName = alias
-	} else {
-		justName = strings.TrimSuffix(nameExt, filepath.Ext(nameExt))
+	if tempTable, ok := TableCache[csvFile]; ok && tempTable.TempTable {
+		TableCache.Touch(csvFile)
+		name := alias
+		if name == "" {
+			name = csvFile
+		}
+		return newDataSourceView(tempTable.DataSource, name)
 	}
 
-	if tempTable, ok := TableCache[justName]; ok {
-		if tempTable.TempTable {
-			TableCache.Touch(justName)
-			return tempTable.DataSource
-		}
+	csvFile = ExpandCsvFileName(csvFile)
+	_, nameExt := filepath.Split(csvFile)
+	justName := strings.TrimSuffix(nameExt, filepath.Ext(nameExt))
+	if alias != "" {
+		justName = alias
+	}
+	cacheKey := csvFile
+	if abs, err := filepath.Abs(csvFile); err == nil {
+		cacheKey = abs
 	}
 
 	stat, err := os.Stat(csvFile)
-	if cached, ok := TableCache[justName]; ok {
-		if err != nil {
-			// there was an error reading stat from the file, delete the cache entry
-			delete(TableCache, justName)
-		} else {
-			if stat.ModTime() != cached.ModTime {
-				// if the file on dist was changed, delete the cache entry
-				delete(TableCache, justName)
-			} else {
-				// update last access time
-				TableCache.Touch(justName)
-				return cached.DataSource
-			}
+	if cached, ok := TableCache[cacheKey]; ok && !cached.TempTable {
+		if err == nil && stat.ModTime().Equal(cached.ModTime) {
+			TableCache.Touch(cacheKey)
+			return newDataSourceView(cached.DataSource, justName)
 		}
+		// the file is gone or was changed, delete the cache entry
+		delete(TableCache, cacheKey)
 	}
 
 	file, err := os.Open(csvFile)
@@ -115,8 +117,27 @@ func NewCsvDataSourceWithAlias(csvFile string, alias string) DataSource {
 	if err != nil {
 		panic(err)
 	}
-	TableCache.AddToCache(justName, cds, stat.ModTime(), false)
+	TableCache.AddToCache(cacheKey, cds, stat.ModTime(), false)
+	if _, cached := TableCache[cacheKey]; cached {
+		// the cached datasource must not be handed out, its cursor would be shared
+		return newDataSourceView(cds, justName)
+	}
 	return cds
+}
+
+// newDataSourceView creates a datasource with the rows of src and the columns qualified with the name.
+// The values are shared with src, but the cursor and the headers are not.
+func newDataSourceView(src DataSource, name string) DataSource {
+	columns := make([]ColumnMetadata, src.Header().ColumnCount())
+	for idx, column := range src.Header().ColumnsMetadata() {
+		columns[idx] = &columnMetadata{parentName: name, name: column.Name(), index: column.Index()}
+	}
+	header := &dataSourceHeader{columns: columns}
+	rows := make([]Row, len(src.GetRows()))
+	for idx, row := range src.GetRows() {
+		rows[idx] = newRowWithId(row.Id(), header, row.Values())
+	}
+	return &memDataSource{name: name, index: -1, data: rows, headers: header}
 }
 
 func loadCsv(csvReader *csv.Reader, header DataSourceHeader) ([]Row, error) {

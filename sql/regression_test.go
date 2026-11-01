@@ -273,3 +273,40 @@ func TestNullsAreExportedAsEmptyCells(t *testing.T) {
 	g.Expect(err).ToNot(HaveOccurred())
 	g.Expect(string(content)).To(Equal("a,b\n1,\n,x\n"))
 }
+
+func TestTempTableSelfJoin(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "id,v\n1,x\n2,y\n3,z\n")
+	ExecuteSql(`select * from "` + a + `" into temp self_tmp`)
+	t.Cleanup(func() { delete(core.TableCache, "self_tmp") })
+
+	g.Expect(ExecuteSql(`select x.id, y.id from self_tmp x join self_tmp y on x.id = y.id`).GetRows()).To(HaveLen(3))
+	g.Expect(ExecuteSql(`select x.id, y.id from self_tmp x join self_tmp y on x.id < y.id`).GetRows()).To(HaveLen(3))
+	g.Expect(ExecuteSql(`select * from self_tmp x cross join self_tmp y`).GetRows()).To(HaveLen(9))
+	g.Expect(ExecuteSql(`select * from self_tmp x left join self_tmp y on x.id = y.id + 1`).GetRows()).To(HaveLen(3))
+}
+
+func TestTempTableNameAndAlias(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "id,v\n1,x\n2,y\n")
+	b := writeCsv(t, "b.csv", "id\n7\n8\n9\n")
+	ExecuteSql(`select * from "` + a + `" into temp alias_tmp`)
+	t.Cleanup(func() { delete(core.TableCache, "alias_tmp") })
+
+	// the temp table can be referred to by its name and by an alias
+	g.Expect(ExecuteSql(`select alias_tmp.id from alias_tmp`).GetRows()).To(HaveLen(2))
+	g.Expect(ExecuteSql(`select t.id from alias_tmp t`).GetRows()).To(HaveLen(2))
+	// an alias equal to the name of a temp table does not replace the file
+	g.Expect(ExecuteSql(`select id from "` + b + `" alias_tmp`).GetRows()).To(HaveLen(3))
+	// ...and a file with the same base name as a temp table is a file
+	g.Expect(ExecuteSql(`select id from "` + b + `"`).GetRows()).To(HaveLen(3))
+}
+
+func TestLastResultCanBeQueried(t *testing.T) {
+	g := NewGomegaWithT(t)
+	a := writeCsv(t, "a.csv", "id\n1\n2\n3\n")
+
+	ExecuteSql(`select id from "` + a + `" where id > 1`)
+	g.Expect(ExecuteSql(`select id from ".last"`).GetRows()).To(HaveLen(2))
+	g.Expect(ExecuteSql(`select id from ".last"`).GetRows()).To(HaveLen(2))
+}
