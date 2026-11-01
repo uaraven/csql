@@ -6,6 +6,7 @@ require (
 	github.com/antlr4-go/antlr/v4 v4.13.1
 	github.com/deckarep/golang-set/v2 v2.3.0
 	github.com/jessevdk/go-flags v1.5.0
+	github.com/mattn/go-runewidth v0.0.14
 	github.com/onsi/gomega v1.24.1
 	github.com/peterh/liner v1.2.2
 	github.com/uaraven/ansie v0.3.3
@@ -15,7 +16,6 @@ require (
 
 require (
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect

@@ -20,11 +20,10 @@
 package cli
 
 import (
-	"fmt"
+	"github.com/mattn/go-runewidth"
 	"github.com/uaraven/ansie"
 	"github.com/uaraven/csql/core"
 	"github.com/uaraven/csql/funky"
-	"golang.org/x/exp/constraints"
 	"golang.org/x/term"
 	"os"
 	"strings"
@@ -75,8 +74,8 @@ func InitTable(ds core.DataSource, maxWidth int) *Table {
 	columns := funky.Map(ds.Header().ColumnsMetadata(), func(t core.ColumnMetadata) Column {
 		c := Column{
 			Name:              t.Name(),
-			DataWidth:         len(t.Name()),
-			minWidth:          len(t.Name()) + 2,
+			DataWidth:         runewidth.StringWidth(t.Name()),
+			minWidth:          runewidth.StringWidth(t.Name()) + 2,
 			FgColour:          columnFgColorIndex(columnIdx, 0),
 			BgColour:          ansie.Black,
 			AlternateBgColour: ansie.Grey11,
@@ -97,7 +96,7 @@ func InitTable(ds core.DataSource, maxWidth int) *Table {
 
 	for i := 0; i < readRows; i++ {
 		for idx := range columns {
-			l := len(rows[i].GetByIndex(idx + 1).Repr())
+			l := runewidth.StringWidth(rows[i].GetByIndex(idx + 1).Repr())
 			if columns[idx].DataWidth < l {
 				columns[idx].DataWidth = l
 			}
@@ -128,53 +127,33 @@ func InitTable(ds core.DataSource, maxWidth int) *Table {
 	return t
 }
 
-// CalculateWidths calculates widths of the columns taking into account the actual width of the data and
-// max width of the terminal. If terminal width cannot be determined, supplied maxWidth is used.
+// calculateWidths calculates widths of the columns taking into account the actual width of the data and
+// max width of the terminal. If the columns do not fit, the widest columns are shrunk first, but no column
+// becomes narrower than its minimum width, so the table can still be wider than the terminal.
 //
 // If maxWidth <= 0, then default width of 80 columns is assumed
 func (t *Table) calculateWidths() {
-	totalDataWidth := funky.Sum(funky.Map(t.Columns, func(c Column) int {
-		return c.DataWidth
-	}))
-	if t.SeparateColumns {
-		totalDataWidth += len(t.Columns) - 1
+	separators := 0
+	if t.SeparateColumns && len(t.Columns) > 1 {
+		separators = len(t.Columns) - 1
 	}
-
-	if totalDataWidth < t.TerminalWidth {
-		for idx, cw := range t.Columns {
-			t.Columns[idx].columnWidth = max(cw.minWidth, cw.DataWidth)
-		}
-	} else {
-		spaceToReduce := totalDataWidth - t.TerminalWidth
-		resizableColumns := make([]int, 0)
+	total := separators
+	for idx, c := range t.Columns {
+		t.Columns[idx].columnWidth = max(c.minWidth, c.DataWidth)
+		total += t.Columns[idx].columnWidth
+	}
+	for ; total > t.TerminalWidth; total-- {
+		widest := -1
 		for idx, c := range t.Columns {
-			if c.DataWidth > c.minWidth {
-				resizableColumns = append(resizableColumns, idx)
-			} else {
-				t.Columns[idx].columnWidth = c.minWidth
+			if c.columnWidth > c.minWidth && (widest < 0 || c.columnWidth > t.Columns[widest].columnWidth) {
+				widest = idx
 			}
 		}
-		reduceBy := spaceToReduce/len(resizableColumns) + 1
-		if t.SeparateColumns {
-			reduceBy += len(t.Columns) - 1
+		if widest < 0 {
+			return
 		}
-		for _, idx := range resizableColumns {
-			t.Columns[idx].columnWidth = max(t.Columns[idx].minWidth, t.Columns[idx].DataWidth-reduceBy)
-		}
+		t.Columns[widest].columnWidth--
 	}
-	totalColWidth := funky.Sum(funky.Map(t.Columns, func(c Column) int {
-		return c.columnWidth
-	}))
-	if t.SeparateColumns {
-		totalColWidth += len(t.Columns) - 1
-	}
-}
-
-func max[T constraints.Ordered](t1 T, t2 T) T {
-	if t1 >= t2 {
-		return t1
-	}
-	return t2
 }
 
 func (t *Table) PrintHeader() string {
@@ -184,7 +163,7 @@ func (t *Table) PrintHeader() string {
 	}
 	for idx, col := range t.Columns {
 		var suffix string
-		suffixLen := col.columnWidth - len(col.Name)
+		suffixLen := col.columnWidth - runewidth.StringWidth(col.Name)
 		if suffixLen > 0 {
 			suffix = strings.Repeat(" ", suffixLen)
 		}
@@ -203,33 +182,21 @@ func (t *Table) PrintHeader() string {
 func (t *Table) PrintData(data []core.Row) string {
 	var sb strings.Builder
 	for rowIdx, row := range data {
-		var rowSb strings.Builder
-
 		for idx, col := range t.Columns {
-			value := row.GetByIndex(idx + 1).Repr()
+			value := runewidth.Truncate(row.GetByIndex(idx+1).Repr(), col.columnWidth, "…")
 			var bgColour ansie.Colour
 			if t.Zebra && rowIdx%2 != 0 {
 				bgColour = col.AlternateBgColour
 			} else {
 				bgColour = col.BgColour
 			}
-			if len(value) > col.columnWidth {
-				value = value[:col.columnWidth-1] + "…"
-			}
 			sb.WriteString(ansie.Ansi.Fg(col.FgColour).Bg(bgColour).
-				S("%*s", -col.columnWidth, value).Reset().String())
-			rowSb.WriteString(fmt.Sprintf("%*s", -col.columnWidth, value))
+				A(runewidth.FillRight(value, col.columnWidth)).Reset().String())
 			if idx < len(t.Columns)-1 && t.SeparateColumns {
-				rowSb.WriteRune(t.VerticalSeparator)
 				sb.WriteRune(t.VerticalSeparator)
 			}
 		}
-
-		rowString := rowSb.String()
-
-		if len([]rune(rowString)) < t.TerminalWidth {
-			sb.WriteRune('\n')
-		}
+		sb.WriteRune('\n')
 
 		if t.SeparateRows && rowIdx != len(data) {
 			sb.WriteString(strings.Repeat(string(t.HorizontalSeparator), t.TerminalWidth))
