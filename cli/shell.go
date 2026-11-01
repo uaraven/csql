@@ -217,7 +217,7 @@ func splitArgs(input string) []string {
 func (s *CsqlShell) ExecuteQuery(query string) {
 	start := time.Now()
 	ds := RunQuery(query)
-	completed := time.Now().Sub(start)
+	completed := time.Since(start)
 	if ds == nil {
 		return
 	}

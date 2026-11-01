@@ -52,14 +52,14 @@ func RunQuery(query string) (result core.DataSource) {
 func ExecuteQuery(query string) {
 	start := time.Now()
 	ds := RunQuery(query)
-	completed := time.Now().Sub(start)
+	completed := time.Since(start)
 	if ds == nil {
 		return
 	}
 	table := InitTable(ds, -1)
 	fmt.Println(table.PrintHeader())
 	fmt.Println(table.PrintData(ds.GetRows()))
-	fmt.Println(fmt.Sprintf("Rows: %d, elapsed time: %5.3f sec", len(ds.GetRows()), completed.Seconds()))
+	fmt.Printf("Rows: %d, elapsed time: %5.3f sec\n", len(ds.GetRows()), completed.Seconds())
 }
 
 func ExecuteToCsv(query string, outputFile string) {
@@ -68,8 +68,8 @@ func ExecuteToCsv(query string, outputFile string) {
 	if ds == nil {
 		return
 	}
-	completed := time.Now().Sub(start)
 	err := core.WriteDataSourceToFile(ds, outputFile)
+	completed := time.Since(start)
 	if err != nil {
 		fmt.Printf("Failed to save results to '%s': '%v'\n", outputFile, err.Error())
 	}

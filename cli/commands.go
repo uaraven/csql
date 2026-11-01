@@ -235,7 +235,7 @@ func StatusCommand() *Command {
 				if v.TempTable {
 					temp = "    ✓"
 				}
-				diff := time.Now().Sub(v.AccessTime)
+				diff := time.Since(v.AccessTime)
 				shell.PrintMessage(shell.C.Fg(ansie.Blue).S("%*s ", titleWidth, k).
 					Fg(ansie.Green).S("%10d", len(v.DataSource.GetRows())).Reset().A(" rows ").
 					Fg(ansie.Yellow).S("%s", util.FormatDuration(diff)).
