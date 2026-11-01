@@ -69,11 +69,16 @@ func NewHeaderWithProjection(src DataSource, projection []ProjectionColumn) Data
 			if columnIdx == InvalidFieldIndex {
 				panic(errors.UnknownColumnError(prjColumn.loc, sourceColumn))
 			}
-			sourceColumnMetadata := src.Header().ColumnsMetadata()[columnIdx]
-			columnMeta = columnMetadata{
-				parentName: sourceColumnMetadata.ParentName(),
-				index:      idx,
-				name:       sourceColumnMetadata.Name(),
+			if columnIdx == RowIdIndex {
+				// the row id is not a real column, it has no metadata in the source header
+				columnMeta = columnMetadata{index: idx, name: RowId}
+			} else {
+				sourceColumnMetadata := src.Header().ColumnsMetadata()[columnIdx]
+				columnMeta = columnMetadata{
+					parentName: sourceColumnMetadata.ParentName(),
+					index:      idx,
+					name:       sourceColumnMetadata.Name(),
+				}
 			}
 		} else {
 			// projection column is an expression

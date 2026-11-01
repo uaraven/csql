@@ -56,7 +56,7 @@ type Select struct {
 	Projection SelectProjection
 	From       DataSource
 	Filter     Expression
-	Limit      int32 // 0 means no limit
+	Limit      *int32 // nil means no limit
 	OrderBy    *OrderByExpression
 	GroupBy    *GroupByExpression
 	Having     Expression
@@ -72,8 +72,8 @@ func (sel Select) String() string {
 		sb.WriteString(sel.OrderBy.String())
 		sb.WriteRune('\n')
 	}
-	if sel.Limit > 0 {
-		sb.WriteString(fmt.Sprintf("LIMIT %d\n", sel.Limit))
+	if sel.Limit != nil {
+		sb.WriteString(fmt.Sprintf("LIMIT %d\n", *sel.Limit))
 	}
 	if sel.GroupBy != nil {
 		sb.WriteString(sel.GroupBy.String())

@@ -90,6 +90,11 @@ func (ae AstTransformer) TransformSelect(ast Select) core.DataSource {
 
 	projection := ae.TransformProjection(ast.Projection.ProjectionFields)
 
+	limit := core.NoLimit
+	if ast.Limit != nil {
+		limit = int(*ast.Limit)
+	}
+
 	if ast.GroupBy != nil || hasAggregates(projection) {
 		groupBy := ae.TransformGroupByExpression(ast.GroupBy)
 		var having core.Evaluator
@@ -97,8 +102,8 @@ func (ae AstTransformer) TransformSelect(ast Select) core.DataSource {
 			having = ae.TransformExpression(ast.Having)
 		}
 		ds := core.NewAggregationDataSourceHaving(ds, projection, groupBy, having)
-		if ast.Limit > 0 || len(orderBy) > 0 {
-			ds = core.NewOrderedDatasource(ds, orderBy, int(ast.Limit))
+		if ast.Limit != nil || len(orderBy) > 0 {
+			ds = core.NewOrderedDatasource(ds, orderBy, limit)
 		}
 		return ds
 	} else {
@@ -106,8 +111,8 @@ func (ae AstTransformer) TransformSelect(ast Select) core.DataSource {
 			panic(errors.NewError(nil, "HAVING clause in non-aggregate query"))
 		}
 		ds = core.NewProjectionDataSource(ds, projection, ast.Projection.Distinct)
-		if ast.Limit > 0 || len(orderBy) > 0 {
-			ds = core.NewOrderedDatasource(ds, orderBy, int(ast.Limit))
+		if ast.Limit != nil || len(orderBy) > 0 {
+			ds = core.NewOrderedDatasource(ds, orderBy, limit)
 		}
 		return ds
 	}

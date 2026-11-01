@@ -225,7 +225,7 @@ func (fv floatValue) Evaluate(_ EvaluationContext) Value {
 }
 
 func (fv floatValue) String() string {
-	return fmt.Sprintf("%f", fv.value)
+	return strconv.FormatFloat(fv.value, 'g', -1, 64)
 }
 
 func (fv floatValue) Repr() string {

@@ -66,6 +66,9 @@ func NewOrderByIndexL(index int, desc bool, l *errors.SourceLocation) OrderByFie
 	}
 }
 
+// NoLimit is the limit value that disables limiting of the rows
+const NoLimit = -1
+
 func NewOrderedDatasource(ds DataSource, orderBy []OrderByField, limit int) DataSource {
 	rows := ds.GetRows()
 
@@ -75,10 +78,8 @@ func NewOrderedDatasource(ds DataSource, orderBy []OrderByField, limit int) Data
 		})
 	}
 
-	if limit > 0 {
-		if limit < len(rows) {
-			rows = rows[:limit]
-		}
+	if limit >= 0 && limit < len(rows) {
+		rows = rows[:limit]
 	}
 	return NewMemDataSource(ds.GetName(), ds.Header().ColumnsMetadata(), rows)
 }

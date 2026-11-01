@@ -161,7 +161,8 @@ func (c CsqlVisitorImpl) VisitSelectStatement(ctx *parser.SelectStatementContext
 		astSelect.Filter = e
 	}
 	if ctx.Limit() != nil {
-		astSelect.Limit = ctx.Limit().Accept(c).(int32)
+		limit := ctx.Limit().Accept(c).(int32)
+		astSelect.Limit = &limit
 	}
 	if ctx.OrderBy() != nil {
 		obe := ctx.OrderBy().Accept(c).(OrderByExpression)

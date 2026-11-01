@@ -21,9 +21,6 @@ package core
 
 import (
 	"fmt"
-	mapset "github.com/deckarep/golang-set/v2"
-	"github.com/uaraven/csql/collection"
-	"github.com/uaraven/csql/funky"
 )
 
 func NewFullJoin(left DataSource, right DataSource, joinOn Condition) DataSource {
@@ -38,57 +35,13 @@ func NewFullJoin(left DataSource, right DataSource, joinOn Condition) DataSource
 }
 
 func fullJoin(left DataSource, right DataSource, header DataSourceHeader, joinOn Condition) []Row {
-	leftJoined, usedRightRows := leftJoin(left, right, header, joinOn)
-	unusedRightRows := funky.Filter(right.GetRows(), func(row Row) bool {
-		return !usedRightRows.Contains(row.Key())
-	})
-	counter := len(leftJoined) - 1
-	rightJoined := funky.Map(unusedRightRows, func(row Row) Row {
-		counter++
-		return joinRows(counter, header, nullRow(left.Header()), row)
-	})
-	return append(leftJoined, rightJoined...)
-}
-
-func selectJoinedLeft(counter int, header DataSourceHeader, leftRow Row, right DataSource, joinOn Condition, usedRight mapset.Set[string]) (collection.LinkedList[Row], int) {
-	var rightSelected collection.LinkedList[Row] = collection.NewLinkedList[Row]()
-	right.Rewind()
-	for {
-		rightRow := right.NextRow()
-		if rightRow == nil {
-			return rightSelected, counter
-		}
-		joined := joinRows(counter, header, leftRow, rightRow)
-		if joined.Satisfies(joinOn) {
-			usedRight.Add(rightRow.Key())
-			rightSelected.Append(newRowWithId(counter, header, joined.Values()))
-			counter++
-
+	rightRows := right.GetRows()
+	result, usedRight := outerJoin(left.GetRows(), rightRows, true, nullRow(right.Header()), header, joinOn)
+	nullLeft := nullRow(left.Header())
+	for idx, row := range rightRows {
+		if !usedRight[idx] {
+			result = append(result, joinRows(len(result), header, nullLeft, row))
 		}
 	}
-}
-
-func leftJoin(left DataSource, right DataSource, header DataSourceHeader, joinOn Condition) ([]Row, mapset.Set[string]) {
-	result := make([]Row, 0)
-	usedRightRows := mapset.NewSet[string]()
-	counter := 0
-	for {
-		leftRow := left.NextRow()
-		if leftRow == nil {
-			return result, usedRightRows
-		}
-		joined, counter := selectJoinedLeft(counter, header, leftRow, right, joinOn, usedRightRows)
-		if joined.Empty() {
-			joinedRow := joinRows(counter, header, leftRow, nullRow(right.Header()))
-			counter++
-			result = append(result, joinedRow)
-		} else {
-			iter := joined.Iterator()
-			for iter.HasNext() {
-				result = append(result, iter.Next())
-				counter++
-			}
-		}
-	}
-
+	return result
 }

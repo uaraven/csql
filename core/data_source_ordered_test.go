@@ -31,7 +31,7 @@ func TestOrderedDatasource_OrderBy(t *testing.T) {
 
 	ods := NewOrderedDatasource(ds, []OrderByField{
 		NewOrderBy("width", false),
-	}, 0)
+	}, NoLimit)
 
 	rows := ReadAllRows(ods)
 
@@ -49,7 +49,7 @@ func TestOrderedDatasource_OrderByDesc(t *testing.T) {
 
 	ods := NewOrderedDatasource(ds, []OrderByField{
 		NewOrderBy("width", true),
-	}, 0)
+	}, NoLimit)
 
 	rows := ReadAllRows(ods)
 
@@ -68,7 +68,7 @@ func TestOrderedDatasource_OrderByTwoFields(t *testing.T) {
 	ods := NewOrderedDatasource(ds, []OrderByField{
 		NewOrderBy("last_name", false),
 		NewOrderBy("first_name", true),
-	}, 0)
+	}, NoLimit)
 
 	rows := ReadAllRows(ods)
 
@@ -87,7 +87,7 @@ func TestOrderedDatasource_OrderByIndex(t *testing.T) {
 	ods := NewOrderedDatasource(ds, []OrderByField{
 		NewOrderByIndex(4, false), // last_name
 		NewOrderByIndex(3, true),  // first_name
-	}, 0)
+	}, NoLimit)
 
 	rows := ReadAllRows(ods)
 
